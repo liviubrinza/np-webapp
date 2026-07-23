@@ -13,6 +13,12 @@ spring:
 app:
   storage:
     documents-dir: ./storage/documents
+  contact:
+    address: "TODO: set the real office address"
+    phone: "TODO: set the real phone number"
+    email: "TODO: set the real contact email"
+    latitude: 46.72982564167728
+    longitude: 23.48734642212008
 
 ---
 spring:

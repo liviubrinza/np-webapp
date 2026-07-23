@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/fragments :: head(#{nav.book}, ${null})}"></head>
+<body>
+
+<nav th:replace="~{layout/fragments :: navbar}"></nav>
+
+<main class="container my-5" style="max-width: 640px;">
+    <h1 th:text="#{nav.book}">Book Appointment</h1>
+
+    <form th:action="@{'/' + ${currentLocale} + '/book'}" th:object="${bookingRequest}" method="post" novalidate>
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.clientName}">Name</label>
+            <input type="text" class="form-control" th:field="*{clientName}"
+                   th:classappend="${#fields.hasErrors('clientName')} ? 'is-invalid'"/>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('clientName')}" th:errors="*{clientName}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.email}">Email</label>
+            <input type="email" class="form-control" th:field="*{email}"
+                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"/>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.phone}">Phone</label>
+            <input type="text" class="form-control" th:field="*{phone}"
+                   th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"/>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.service}">Service</label>
+            <select class="form-select" th:field="*{serviceId}"
+                    th:classappend="${#fields.hasErrors('serviceId')} ? 'is-invalid'">
+                <option value="" th:text="#{book.service.choose}">Choose a service...</option>
+                <option th:each="service : ${services}" th:value="${service.id()}" th:text="${service.name()}"></option>
+            </select>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('serviceId')}" th:errors="*{serviceId}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.requestedAt}">Preferred date/time</label>
+            <input type="datetime-local" class="form-control" th:field="*{requestedAt}"
+                   th:classappend="${#fields.hasErrors('requestedAt')} ? 'is-invalid'"/>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{book.notes}">Notes</label>
+            <textarea class="form-control" rows="3" th:field="*{notes}"
+                      th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"></textarea>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" th:text="#{book.submit}">Book Appointment</button>
+    </form>
+</main>
+
+<footer th:replace="~{layout/fragments :: footer}"></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
