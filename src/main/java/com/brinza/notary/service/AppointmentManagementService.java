@@ -2,12 +2,16 @@ package com.brinza.notary.service;
 
 import com.brinza.notary.domain.Appointment;
 import com.brinza.notary.domain.AppointmentStatus;
+import com.brinza.notary.domain.InternalNote;
 import com.brinza.notary.dto.AppointmentDetailView;
 import com.brinza.notary.dto.AppointmentListItemView;
+import com.brinza.notary.dto.AppointmentListView;
+import com.brinza.notary.dto.InternalNoteView;
 import com.brinza.notary.repository.AppointmentRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -25,10 +29,28 @@ public class AppointmentManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<AppointmentListItemView> search(AppointmentStatus status, LocalDateTime from, LocalDateTime to) {
-        return appointmentRepository.search(status, from, to).stream()
+    public List<AppointmentListItemView> search(AppointmentStatus status, LocalDateTime from, LocalDateTime to, String clientName) {
+        String normalizedName = (clientName == null || clientName.isBlank()) ? null : clientName.trim();
+        return appointmentRepository.search(status, from, to, normalizedName).stream()
                 .map(this::toListItem)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AppointmentListView searchGrouped(AppointmentStatus status, LocalDateTime from, LocalDateTime to, String clientName) {
+        List<AppointmentListItemView> all = search(status, from, to, clientName);
+
+        List<AppointmentListItemView> pending = all.stream()
+                .filter(a -> a.status() == AppointmentStatus.PENDING)
+                .sorted(Comparator.comparing(AppointmentListItemView::createdAt))
+                .toList();
+
+        List<AppointmentListItemView> others = all.stream()
+                .filter(a -> a.status() != AppointmentStatus.PENDING)
+                .sorted(Comparator.comparing(AppointmentListItemView::requestedAt))
+                .toList();
+
+        return new AppointmentListView(pending, others);
     }
 
     @Transactional(readOnly = true)
@@ -46,19 +68,20 @@ public class AppointmentManagementService {
     }
 
     @Transactional
-    public void updateInternalNotes(Long id, String internalNotes) {
+    public void addInternalNote(Long id, String authorUsername, String note) {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No appointment with id " + id));
-        appointment.setInternalNotes(internalNotes);
+        appointment.addInternalNote(new InternalNote(authorUsername, note));
     }
 
     private AppointmentListItemView toListItem(Appointment appointment) {
         return new AppointmentListItemView(
                 appointment.getId(),
                 appointment.getClientName(),
-                serviceCatalogService.resolveName(appointment.getService(), Locale.ENGLISH),
+                serviceCatalogService.resolveName(appointment.getService(), Locale.of("ro")),
                 appointment.getRequestedAt(),
-                appointment.getStatus()
+                appointment.getStatus(),
+                appointment.getCreatedAt()
         );
     }
 
@@ -68,11 +91,13 @@ public class AppointmentManagementService {
                 appointment.getClientName(),
                 appointment.getEmail(),
                 appointment.getPhone(),
-                serviceCatalogService.resolveName(appointment.getService(), Locale.ENGLISH),
+                serviceCatalogService.resolveName(appointment.getService(), Locale.of("ro")),
                 appointment.getRequestedAt(),
                 appointment.getStatus(),
                 appointment.getNotes(),
-                appointment.getInternalNotes(),
+                appointment.getInternalNotes().stream()
+                        .map(n -> new InternalNoteView(n.getAuthorUsername(), n.getNote(), n.getCreatedAt()))
+                        .toList(),
                 appointment.getCreatedAt()
         );
     }

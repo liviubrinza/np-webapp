@@ -7,7 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "admin_users")
@@ -27,6 +30,12 @@ public class AdminUser {
     @Column(nullable = false, length = 20)
     private AdminRole role;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
     protected AdminUser() {
     }
 
@@ -34,6 +43,11 @@ public class AdminUser {
         this.username = username;
         this.passwordHash = passwordHash;
         this.role = role;
+    }
+
+    @PrePersist
+    void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -62,5 +76,17 @@ public class AdminUser {
 
     public void setRole(AdminRole role) {
         this.role = role;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
     }
 }

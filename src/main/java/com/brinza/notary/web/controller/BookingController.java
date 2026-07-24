@@ -15,9 +15,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 @RequestMapping("/{lang:en|ro|hu}/book")
 public class BookingController {
+
+    private static final int OPENING_HOUR = 9;
+    private static final int CLOSING_HOUR = 17;
 
     private final ServiceCatalogService serviceCatalogService;
     private final AppointmentBookingService appointmentBookingService;
@@ -32,6 +38,7 @@ public class BookingController {
     public String showForm(Model model) {
         model.addAttribute("bookingRequest", new BookingRequest());
         model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
+        model.addAttribute("timeSlots", buildTimeSlots());
         return "public/book";
     }
 
@@ -43,6 +50,7 @@ public class BookingController {
                           RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
+            model.addAttribute("timeSlots", buildTimeSlots());
             return "public/book";
         }
 
@@ -54,5 +62,16 @@ public class BookingController {
     @GetMapping("/confirmation")
     public String confirmation() {
         return "public/book-confirmation";
+    }
+
+    private static List<String> buildTimeSlots() {
+        List<String> slots = new ArrayList<>();
+        for (int hour = OPENING_HOUR; hour <= CLOSING_HOUR; hour++) {
+            slots.add(String.format("%02d:00", hour));
+            if (hour != CLOSING_HOUR) {
+                slots.add(String.format("%02d:30", hour));
+            }
+        }
+        return slots;
     }
 }

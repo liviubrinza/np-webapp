@@ -20,6 +20,9 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true, length = 100)
+    private String code;
+
     @Column(name = "duration_minutes", nullable = false)
     private Integer durationMinutes;
 
@@ -39,6 +42,14 @@ public class Service {
 
     public Long getId() {
         return id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public Integer getDurationMinutes() {

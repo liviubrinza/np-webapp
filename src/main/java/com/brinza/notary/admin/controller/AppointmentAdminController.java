@@ -3,6 +3,7 @@ package com.brinza.notary.admin.controller;
 import com.brinza.notary.domain.AppointmentStatus;
 import com.brinza.notary.service.AppointmentManagementService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,15 +31,19 @@ public class AppointmentAdminController {
     public String list(@RequestParam(required = false) AppointmentStatus status,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                        @RequestParam(required = false) String name,
                         Model model) {
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDateTime = to != null ? to.atTime(LocalTime.MAX) : null;
 
-        model.addAttribute("appointments", appointmentManagementService.search(status, fromDateTime, toDateTime));
+        var grouped = appointmentManagementService.searchGrouped(status, fromDateTime, toDateTime, name);
+        model.addAttribute("pendingAppointments", grouped.pending());
+        model.addAttribute("otherAppointments", grouped.others());
         model.addAttribute("statuses", AppointmentStatus.values());
         model.addAttribute("selectedStatus", status);
         model.addAttribute("from", from);
         model.addAttribute("to", to);
+        model.addAttribute("name", name);
         return "admin/appointments/list";
     }
 
@@ -53,15 +58,19 @@ public class AppointmentAdminController {
     public String updateStatus(@PathVariable Long id, @RequestParam AppointmentStatus status,
                                 RedirectAttributes redirectAttributes) {
         appointmentManagementService.updateStatus(id, status);
-        redirectAttributes.addFlashAttribute("success", "Status updated.");
+        redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
         return "redirect:/admin/appointments/" + id;
     }
 
     @PostMapping("/{id}/notes")
-    public String updateNotes(@PathVariable Long id, @RequestParam(required = false) String internalNotes,
-                               RedirectAttributes redirectAttributes) {
-        appointmentManagementService.updateInternalNotes(id, internalNotes);
-        redirectAttributes.addFlashAttribute("success", "Notes saved.");
+    public String addNote(@PathVariable Long id, @RequestParam String note,
+                           Authentication authentication, RedirectAttributes redirectAttributes) {
+        if (note == null || note.isBlank()) {
+            redirectAttributes.addFlashAttribute("error", "Nota nu poate fi goală.");
+            return "redirect:/admin/appointments/" + id;
+        }
+        appointmentManagementService.addInternalNote(id, authentication.getName(), note);
+        redirectAttributes.addFlashAttribute("success", "Notă adăugată.");
         return "redirect:/admin/appointments/" + id;
     }
 }

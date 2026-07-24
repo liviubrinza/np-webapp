@@ -1,66 +1,60 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Appointments')}"></head>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Programări')}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
 
 <main class="container my-4">
-    <h1 class="h3 mb-4">Appointments</h1>
+    <h1 class="h3 mb-4">Programări</h1>
 
     <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
 
-    <form method="get" th:action="@{/admin/appointments}" class="row g-2 align-items-end mb-4">
-        <div class="col-auto">
-            <label class="form-label mb-0">Status</label>
-            <select name="status" class="form-select form-select-sm">
-                <option value="" th:selected="${selectedStatus == null}">All</option>
-                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
-                        th:selected="${s == selectedStatus}"></option>
-            </select>
+    <div class="card bg-light mb-4">
+        <div class="card-body">
+            <form method="get" th:action="@{/admin/appointments}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Nume</b></label>
+                    <input type="text" name="name" class="form-control form-control-sm" placeholder="Numele clientului"
+                           th:value="${name}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Stare</b></label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="" th:selected="${selectedStatus == null}">Toate</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
+                                th:selected="${s == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>De la</b></label>
+                    <input type="date" name="from" class="form-control form-control-sm" th:value="${from}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Până la</b></label>
+                    <input type="date" name="to" class="form-control form-control-sm" th:value="${to}"/>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
+                    <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary btn-sm">Resetează</a>
+                </div>
+            </form>
         </div>
-        <div class="col-auto">
-            <label class="form-label mb-0">From</label>
-            <input type="date" name="from" class="form-control form-control-sm" th:value="${from}"/>
-        </div>
-        <div class="col-auto">
-            <label class="form-label mb-0">To</label>
-            <input type="date" name="to" class="form-control form-control-sm" th:value="${to}"/>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-            <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary btn-sm">Clear</a>
-        </div>
-    </form>
+    </div>
 
-    <table class="table table-hover align-middle">
-        <thead>
-        <tr>
-            <th>Client</th>
-            <th>Service</th>
-            <th>Requested</th>
-            <th>Status</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="a : ${appointments}">
-            <td><a th:href="@{/admin/appointments/{id}(id=${a.id()})}" th:text="${a.clientName()}"></a></td>
-            <td th:text="${a.serviceName()}"></td>
-            <td th:text="${#temporals.format(a.requestedAt(), 'dd MMM yyyy, HH:mm')}"></td>
-            <td>
-                <span th:switch="${a.status().name()}">
-                    <span th:case="'PENDING'" class="badge bg-warning text-dark">PENDING</span>
-                    <span th:case="'CONFIRMED'" class="badge bg-success">CONFIRMED</span>
-                    <span th:case="'CANCELLED'" class="badge bg-danger">CANCELLED</span>
-                    <span th:case="'COMPLETED'" class="badge bg-secondary">COMPLETED</span>
-                </span>
-            </td>
-        </tr>
-        <tr th:if="${appointments.isEmpty()}">
-            <td colspan="4" class="text-muted text-center py-4">No appointments match these filters.</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="card mb-4">
+        <div class="card-header"><b>În așteptare</b></div>
+        <div class="card-body">
+            <div th:replace="~{admin/fragments :: appointmentsTable(${pendingAppointments}, 'Nu există programări în așteptare.', false)}"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><b>Confirmate / Anulate / Finalizate</b></div>
+        <div class="card-body">
+            <div th:replace="~{admin/fragments :: appointmentsTable(${otherAppointments}, 'Nicio altă programare nu corespunde acestor filtre.', true)}"></div>
+        </div>
+    </div>
 </main>
 
 </body>

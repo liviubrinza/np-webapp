@@ -5,24 +5,81 @@
 <head th:fragment="head(title)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title th:text="${title} + ' | Notary Admin'">Notary Admin</title>
+    <title th:text="${title} + ' | Birou Notarial'">Birou Notarial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
 
-<nav th:fragment="navbar" class="navbar navbar-dark bg-dark">
+<nav th:fragment="navbar" class="navbar navbar-dark" style="background-color: #66090c;">
     <div class="container-fluid">
-        <a class="navbar-brand" th:href="@{/admin}">Notary Admin Panel</a>
+        <a class="navbar-brand" th:href="@{/admin}">Panou Admin</a>
         <ul class="navbar-nav flex-row me-auto">
             <li class="nav-item me-3">
-                <a class="nav-link text-white" th:href="@{/admin/appointments}">Appointments</a>
+                <a class="nav-link text-white" th:href="@{/admin/appointments}">Programări</a>
+            </li>
+            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
+                <a class="nav-link text-white" th:href="@{/admin/statistics}">Statistici</a>
+            </li>
+            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
+                <a class="nav-link text-white" th:href="@{/admin/users}">Utilizatori Admin</a>
             </li>
         </ul>
         <form th:action="@{/admin/logout}" method="post" class="d-flex align-items-center mb-0">
             <span class="navbar-text text-white me-3" sec:authentication="name">admin</span>
-            <button type="submit" class="btn btn-outline-light btn-sm">Log Out</button>
+            <a th:href="@{/admin/profile}" class="btn btn-outline-light btn-sm me-2">Profil</a>
+            <button type="submit" class="btn btn-outline-light btn-sm">Deconectare</button>
         </form>
     </div>
 </nav>
+
+<ul th:fragment="statisticsNav(active)" class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'requests'} ? 'active'"
+           th:href="@{/admin/statistics}">Cereri</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'traffic'} ? 'active'"
+           th:href="@{/admin/statistics/traffic}">Trafic</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'activity'} ? 'active'"
+           th:href="@{/admin/statistics/activity}">Activitate Admin</a>
+    </li>
+</ul>
+
+<table th:fragment="appointmentsTable(appointments, emptyMessage, showStatus)" class="table table-striped table-hover align-middle">
+    <thead>
+    <tr>
+        <th style="width: 3rem;" class="text-center">Nr.</th>
+        <th>Client</th>
+        <th>Serviciu</th>
+        <th>Solicitat</th>
+        <th th:if="${showStatus}">Stare</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a, iterStat : ${appointments}">
+        <td th:text="${iterStat.count}"></td>
+        <td><a th:href="@{/admin/appointments/{id}(id=${a.id()})}" th:text="${a.clientName()}"></a></td>
+        <td th:text="${a.serviceName()}"></td>
+        <td th:text="${#temporals.format(a.requestedAt(), 'dd MMM yyyy, HH:mm')}"></td>
+        <td th:if="${showStatus}">
+            <span th:switch="${a.status().name()}">
+                <span th:case="'PENDING'" class="badge bg-warning text-dark" th:text="${a.status().displayName}"></span>
+                <span th:case="'CONFIRMED'" class="badge bg-success" th:text="${a.status().displayName}"></span>
+                <span th:case="'CANCELLED'" class="badge bg-danger" th:text="${a.status().displayName}"></span>
+                <span th:case="'COMPLETED'" class="badge bg-secondary" th:text="${a.status().displayName}"></span>
+            </span>
+        </td>
+    </tr>
+    <tr th:if="${appointments.isEmpty()}">
+        <td th:colspan="${showStatus} ? 5 : 4" class="text-muted text-center py-4" th:text="${emptyMessage}"></td>
+    </tr>
+    </tbody>
+</table>
 
 </body>
 </html>

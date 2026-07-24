@@ -1,5 +1,6 @@
 package com.brinza.notary.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
@@ -73,6 +74,19 @@ public class BookingRequest {
 
     public void setRequestedAt(LocalDateTime requestedAt) {
         this.requestedAt = requestedAt;
+    }
+
+    @AssertTrue(message = "{book.requestedAt.halfHour}")
+    public boolean isRequestedAtOnHalfHour() {
+        if (requestedAt == null) {
+            return true;
+        }
+        int hour = requestedAt.getHour();
+        int minute = requestedAt.getMinute();
+        if (requestedAt.getSecond() != 0 || (minute != 0 && minute != 30)) {
+            return false;
+        }
+        return hour >= 9 && hour <= 17 && !(hour == 17 && minute == 30);
     }
 
     public String getNotes() {

@@ -9,16 +9,20 @@
     <h1 th:text="#{book.confirmation.title}">Appointment Requested</h1>
     <p class="lead" th:text="#{book.confirmation.message}">Thank you, we will be in touch.</p>
 
-    <dl class="row" th:if="${appointment != null}">
-        <dt class="col-sm-3" th:text="#{book.clientName}">Name</dt>
-        <dd class="col-sm-9" th:text="${appointment.clientName()}"></dd>
+    <div class="card mt-4" th:if="${appointment != null}">
+        <div class="card-body p-4">
+            <dl class="row mb-0">
+                <dt class="col-sm-3" th:text="#{book.clientName}">Name</dt>
+                <dd class="col-sm-9" th:text="${appointment.clientName()}"></dd>
 
-        <dt class="col-sm-3" th:text="#{book.service}">Service</dt>
-        <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
+                <dt class="col-sm-3" th:text="#{book.service}">Service</dt>
+                <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
 
-        <dt class="col-sm-3" th:text="#{book.requestedAt}">Preferred date/time</dt>
-        <dd class="col-sm-9" th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')}"></dd>
-    </dl>
+                <dt class="col-sm-3" th:text="#{book.requestedAt}">Preferred date/time</dt>
+                <dd class="col-sm-9 mb-0" th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')}"></dd>
+            </dl>
+        </div>
+    </div>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>

@@ -14,7 +14,7 @@ import java.util.Locale;
  */
 public class PathLocaleResolver implements LocaleResolver {
 
-    public static final Locale DEFAULT_LOCALE = Locale.of("en");
+    public static final Locale DEFAULT_LOCALE = Locale.of("ro");
 
     public static final List<Locale> SUPPORTED_LOCALES = List.of(
             Locale.of("en"), Locale.of("ro"), Locale.of("hu"));

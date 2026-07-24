@@ -9,5 +9,6 @@ public record AppointmentListItemView(
         String clientName,
         String serviceName,
         LocalDateTime requestedAt,
-        AppointmentStatus status) {
+        AppointmentStatus status,
+        LocalDateTime createdAt) {
 }

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{nav.book}, ${null})}"></head>
+<head th:replace="~{layout/fragments :: head(#{nav.book}, ~{::link})}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</head>
 <body>
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
@@ -8,6 +10,8 @@
 <main class="container my-5" style="max-width: 640px;">
     <h1 th:text="#{nav.book}">Book Appointment</h1>
 
+    <div class="card mt-4">
+    <div class="card-body p-4">
     <form th:action="@{'/' + ${currentLocale} + '/book'}" th:object="${bookingRequest}" method="post" novalidate>
         <div class="mb-3">
             <label class="form-label" th:text="#{book.clientName}">Name</label>
@@ -42,9 +46,21 @@
 
         <div class="mb-3">
             <label class="form-label" th:text="#{book.requestedAt}">Preferred date/time</label>
-            <input type="datetime-local" class="form-control" th:field="*{requestedAt}"
-                   th:classappend="${#fields.hasErrors('requestedAt')} ? 'is-invalid'"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
+            <div class="row g-2">
+                <div class="col-6">
+                    <input type="text" id="requestedAtDate" class="form-control" autocomplete="off"
+                           th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
+                </div>
+                <div class="col-6">
+                    <select id="requestedAtTime" class="form-select"
+                            th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'">
+                        <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"></option>
+                    </select>
+                </div>
+            </div>
+            <input type="hidden" th:field="*{requestedAt}"/>
+            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
+            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnHalfHour')}" th:errors="*{requestedAtOnHalfHour}"></div>
         </div>
 
         <div class="mb-3">
@@ -56,9 +72,43 @@
 
         <button type="submit" class="btn btn-primary" th:text="#{book.submit}">Book Appointment</button>
     </form>
+    </div>
+    </div>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script th:if="${currentLocale == 'ro'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
+<script th:if="${currentLocale == 'hu'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var hidden = document.getElementById('requestedAt');
+        var dateInput = document.getElementById('requestedAtDate');
+        var timeSelect = document.getElementById('requestedAtTime');
+        var locale = /*[[${currentLocale}]]*/ 'en';
+
+        function sync() {
+            hidden.value = dateInput.value ? (dateInput.value + 'T' + timeSelect.value) : '';
+        }
+
+        var picker = flatpickr(dateInput, {
+            altInput: true,
+            altFormat: 'd-M-Y',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            locale: locale === 'en' ? 'default' : locale,
+            onChange: sync
+        });
+
+        if (hidden.value) {
+            var parts = hidden.value.split('T');
+            picker.setDate(parts[0], true);
+            timeSelect.value = parts[1];
+        }
+
+        timeSelect.addEventListener('change', sync);
+    });
+</script>
 </body>
 </html>

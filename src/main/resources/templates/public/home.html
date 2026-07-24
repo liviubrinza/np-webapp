@@ -5,9 +5,17 @@
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
 
-<main class="container my-5">
-    <h1 th:text="#{home.heading}">Welcome</h1>
-    <p class="lead" th:text="#{home.intro}">Professional notary services you can trust.</p>
+<main class="d-flex flex-column">
+    <section class="hero-section">
+        <div class="container">
+            <div class="hero-panel">
+                <h1 th:text="#{home.heading}">Welcome</h1>
+                <p class="lead" th:text="#{home.intro}">Professional notary services you can trust.</p>
+                <a class="btn btn-primary btn-lg px-4 mt-3" th:href="@{'/' + ${currentLocale} + '/book'}"
+                   th:text="#{nav.book}">Book Appointment</a>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>

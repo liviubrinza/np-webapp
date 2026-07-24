@@ -3,6 +3,7 @@ package com.brinza.notary.dto;
 import com.brinza.notary.domain.AppointmentStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record AppointmentDetailView(
         Long id,
@@ -13,6 +14,6 @@ public record AppointmentDetailView(
         LocalDateTime requestedAt,
         AppointmentStatus status,
         String notes,
-        String internalNotes,
+        List<InternalNoteView> internalNotes,
         LocalDateTime createdAt) {
 }
