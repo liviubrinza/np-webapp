@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Programări')}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4">
+    <h1 class="h3 mb-4">Programări</h1>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <div class="card bg-light mb-4">
+        <div class="card-body">
+            <form method="get" th:action="@{/admin/appointments}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Nume</b></label>
+                    <input type="text" name="name" class="form-control form-control-sm" placeholder="Numele clientului"
+                           th:value="${name}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Stare</b></label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="" th:selected="${selectedStatus == null}">Toate</option>
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
+                                th:selected="${s == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>De la</b></label>
+                    <input type="date" name="from" class="form-control form-control-sm" th:value="${from}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Până la</b></label>
+                    <input type="date" name="to" class="form-control form-control-sm" th:value="${to}"/>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
+                    <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary btn-sm">Resetează</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><b>În așteptare</b></div>
+        <div class="card-body">
+            <div th:replace="~{admin/fragments :: appointmentsTable(${pendingAppointments}, 'Nu există programări în așteptare.', false)}"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><b>Confirmate / Anulate / Finalizate</b></div>
+        <div class="card-body">
+            <div th:replace="~{admin/fragments :: appointmentsTable(${otherAppointments}, 'Nicio altă programare nu corespunde acestor filtre.', true)}"></div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

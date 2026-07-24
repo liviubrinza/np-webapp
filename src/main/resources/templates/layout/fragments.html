@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<head th:fragment="head(title, extraHead)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${title} + ' | ' + #{site.title}">Notary Public Office</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <th:block th:if="${extraHead != null}">
+        <th:block th:replace="${extraHead}"></th:block>
+    </th:block>
+</head>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark border-bottom" style="background-color: #66090c;">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{'/' + ${currentLocale}}" th:text="#{site.title}">Notary Public Office</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{'/' + ${currentLocale}}" th:text="#{nav.home}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{'/' + ${currentLocale} + '/services'}" th:text="#{nav.services}">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{'/' + ${currentLocale} + '/contact'}" th:text="#{nav.contact}">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{'/' + ${currentLocale} + '/book'}" th:text="#{nav.book}">Book Appointment</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:switch="${currentLocale}">
+                            <span th:case="'en'"><img th:src="@{/images/flags/gb.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.en}">English</span></span>
+                            <span th:case="'hu'"><img th:src="@{/images/flags/hu.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.hu}">Hungarian</span></span>
+                            <span th:case="*"><img th:src="@{/images/flags/ro.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.ro}">Romanian</span></span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li>
+                            <a class="dropdown-item" th:classappend="${currentLocale == 'ro'} ? 'active'"
+                               th:href="@{'/ro' + ${pathAfterLocale}}">
+                                <img th:src="@{/images/flags/ro.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.ro}">Romanian</span></a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:classappend="${currentLocale == 'en'} ? 'active'"
+                               th:href="@{'/en' + ${pathAfterLocale}}">
+                                <img th:src="@{/images/flags/gb.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.en}">English</span></a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:classappend="${currentLocale == 'hu'} ? 'active'"
+                               th:href="@{'/hu' + ${pathAfterLocale}}">
+                                <img th:src="@{/images/flags/hu.svg}" width="20" height="14" alt=""/> <span th:text="#{lang.hu}">Hungarian</span></a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<footer th:fragment="footer" class="site-footer text-center py-4 mt-5">
+    <div class="container">
+        <span th:text="${T(java.time.Year).now()} + ' ' + #{site.title} + ' — ' + #{footer.rights}">
+            2026 Notary Public Office — All rights reserved.
+        </span>
+    </div>
+</footer>
+
+</body>
+</html>

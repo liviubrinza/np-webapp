@@ -1,0 +1,75 @@
+# Source of truth for the services offered by the office.
+#
+# Add a new service by adding a new list entry with a unique `code` (used to
+# match entries across restarts — never reuse a code for a different service,
+# and don't change an existing code unless you mean to replace it).
+#
+# Remove a service by deleting its entry here; the app will deactivate the
+# corresponding row on next startup (existing appointments that reference it
+# are kept, it's just hidden from the public site) rather than deleting it.
+app:
+  services:
+    - code: document-authentication
+      duration-minutes: 30
+      translations:
+        en:
+          name: "Document Authentication"
+          description: "Certification of copies and signatures for official and personal documents."
+        ro:
+          name: "Autentificare Documente"
+          description: "Certificarea copiilor și semnăturilor pentru documente oficiale și personale."
+        hu:
+          name: "Dokumentum-hitelesítés"
+          description: "Másolatok és aláírások hitelesítése hivatalos és személyes iratokhoz."
+
+    - code: power-of-attorney
+      duration-minutes: 45
+      translations:
+        en:
+          name: "Power of Attorney"
+          description: "Drafting and notarizing general or special powers of attorney."
+        ro:
+          name: "Procură"
+          description: "Redactarea și autentificarea procurilor generale sau speciale."
+        hu:
+          name: "Meghatalmazás"
+          description: "Általános vagy különleges meghatalmazások szerkesztése és hitelesítése."
+
+    - code: certified-translation-notarization
+      duration-minutes: 20
+      translations:
+        en:
+          name: "Certified Translation Notarization"
+          description: "Notarization of certified translations for use with authorities abroad."
+        ro:
+          name: "Legalizare Traduceri"
+          description: "Legalizarea traducerilor autorizate pentru utilizare la autorități din străinătate."
+        hu:
+          name: "Hiteles fordítás közjegyzői hitelesítése"
+          description: "Hiteles fordítások közjegyzői hitelesítése külföldi hatóságok számára."
+
+    - code: deeds-and-contracts
+      duration-minutes: 120
+      translations:
+        en:
+          name: "Deeds and Contracts"
+          description: "Notarial authentication of sale and purchase agreements, deeds of gift (donations), mortgage agreements, loan-for-use agreements (commodatum), and lease agreements."
+        ro:
+          name: "Acte și contracte"
+          description: "Autentificare vânzări-cumpărări, donații, ipoteci, comodat și închirieri."
+        hu:
+          name: "Okiratok és szerződések"
+          description: "Adásvételi szerződések, ajándékozási szerződések, jelzálogszerződések, haszonkölcsön-szerződések és bérleti szerződések közjegyzői hitelesítése."
+
+    - code: probate-proceedings
+      duration-minutes: 180
+      translations:
+        en:
+          name: "Probate Proceedings"
+          description: "Administration of estates and issuance of certificates of inheritance."
+        ro:
+          name: "Proceduri succesorale"
+          description: "Dezbatere moșteniri și eliberare certificate de moștenitor."
+        hu:
+          name: "Hagyatéki eljárások"
+          description: "Hagyatéki eljárás lefolytatása és öröklési bizonyítvány kiállítása."

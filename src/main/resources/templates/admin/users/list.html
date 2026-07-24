@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Utilizatori Admin')}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Utilizatori Admin</h1>
+        <a th:href="@{/admin/users/new}" class="btn btn-primary btn-sm">Admin nou</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <table class="table table-hover align-middle">
+        <thead>
+        <tr>
+            <th>Nume de utilizator</th>
+            <th>Creat</th>
+            <th>Ultima autentificare</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${admins}">
+            <td th:text="${a.username()}"></td>
+            <td th:text="${#temporals.format(a.createdAt(), 'dd MMM yyyy, HH:mm')}"></td>
+            <td th:text="${a.lastLogin() != null} ? ${#temporals.format(a.lastLogin(), 'dd MMM yyyy, HH:mm')} : 'Niciodată'"></td>
+            <td class="text-end">
+                <a th:href="@{/admin/users/{id}/edit(id=${a.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
+                <form th:action="@{/admin/users/{id}/delete(id=${a.id()})}" method="post" class="d-inline"
+                      onsubmit="return confirm('Ștergeți acest cont de admin?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Șterge</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${admins.isEmpty()}">
+            <td colspan="4" class="text-muted text-center py-4">Nu există conturi de admin încă.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>

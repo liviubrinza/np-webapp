@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Detalii Programare')}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 720px;">
+    <a th:href="@{/admin/appointments}" class="d-inline-block mb-3">&larr; Înapoi la programări</a>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <h1 class="h3 mb-4" th:text="${appointment.clientName()}">Client Name</h1>
+
+    <dl class="row">
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9" th:text="${appointment.email()}"></dd>
+
+        <dt class="col-sm-3">Telefon</dt>
+        <dd class="col-sm-9" th:text="${appointment.phone()}"></dd>
+
+        <dt class="col-sm-3">Serviciu</dt>
+        <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
+
+        <dt class="col-sm-3">Data programării</dt>
+        <dd class="col-sm-9" th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')}"></dd>
+
+        <dt class="col-sm-3">Trimisă la</dt>
+        <dd class="col-sm-9" th:text="${#temporals.format(appointment.createdAt(), 'dd MMM yyyy, HH:mm')}"></dd>
+
+        <dt class="col-sm-3">Mesajul clientului</dt>
+        <dd class="col-sm-9" th:text="${appointment.notes() ?: '—'}"></dd>
+    </dl>
+
+    <hr/>
+
+    <form th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
+          class="row g-2 align-items-end mb-4">
+        <div class="col-auto">
+            <label class="form-label mb-0">Stare</label>
+            <select name="status" class="form-select">
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
+                        th:selected="${s == appointment.status()}"></option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Actualizează starea</button>
+        </div>
+    </form>
+
+    <h2 class="h5 mb-3">Note interne</h2>
+
+    <p class="text-muted" th:if="${appointment.internalNotes().isEmpty()}">Nu există note interne încă.</p>
+
+    <table class="table table-striped mb-3" th:unless="${appointment.internalNotes().isEmpty()}">
+        <thead>
+        <tr>
+            <th>Notă</th>
+            <th>Dată</th>
+            <th>Utilizator</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="n : ${appointment.internalNotes()}">
+            <td th:text="${n.note()}"></td>
+            <td class="text-muted"><small th:text="${#temporals.format(n.createdAt(), 'dd MMM yyyy, HH:mm')}"></small></td>
+            <td th:text="${n.authorUsername()}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <form th:action="@{/admin/appointments/{id}/notes(id=${appointment.id()})}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Adaugă notă</label>
+            <textarea name="note" class="form-control" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Adaugă notă</button>
+    </form>
+</main>
+
+</body>
+</html>

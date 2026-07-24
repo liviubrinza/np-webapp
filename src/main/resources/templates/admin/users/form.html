@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head(${adminId} != null ? 'Editează Admin' : 'Admin Nou')}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 480px;">
+    <a th:href="@{/admin/users}" class="d-inline-block mb-3">&larr; Înapoi la utilizatori admin</a>
+
+    <h1 class="h3 mb-4" th:text="${adminId} != null ? 'Editează Admin' : 'Admin Nou'"></h1>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="${adminId} != null ? @{/admin/users/{id}(id=${adminId})} : @{/admin/users}"
+          th:object="${adminUserForm}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Nume de utilizator</label>
+            <input type="text" th:field="*{username}" class="form-control"/>
+            <div class="text-danger small" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Parolă</label>
+            <input type="password" th:field="*{password}" class="form-control"/>
+            <div class="form-text" th:if="${adminId} != null">Lăsați necompletat pentru a păstra parola curentă.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvează</button>
+    </form>
+</main>
+
+</body>
+</html>

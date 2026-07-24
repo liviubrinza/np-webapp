@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Autentificare Admin | Birou Notarial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<div class="container" style="max-width: 400px; margin-top: 8rem;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h1 class="h4 mb-3 text-center">Autentificare Admin</h1>
+
+            <div class="alert alert-danger py-2" th:if="${param.error}">
+                Nume de utilizator sau parolă incorectă.
+            </div>
+            <div class="alert alert-info py-2" th:if="${param.logout}">
+                V-ați deconectat.
+            </div>
+
+            <form th:action="@{/admin/login}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Nume de utilizator</label>
+                    <input type="text" name="username" class="form-control" required autofocus/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Parolă</label>
+                    <input type="password" name="password" class="form-control" required/>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Autentificare</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

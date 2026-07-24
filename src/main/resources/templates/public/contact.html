@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/fragments :: head(#{contact.heading}, ~{::link})}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body>
+
+<nav th:replace="~{layout/fragments :: navbar}"></nav>
+
+<main class="container my-5">
+    <h1 th:text="#{contact.heading}">Contact Us</h1>
+
+    <div class="row g-4 mt-2">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">
+                            <strong th:text="#{contact.address.label}">Address</strong><br/>
+                            <span th:text="${address}">Address</span>
+                        </li>
+                        <li class="mb-3">
+                            <strong th:text="#{contact.phone.label}">Phone</strong><br/>
+                            <span th:text="${phone}">Phone</span>
+                        </li>
+                        <li>
+                            <strong th:text="#{contact.email.label}">Email</strong><br/>
+                            <span th:text="${email}">Email</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div id="map" class="map-container rounded border"
+                 th:attr="data-lat=${latitude},data-lng=${longitude}"></div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{layout/fragments :: footer}"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const mapEl = document.getElementById('map');
+    const lat = parseFloat(mapEl.dataset.lat);
+    const lng = parseFloat(mapEl.dataset.lng);
+    const map = L.map('map').setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    L.marker([lat, lng]).addTo(map);
+</script>
+</body>
+</html>

@@ -13,6 +13,12 @@ spring:
 app:
   storage:
     documents-dir: ./storage/documents
+  contact:
+    address: "To be added later"
+    phone: "0777 777 777"
+    email: "something@somethingelse.com"
+    latitude: 46.72982564167728
+    longitude: 23.48734642212008
 
 ---
 spring:

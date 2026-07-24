@@ -1,0 +1,17 @@
+# Initial admin-panel accounts, created on first startup only.
+#
+# Each entry is matched by `username`. If an account with that username
+# already exists in the database, it is left completely untouched (this file
+# only creates missing accounts — it will never overwrite a password or role
+# that was changed later through the Admin Users screen). Removing an entry
+# here does NOT delete the corresponding account.
+#
+# Change these default passwords before any real deployment.
+app:
+  admin-users:
+    - username: admin
+      password: admin
+      role: ADMIN
+    - username: technician
+      password: technician
+      role: TECHNICIAN

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Statistici · Activitate Admin')}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4">
+    <h1 class="h3 mb-4">Statistici</h1>
+    <div th:replace="~{admin/fragments :: statisticsNav('activity')}"></div>
+
+    <div class="alert alert-secondary">Istoricul activității adminilor nu este încă implementat. Reveniți în curând.</div>
+</main>
+
+</body>
+</html>
