@@ -12,6 +12,7 @@ public record AppointmentDetailView(
         String phone,
         String serviceName,
         LocalDateTime requestedAt,
+        LocalDateTime endedAt,
         AppointmentStatus status,
         String notes,
         List<InternalNoteView> internalNotes,

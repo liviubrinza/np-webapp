@@ -200,3 +200,55 @@ a:hover {
     width: 100%;
     box-shadow: 0 4px 14px rgba(102, 9, 12, 0.08);
 }
+
+/* Admin calendar — per-day appointment-load indicator */
+.flatpickr-day.day-status-free {
+    background: #28a745 !important;
+    border-color: #28a745 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.day-status-partial {
+    background: #fd7e14 !important;
+    border-color: #fd7e14 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.day-status-full {
+    background: #dc3545 !important;
+    border-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.flatpickr-day.day-status-free:hover,
+.flatpickr-day.day-status-partial:hover,
+.flatpickr-day.day-status-full:hover {
+    filter: brightness(0.9);
+}
+
+.flatpickr-day.today.day-status-free,
+.flatpickr-day.today.day-status-partial,
+.flatpickr-day.today.day-status-full {
+    box-shadow: inset 0 0 0 2px var(--brand-text);
+}
+
+.calendar-legend-dot {
+    display: inline-block;
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.calendar-legend-free {
+    background-color: #28a745;
+}
+
+.calendar-legend-partial {
+    background-color: #fd7e14;
+}
+
+.calendar-legend-full {
+    background-color: #dc3545;
+}

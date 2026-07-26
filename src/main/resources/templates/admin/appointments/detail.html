@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Detalii Programare')}"></head>
+<head th:replace="~{admin/fragments :: head('Detalii Programare', null)}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -24,7 +24,8 @@
         <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
 
         <dt class="col-sm-3">Data programării</dt>
-        <dd class="col-sm-9" th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')}"></dd>
+        <dd class="col-sm-9"
+            th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')} + ' – ' + ${#temporals.format(appointment.endedAt(), 'HH:mm')}"></dd>
 
         <dt class="col-sm-3">Trimisă la</dt>
         <dd class="col-sm-9" th:text="${#temporals.format(appointment.createdAt(), 'dd MMM yyyy, HH:mm')}"></dd>
@@ -34,6 +35,34 @@
     </dl>
 
     <hr/>
+
+    <h2 class="h5 mb-3">Data și ora programării</h2>
+
+    <form th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
+          class="row g-2 align-items-end mb-4">
+        <div class="col-auto">
+            <label class="form-label mb-0">Data</label>
+            <input type="date" name="date" class="form-control"
+                   th:value="${#temporals.format(appointment.requestedAt(), 'yyyy-MM-dd')}"/>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-0">Ora început</label>
+            <select name="startTime" class="form-select">
+                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                        th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"></option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <label class="form-label mb-0">Ora sfârșit</label>
+            <select name="endTime" class="form-select">
+                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                        th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"></option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Actualizează programarea</button>
+        </div>
+    </form>
 
     <form th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
           class="row g-2 align-items-end mb-4">

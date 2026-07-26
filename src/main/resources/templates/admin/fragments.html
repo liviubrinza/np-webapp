@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
-<head th:fragment="head(title)">
+<head th:fragment="head(title, extraHead)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title th:text="${title} + ' | Birou Notarial'">Birou Notarial</title>
@@ -11,6 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <th:block th:if="${extraHead != null}">
+        <th:block th:replace="${extraHead}"></th:block>
+    </th:block>
 </head>
 
 <nav th:fragment="navbar" class="navbar navbar-dark" style="background-color: #66090c;">
@@ -19,6 +22,9 @@
         <ul class="navbar-nav flex-row me-auto">
             <li class="nav-item me-3">
                 <a class="nav-link text-white" th:href="@{/admin/appointments}">Programări</a>
+            </li>
+            <li class="nav-item me-3">
+                <a class="nav-link text-white" th:href="@{/admin/calendar}">Calendar</a>
             </li>
             <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
                 <a class="nav-link text-white" th:href="@{/admin/statistics}">Statistici</a>

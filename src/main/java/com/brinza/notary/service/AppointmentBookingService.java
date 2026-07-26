@@ -40,6 +40,7 @@ public class AppointmentBookingService {
                 request.getPhone(),
                 service,
                 request.getRequestedAt(),
+                request.getRequestedAt().plusMinutes(service.getDurationMinutes()),
                 request.getNotes()
         );
         Appointment saved = appointmentRepository.save(appointment);
