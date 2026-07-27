@@ -23,9 +23,14 @@
                             <strong th:text="#{contact.phone.label}">Phone</strong><br/>
                             <span th:text="${phone}">Phone</span>
                         </li>
-                        <li>
+                        <li class="mb-3">
                             <strong th:text="#{contact.email.label}">Email</strong><br/>
                             <span th:text="${email}">Email</span>
+                        </li>
+                        <li>
+                            <strong th:text="#{contact.schedule.label}">Work Schedule</strong><br/>
+                            <span th:text="#{contact.schedule.days}">Monday - Friday</span>,
+                            <span th:text="${hours}">09:00 - 18:00</span>
                         </li>
                     </ul>
                 </div>

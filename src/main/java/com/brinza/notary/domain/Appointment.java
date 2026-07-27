@@ -44,6 +44,9 @@ public class Appointment {
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
+    @Column(name = "ended_at", nullable = false)
+    private LocalDateTime endedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AppointmentStatus status = AppointmentStatus.PENDING;
@@ -62,19 +65,22 @@ public class Appointment {
     }
 
     public Appointment(String clientName, String email, String phone, Service service,
-                        LocalDateTime requestedAt, String notes) {
+                        LocalDateTime requestedAt, LocalDateTime endedAt, String notes) {
         this.clientName = clientName;
         this.email = email;
         this.phone = phone;
         this.service = service;
         this.requestedAt = requestedAt;
+        this.endedAt = endedAt;
         this.notes = notes;
         this.status = AppointmentStatus.PENDING;
     }
 
     @PrePersist
     void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 
     public Long getId() {
@@ -121,6 +127,14 @@ public class Appointment {
         this.requestedAt = requestedAt;
     }
 
+    public LocalDateTime getEndedAt() {
+        return endedAt;
+    }
+
+    public void setEndedAt(LocalDateTime endedAt) {
+        this.endedAt = endedAt;
+    }
+
     public AppointmentStatus getStatus() {
         return status;
     }
@@ -148,5 +162,9 @@ public class Appointment {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -1,0 +1,308 @@
+# Demo/test appointment data, loaded when app.demo-data.appointments.enabled is true
+# (see application.yml). Loaded by AppointmentDemoDataSeeder on startup, skipped if the
+# appointments table already has rows - re-enabling the flag will not duplicate entries.
+#
+# Every detail of an appointment is configurable here, independently of the linked service:
+# `booked-service` only matches a Service by its stable `code` (see services.yml) for display/
+# categorization - `duration` (minutes) is its own field and drives `ended-at` off `requested-at`.
+# `booked-date` is the appointment's created-at timestamp (when the booking was made), separate
+# from `requested-at` (the actual appointment slot). `status` accepts any AppointmentStatus value.
+#
+# 3/5/18 August 2026 are deliberately fully booked back-to-back from 09:00 to 17:00 with no gaps
+# (each block's durations sum to exactly 480 minutes) - keep that invariant if you edit them.
+app:
+  demo-appointments:
+    - client-name: "Attila Nagy"
+      email: "attila.nagy12@gmail.com"
+      phone: "0761234567"
+      booked-service: probate-proceedings
+      requested-at: "2026-08-03T09:00:00"
+      booked-date: "2026-08-01T09:00:00"
+      duration: 180
+      status: CONFIRMED
+      notes: "Estate settlement, expects a long session."
+    - client-name: "Katalin Kovács"
+      email: "katalin.kovacs33@yahoo.com"
+      phone: "0752983461"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-03T12:00:00"
+      booked-date: "2026-07-15T10:15:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Bringing spouse for co-signing."
+    - client-name: "Ion Radu"
+      email: "ion.radu58@outlook.com"
+      phone: "0779456123"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-03T14:00:00"
+      booked-date: "2026-07-18T11:30:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Ana Ionescu"
+      email: "ana.ionescu21@gmail.com"
+      phone: "0733820456"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-03T14:45:00"
+      booked-date: "2026-07-21T12:45:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "First time client."
+    - client-name: "Mihai Farkas"
+      email: "mihai.farkas67@yahoo.com"
+      phone: "0748123975"
+      booked-service: document-authentication
+      requested-at: "2026-08-03T15:30:00"
+      booked-date: "2026-07-24T13:00:00"
+      duration: 30
+      status: CONFIRMED
+    - client-name: "Cristina Molnár"
+      email: "cristina.molnar44@outlook.com"
+      phone: "0791456238"
+      booked-service: document-authentication
+      requested-at: "2026-08-03T16:00:00"
+      booked-date: "2026-07-27T14:15:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Gheorghe Nagy"
+      email: "gheorghe.nagy19@gmail.com"
+      phone: "0764987321"
+      booked-service: document-authentication
+      requested-at: "2026-08-03T16:30:00"
+      booked-date: "2026-07-30T15:30:00"
+      duration: 30
+      status: CONFIRMED
+    - client-name: "Cristina Tóth"
+      email: "cristina.toth74@yahoo.com"
+      phone: "0733212852"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-08-04T15:30:00"
+      booked-date: "2026-07-14T16:45:00"
+      duration: 20
+      status: CONFIRMED
+    - client-name: "Ildikó Farkas"
+      email: "ildiko.farkas72@yahoo.com"
+      phone: "0725634871"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-05T09:00:00"
+      booked-date: "2026-07-18T09:00:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Large property sale."
+    - client-name: "Zsolt Radu"
+      email: "zsolt.radu8@gmail.com"
+      phone: "0798123456"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-05T11:00:00"
+      booked-date: "2026-07-21T10:15:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Elena Nagy"
+      email: "elena.nagy55@outlook.com"
+      phone: "0736789123"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-05T13:00:00"
+      booked-date: "2026-07-24T11:30:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Attila Popa"
+      email: "attila.popa30@gmail.com"
+      phone: "0742567890"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-05T15:00:00"
+      booked-date: "2026-07-27T12:45:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Katalin Dumitru"
+      email: "katalin.dumitru64@yahoo.com"
+      phone: "0759831246"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-05T15:45:00"
+      booked-date: "2026-07-30T13:00:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Needs documents translated in advance."
+    - client-name: "Ion Molnár"
+      email: "ion.molnar11@outlook.com"
+      phone: "0788245671"
+      booked-service: document-authentication
+      requested-at: "2026-08-05T16:30:00"
+      booked-date: "2026-08-02T14:15:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "First time client."
+    - client-name: "Enikő Popescu"
+      email: "eniko.popescu12@yahoo.com"
+      phone: "0762184869"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-11T15:30:00"
+      booked-date: "2026-07-22T15:30:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Gheorghe Marin"
+      email: "gheorghe.marin29@outlook.com"
+      phone: "0749547981"
+      booked-service: document-authentication
+      requested-at: "2026-08-13T13:30:00"
+      booked-date: "2026-07-27T16:45:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "First time client."
+    - client-name: "Maria Kovács"
+      email: "maria.kovacs47@gmail.com"
+      phone: "0721345678"
+      booked-service: probate-proceedings
+      requested-at: "2026-08-18T09:00:00"
+      booked-date: "2026-08-04T09:00:00"
+      duration: 180
+      status: CONFIRMED
+      notes: "Estate settlement."
+    - client-name: "Andrei Szabó"
+      email: "andrei.szabo23@yahoo.com"
+      phone: "0763987214"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T12:00:00"
+      booked-date: "2026-08-07T10:15:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Ioana Radu"
+      email: "ioana.radu9@outlook.com"
+      phone: "0746123890"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T12:45:00"
+      booked-date: "2026-08-10T11:30:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Cristian Nagy"
+      email: "cristian.nagy36@gmail.com"
+      phone: "0797456213"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T13:30:00"
+      booked-date: "2026-08-13T12:45:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Enikő Dumitru"
+      email: "eniko.dumitru15@yahoo.com"
+      phone: "0754321698"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T14:15:00"
+      booked-date: "2026-08-16T13:00:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "First time client."
+    - client-name: "Gheorghe Farkas"
+      email: "gheorghe.farkas52@outlook.com"
+      phone: "0729874563"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T15:00:00"
+      booked-date: "2026-07-30T14:15:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Ana Molnár"
+      email: "ana.molnar27@gmail.com"
+      phone: "0716539842"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-18T15:45:00"
+      booked-date: "2026-08-02T15:30:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Prefers a morning slot next time."
+    - client-name: "Mihai Popescu"
+      email: "mihai.popescu41@yahoo.com"
+      phone: "0783214569"
+      booked-service: document-authentication
+      requested-at: "2026-08-18T16:30:00"
+      booked-date: "2026-08-05T16:45:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Elena Radu"
+      email: "elena.radu53@gmail.com"
+      phone: "0762788504"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-08-20T11:15:00"
+      booked-date: "2026-08-10T09:00:00"
+      duration: 20
+      status: CONFIRMED
+    - client-name: "Cristian Szabó"
+      email: "cristian.szabo66@yahoo.com"
+      phone: "0758526776"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-08-27T14:15:00"
+      booked-date: "2026-08-20T10:15:00"
+      duration: 20
+      status: CONFIRMED
+    - client-name: "Ioana Stan"
+      email: "ioana.stan45@gmail.com"
+      phone: "0714789582"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-31T13:30:00"
+      booked-date: "2026-08-27T11:30:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Prefers a morning slot next time."
+    - client-name: "Zsolt Popa"
+      email: "zsolt.popa1@outlook.com"
+      phone: "0746111331"
+      booked-service: power-of-attorney
+      requested-at: "2026-09-09T10:30:00"
+      booked-date: "2026-08-19T12:45:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Needs documents translated in advance."
+    - client-name: "Enikő Marin"
+      email: "eniko.marin38@yahoo.com"
+      phone: "0706205753"
+      booked-service: document-authentication
+      requested-at: "2026-09-11T10:30:00"
+      booked-date: "2026-08-24T13:00:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "Prefers a morning slot next time."
+    - client-name: "Maria Marin"
+      email: "maria.marin77@yahoo.com"
+      phone: "0774575474"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-11T10:45:00"
+      booked-date: "2026-08-27T14:15:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Needs documents translated in advance."
+    - client-name: "Elena Dumitru"
+      email: "elena.dumitru29@outlook.com"
+      phone: "0772727718"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-11T12:45:00"
+      booked-date: "2026-08-30T15:30:00"
+      duration: 120
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Zsolt Szabó"
+      email: "zsolt.szabo76@yahoo.com"
+      phone: "0785701714"
+      booked-service: power-of-attorney
+      requested-at: "2026-09-24T10:30:00"
+      booked-date: "2026-09-15T16:45:00"
+      duration: 45
+      status: CONFIRMED
+    - client-name: "Ana Farkas"
+      email: "ana.farkas45@gmail.com"
+      phone: "0784383587"
+      booked-service: power-of-attorney
+      requested-at: "2026-09-28T14:30:00"
+      booked-date: "2026-09-22T09:00:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Prefers a morning slot next time."
+    - client-name: "Zsolt Muntean"
+      email: "zsolt.muntean75@yahoo.com"
+      phone: "0740731130"
+      booked-service: document-authentication
+      requested-at: "2026-09-29T15:45:00"
+      booked-date: "2026-09-26T10:15:00"
+      duration: 30
+      status: CONFIRMED
+      notes: "Prefers a morning slot next time."

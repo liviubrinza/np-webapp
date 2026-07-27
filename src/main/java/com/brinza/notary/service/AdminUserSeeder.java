@@ -4,6 +4,7 @@ import com.brinza.notary.config.AdminUserSeedProperties;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.repository.AdminUserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
  * this seeder must not clobber on every restart.
  */
 @Component
+@Order(2)
 public class AdminUserSeeder implements CommandLineRunner {
 
     private final AdminUserSeedProperties properties;

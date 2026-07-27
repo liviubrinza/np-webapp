@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Calendar', ~{::link})}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4">
+    <h1 class="h3 mb-4">Calendar</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-center">
+                <div id="calendar"></div>
+            </div>
+            <div class="d-flex justify-content-center gap-4 mt-3">
+                <span><span class="calendar-legend-dot calendar-legend-free"></span> Liberă</span>
+                <span><span class="calendar-legend-dot calendar-legend-partial"></span> Parțial ocupată</span>
+                <span><span class="calendar-legend-dot calendar-legend-full"></span> Complet ocupată</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <b th:text="${#temporals.format(selectedDate, 'dd MMM yyyy')}"></b>
+        </div>
+        <div class="card-body">
+            <div th:replace="~{admin/fragments :: appointmentsTimeline(${appointments})}"></div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var selectedDate = /*[[${#temporals.format(selectedDate, 'yyyy-MM-dd')}]]*/ '2026-01-01';
+        var dayAvailability = /*[(${dayAvailabilityJson})]*/ {};
+
+        function pad(n) {
+            return n < 10 ? '0' + n : '' + n;
+        }
+
+        function toKey(date) {
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+        }
+
+        function navigateToMonth(instance) {
+            var year = instance.currentYear;
+            var month = pad(instance.currentMonth + 1);
+            window.location.href = '/admin/calendar?date=' + year + '-' + month + '-01';
+        }
+
+        flatpickr('#calendar', {
+            inline: true,
+            dateFormat: 'Y-m-d',
+            defaultDate: selectedDate,
+            onChange: function (selectedDates, dateStr) {
+                window.location.href = '/admin/calendar?date=' + dateStr;
+            },
+            onMonthChange: function (selectedDates, dateStr, instance) {
+                navigateToMonth(instance);
+            },
+            onYearChange: function (selectedDates, dateStr, instance) {
+                navigateToMonth(instance);
+            },
+            onDayCreate: function (dObj, dStr, fp, dayElem) {
+                var status = dayAvailability[toKey(dayElem.dateObj)];
+                if (status) {
+                    dayElem.classList.add('day-status-' + status.toLowerCase());
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
