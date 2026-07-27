@@ -9,10 +9,14 @@ spring:
     basename: messages
     encoding: UTF-8
     fallback-to-system-locale: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 40MB
 
 app:
   storage:
-    documents-dir: ./storage/documents
+    documents-dir: ./persistent
   demo-data:
     appointments:
       enabled: true
@@ -65,4 +69,4 @@ spring:
 
 app:
   storage:
-    documents-dir: ${STORAGE_DOCUMENTS_DIR:/data/documents}
+    documents-dir: ${STORAGE_DOCUMENTS_DIR:/data/persistent}

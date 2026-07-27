@@ -5,7 +5,7 @@
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
 
-<main class="container my-4" style="max-width: 720px;">
+<main class="container my-4" style="max-width: 760px;">
     <a th:href="${backUrl}" class="d-inline-block mb-3"
        th:text="${backUrl.startsWith('/admin/calendar')} ? '← Înapoi la calendar' : '← Înapoi la programări'">&larr; Înapoi la programări</a>
 
@@ -14,103 +14,183 @@
 
     <h1 class="h3 mb-4" th:text="${appointment.clientName()}">Client Name</h1>
 
-    <dl class="row">
-        <dt class="col-sm-3">Email</dt>
-        <dd class="col-sm-9" th:text="${appointment.email()}"></dd>
+    <!-- Appointment details -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9" th:text="${appointment.email()}"></dd>
 
-        <dt class="col-sm-3">Telefon</dt>
-        <dd class="col-sm-9" th:text="${appointment.phone()}"></dd>
+                <dt class="col-sm-3">Telefon</dt>
+                <dd class="col-sm-9" th:text="${appointment.phone()}"></dd>
 
-        <dt class="col-sm-3">Serviciu</dt>
-        <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
+                <dt class="col-sm-3">Serviciu</dt>
+                <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
 
-        <dt class="col-sm-3">Data programării</dt>
-        <dd class="col-sm-9"
-            th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')} + ' – ' + ${#temporals.format(appointment.endedAt(), 'HH:mm')}"></dd>
+                <dt class="col-sm-3">Trimisă la</dt>
+                <dd class="col-sm-9" th:text="${#temporals.format(appointment.createdAt(), 'dd MMM yyyy, HH:mm')}"></dd>
 
-        <dt class="col-sm-3">Trimisă la</dt>
-        <dd class="col-sm-9" th:text="${#temporals.format(appointment.createdAt(), 'dd MMM yyyy, HH:mm')}"></dd>
-
-        <dt class="col-sm-3">Mesajul clientului</dt>
-        <dd class="col-sm-9" th:text="${appointment.notes() ?: '—'}"></dd>
-    </dl>
-
-    <hr/>
-
-    <h2 class="h5 mb-3">Data și ora programării</h2>
-
-    <form th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
-          class="row g-2 align-items-end mb-4">
-        <input type="hidden" name="back" th:value="${backUrl}"/>
-        <div class="col-auto">
-            <label class="form-label mb-0">Data</label>
-            <input type="date" name="date" class="form-control"
-                   th:value="${#temporals.format(appointment.requestedAt(), 'yyyy-MM-dd')}"/>
+                <dt class="col-sm-3">Mesajul clientului</dt>
+                <dd class="col-sm-9 mb-0" th:text="${appointment.notes() ?: '—'}"></dd>
+            </dl>
         </div>
-        <div class="col-auto">
-            <label class="form-label mb-0">Ora început</label>
-            <select name="startTime" class="form-select">
-                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
-                        th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"></option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <label class="form-label mb-0">Ora sfârșit</label>
-            <select name="endTime" class="form-select">
-                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
-                        th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"></option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Actualizează programarea</button>
-        </div>
-    </form>
+    </div>
 
-    <form th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
-          class="row g-2 align-items-end mb-4">
-        <input type="hidden" name="back" th:value="${backUrl}"/>
-        <div class="col-auto">
-            <label class="form-label mb-0">Stare</label>
-            <select name="status" class="form-select">
-                <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
-                        th:selected="${s == appointment.status()}"></option>
-            </select>
+    <!-- Appointment date and time -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
+                  class="row g-3 align-items-end">
+                <input type="hidden" name="back" th:value="${backUrl}"/>
+                <div class="col-md-4">
+                    <label class="form-label">Data</label>
+                    <input type="date" name="date" class="form-control"
+                           th:value="${#temporals.format(appointment.requestedAt(), 'yyyy-MM-dd')}"/>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ora început</label>
+                    <select name="startTime" class="form-select">
+                        <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                                th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Ora sfârșit</label>
+                    <select name="endTime" class="form-select">
+                        <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                                th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"></option>
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Actualizează programarea</button>
+                </div>
+            </form>
         </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Actualizează starea</button>
+    </div>
+
+    <!-- State -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
+                  class="row g-3 align-items-end">
+                <input type="hidden" name="back" th:value="${backUrl}"/>
+                <div class="col-md-4">
+                    <label class="form-label">Stare</label>
+                    <select name="status" class="form-select">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
+                                th:selected="${s == appointment.status()}"></option>
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Actualizează starea</button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 
-    <h2 class="h5 mb-3">Note interne</h2>
+    <!-- Attached documents -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted mb-3">Documente atașate</h2>
 
-    <p class="text-muted" th:if="${appointment.internalNotes().isEmpty()}">Nu există note interne încă.</p>
+            <p class="text-muted" th:if="${documents.isEmpty()}">Niciun document atașat încă.</p>
 
-    <table class="table table-striped mb-3" th:unless="${appointment.internalNotes().isEmpty()}">
-        <thead>
-        <tr>
-            <th>Notă</th>
-            <th>Dată</th>
-            <th>Utilizator</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="n : ${appointment.internalNotes()}">
-            <td th:text="${n.note()}"></td>
-            <td class="text-muted"><small th:text="${#temporals.format(n.createdAt(), 'dd MMM yyyy, HH:mm')}"></small></td>
-            <td th:text="${n.authorUsername()}"></td>
-        </tr>
-        </tbody>
-    </table>
+            <table class="table table-striped mb-3" th:unless="${documents.isEmpty()}">
+                <thead>
+                <tr>
+                    <th>Fișier</th>
+                    <th>Încărcat</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${documents}">
+                    <td>
+                        <a th:href="@{/admin/appointments/{id}/documents/{docId}/download(id=${appointment.id()}, docId=${d.id()})}"
+                           th:text="${d.originalFilename()}"></a>
+                    </td>
+                    <td class="text-muted"><small th:text="${#temporals.format(d.uploadedAt(), 'dd MMM yyyy, HH:mm')}"></small></td>
+                    <td class="text-end">
+                        <form th:action="@{/admin/appointments/{id}/documents/{docId}/delete(id=${appointment.id()}, docId=${d.id()})}"
+                              method="post" class="delete-document-form"
+                              th:attr="data-document-name=${d.originalFilename()}, data-client-name=${appointment.clientName()}">
+                            <input type="hidden" name="back" th:value="${backUrl}"/>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Șterge</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-    <form th:action="@{/admin/appointments/{id}/notes(id=${appointment.id()})}" method="post">
-        <input type="hidden" name="back" th:value="${backUrl}"/>
-        <div class="mb-3">
-            <label class="form-label">Adaugă notă</label>
-            <textarea name="note" class="form-control" rows="3" required></textarea>
+            <form th:action="@{/admin/appointments/{id}/documents(id=${appointment.id()})}" method="post"
+                  enctype="multipart/form-data" class="row g-3 align-items-end">
+                <input type="hidden" name="back" th:value="${backUrl}"/>
+                <div class="col-md-8">
+                    <label class="form-label">Atașează documente</label>
+                    <input type="file" name="files" class="form-control" multiple accept=".pdf,.doc,.docx" required/>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">Încarcă</button>
+                </div>
+            </form>
         </div>
-        <button type="submit" class="btn btn-primary">Adaugă notă</button>
-    </form>
+    </div>
+
+    <!-- Add an internal note -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/admin/appointments/{id}/notes(id=${appointment.id()})}" method="post">
+                <input type="hidden" name="back" th:value="${backUrl}"/>
+                <div class="mb-3">
+                    <label class="form-label">Adaugă notă</label>
+                    <textarea name="note" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Adaugă notă</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Internal notes -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted mb-3">Note interne</h2>
+
+            <p class="text-muted mb-0" th:if="${appointment.internalNotes().isEmpty()}">Nu există note interne încă.</p>
+
+            <table class="table table-striped mb-0" th:unless="${appointment.internalNotes().isEmpty()}">
+                <thead>
+                <tr>
+                    <th>Notă</th>
+                    <th>Dată</th>
+                    <th>Utilizator</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="n : ${appointment.internalNotes()}">
+                    <td th:text="${n.note()}"></td>
+                    <td class="text-muted"><small th:text="${#temporals.format(n.createdAt(), 'dd MMM yyyy, HH:mm')}"></small></td>
+                    <td th:text="${n.authorUsername()}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </main>
 
+<script>
+    document.querySelectorAll('.delete-document-form').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            var documentName = form.dataset.documentName;
+            var clientName = form.dataset.clientName;
+            var message = 'Sigur doriți să ștergeți documentul "' + documentName
+                    + '" din programarea lui "' + clientName + '"?';
+            if (!confirm(message)) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
 </body>
 </html>

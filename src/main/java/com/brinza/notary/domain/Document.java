@@ -26,8 +26,8 @@ public class Document {
 
     private String category;
 
-    @Column(name = "stored_filename", nullable = false)
-    private String storedFilename;
+    @Column(name = "stored_path", nullable = false)
+    private String storedPath;
 
     @Column(name = "original_filename", nullable = false)
     private String originalFilename;
@@ -45,11 +45,11 @@ public class Document {
     protected Document() {
     }
 
-    public Document(String title, String category, String storedFilename,
+    public Document(String title, String category, String storedPath,
                      String originalFilename, String contentType, Appointment appointment) {
         this.title = title;
         this.category = category;
-        this.storedFilename = storedFilename;
+        this.storedPath = storedPath;
         this.originalFilename = originalFilename;
         this.contentType = contentType;
         this.appointment = appointment;
@@ -80,8 +80,8 @@ public class Document {
         this.category = category;
     }
 
-    public String getStoredFilename() {
-        return storedFilename;
+    public String getStoredPath() {
+        return storedPath;
     }
 
     public String getOriginalFilename() {
