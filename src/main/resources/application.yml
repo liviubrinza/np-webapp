@@ -13,10 +13,14 @@ spring:
 app:
   storage:
     documents-dir: ./storage/documents
+  demo-data:
+    appointments:
+      enabled: true
   contact:
     address: "To be added later"
     phone: "0777 777 777"
     email: "something@somethingelse.com"
+    hours: "09:00 - 18:00"
     latitude: 46.72982564167728
     longitude: 23.48734642212008
 

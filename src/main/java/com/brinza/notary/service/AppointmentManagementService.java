@@ -178,6 +178,7 @@ public class AppointmentManagementService {
                 appointment.getClientName(),
                 serviceCatalogService.resolveName(appointment.getService(), Locale.of("ro")),
                 appointment.getRequestedAt(),
+                appointment.getEndedAt(),
                 appointment.getStatus(),
                 appointment.getCreatedAt()
         );

@@ -87,5 +87,36 @@
     </tbody>
 </table>
 
+<div th:fragment="appointmentsTimeline(appointments)" class="timeline-scroll">
+    <table class="timeline-table">
+        <tbody>
+        <th:block th:each="hour, hourStat : ${#numbers.sequence(9, 16)}">
+        <tr th:each="minute, minuteStat : ${#numbers.sequence(0, 1)}">
+            <td class="timeline-hour-label"
+                th:text="${#numbers.formatInteger(hour, 2)} + (${minute} == 0 ? ':00' : ':30')"></td>
+            <td th:if="${hourStat.first and minuteStat.first}" rowspan="16" class="timeline-track">
+                <div class="timeline-block"
+                     th:each="a : ${appointments}"
+                     th:if="${a.status.name() != 'CANCELLED'}"
+                     th:with="startMin=${a.requestedAt.hour * 60 + a.requestedAt.minute}, endMin=${a.endedAt.hour * 60 + a.endedAt.minute}, backTarget='/admin/calendar?date=' + ${#temporals.format(a.requestedAt, 'yyyy-MM-dd')}"
+                     th:style="|top: ${(startMin - 540) * 2}px; height: ${(endMin - startMin) * 2}px;|"
+                     th:classappend="${'timeline-block-' + a.status.name().toLowerCase()}">
+                    <a class="timeline-block-link" th:href="@{/admin/appointments/{id}(id=${a.id}, back=${backTarget})}">
+                        <span class="timeline-block-header">
+                            <span class="timeline-block-time"
+                                  th:text="${#temporals.format(a.requestedAt, 'HH:mm')} + '-' + ${#temporals.format(a.endedAt, 'HH:mm')}"></span>
+                            <span class="timeline-block-client" th:text="${a.clientName}"></span>
+                        </span>
+                        <span class="timeline-block-service" th:text="${a.serviceName}"></span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        </th:block>
+        </tbody>
+    </table>
+    <p th:if="${appointments.isEmpty()}" class="text-muted text-center py-4">Nu există programări pentru această dată.</p>
+</div>
+
 </body>
 </html>

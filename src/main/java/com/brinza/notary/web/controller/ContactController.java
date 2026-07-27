@@ -13,6 +13,7 @@ public class ContactController {
     private final String address;
     private final String phone;
     private final String email;
+    private final String hours;
     private final double latitude;
     private final double longitude;
 
@@ -20,11 +21,13 @@ public class ContactController {
             @Value("${app.contact.address}") String address,
             @Value("${app.contact.phone}") String phone,
             @Value("${app.contact.email}") String email,
+            @Value("${app.contact.hours}") String hours,
             @Value("${app.contact.latitude}") double latitude,
             @Value("${app.contact.longitude}") double longitude) {
         this.address = address;
         this.phone = phone;
         this.email = email;
+        this.hours = hours;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -34,6 +37,7 @@ public class ContactController {
         model.addAttribute("address", address);
         model.addAttribute("phone", phone);
         model.addAttribute("email", email);
+        model.addAttribute("hours", hours);
         model.addAttribute("latitude", latitude);
         model.addAttribute("longitude", longitude);
         return "public/contact";

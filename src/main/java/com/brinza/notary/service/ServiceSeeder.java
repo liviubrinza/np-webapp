@@ -5,6 +5,7 @@ import com.brinza.notary.domain.Service;
 import com.brinza.notary.domain.ServiceTranslation;
 import com.brinza.notary.repository.ServiceRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +18,12 @@ import java.util.Set;
  * are matched by their stable {@code code}, not database id, so entries can be freely
  * reordered/added in the YAML. A service removed from the YAML is deactivated rather
  * than deleted, since existing appointments may still reference it.
+ *
+ * <p>Ordered ahead of other seeders ({@link AppointmentDemoDataSeeder}) that need
+ * services to already exist.
  */
 @Component
+@Order(1)
 public class ServiceSeeder implements CommandLineRunner {
 
     private final ServiceSeedProperties properties;

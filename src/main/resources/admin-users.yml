@@ -12,6 +12,6 @@ app:
     - username: admin
       password: admin
       role: ADMIN
-    - username: technician
-      password: technician
+    - username: titi
+      password: titi
       role: TECHNICIAN

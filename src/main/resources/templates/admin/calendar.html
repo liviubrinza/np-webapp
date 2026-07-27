@@ -28,7 +28,7 @@
             <b th:text="${#temporals.format(selectedDate, 'dd MMM yyyy')}"></b>
         </div>
         <div class="card-body">
-            <div th:replace="~{admin/fragments :: appointmentsTable(${appointments}, 'Nu există programări pentru această dată.', true)}"></div>
+            <div th:replace="~{admin/fragments :: appointmentsTimeline(${appointments})}"></div>
         </div>
     </div>
 </main>

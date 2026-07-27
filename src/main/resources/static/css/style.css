@@ -203,20 +203,20 @@ a:hover {
 
 /* Admin calendar — per-day appointment-load indicator */
 .flatpickr-day.day-status-free {
-    background: #28a745 !important;
-    border-color: #28a745 !important;
+    background: #5cbd3e !important;
+    border-color: #5cbd3e !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-partial {
-    background: #fd7e14 !important;
-    border-color: #fd7e14 !important;
+    background: #fac278 !important;
+    border-color: #fac278 !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-full {
-    background: #dc3545 !important;
-    border-color: #dc3545 !important;
+    background: #fa6464 !important;
+    border-color: #fa6464 !important;
     color: #fff !important;
 }
 
@@ -251,4 +251,115 @@ a:hover {
 
 .calendar-legend-full {
     background-color: #dc3545;
+}
+
+/* Admin calendar — day timeline */
+.timeline-scroll {
+    max-height: 32rem;
+    overflow-y: auto;
+    border: 1px solid var(--brand-border);
+    border-radius: 0.4rem;
+}
+
+.timeline-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.timeline-hour-label {
+    width: 4.5rem;
+    height: 60px;
+    padding: 0.25rem 0.5rem;
+    border-top: 1px solid var(--brand-border);
+    vertical-align: top;
+    font-size: 0.85rem;
+    color: var(--brand-text-muted);
+    white-space: nowrap;
+    background-color: #f1f1f1;
+}
+
+.timeline-track {
+    position: relative;
+    padding: 0;
+    border-left: 1px solid var(--brand-border);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        var(--brand-border) 0,
+        var(--brand-border) 1px,
+        transparent 1px,
+        transparent 60px
+    );
+}
+
+.timeline-block {
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    min-height: 1.4rem;
+    border-radius: 0.35rem;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 2px solid var(--brand-surface);
+    box-shadow: 0 1px 4px rgba(43, 35, 32, 0.15);
+}
+
+.timeline-block-link {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 0.2rem 0.5rem;
+    color: #fff;
+    text-decoration: none;
+    line-height: 1.25;
+    overflow: hidden;
+}
+
+.timeline-block-link:hover {
+    color: #fff;
+    filter: brightness(0.92);
+}
+
+.timeline-block-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    overflow: hidden;
+}
+
+.timeline-block-time {
+    font-size: 0.68rem;
+    font-weight: 600;
+    opacity: 0.85;
+    flex-shrink: 0;
+}
+
+.timeline-block-client {
+    font-size: 0.8rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeline-block-service {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.timeline-block-pending {
+    background-color: #fd7e14;
+}
+
+.timeline-block-confirmed {
+    background-color: #28a745;
+}
+
+
+.timeline-block-completed {
+    background-color: #6c757d;
 }
