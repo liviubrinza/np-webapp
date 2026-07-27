@@ -14,6 +14,9 @@ target/
 *.mv.db
 *.trace.db
 
+# Uploaded document storage (local dev)
+/persistent/
+
 ### STS ###
 .apt_generated
 .classpath

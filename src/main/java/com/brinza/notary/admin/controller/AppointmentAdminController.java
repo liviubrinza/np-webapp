@@ -2,7 +2,10 @@ package com.brinza.notary.admin.controller;
 
 import com.brinza.notary.domain.AppointmentStatus;
 import com.brinza.notary.service.AppointmentManagementService;
+import com.brinza.notary.service.DocumentManagementService;
+import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URLEncoder;
@@ -29,9 +33,12 @@ public class AppointmentAdminController {
     private static final LocalTime SCHEDULE_END = LocalTime.of(18, 0);
 
     private final AppointmentManagementService appointmentManagementService;
+    private final DocumentManagementService documentManagementService;
 
-    public AppointmentAdminController(AppointmentManagementService appointmentManagementService) {
+    public AppointmentAdminController(AppointmentManagementService appointmentManagementService,
+                                       DocumentManagementService documentManagementService) {
         this.appointmentManagementService = appointmentManagementService;
+        this.documentManagementService = documentManagementService;
     }
 
     @GetMapping
@@ -59,8 +66,36 @@ public class AppointmentAdminController {
         model.addAttribute("appointment", appointmentManagementService.getDetail(id));
         model.addAttribute("statuses", AppointmentStatus.values());
         model.addAttribute("timeSlots", buildTimeSlots());
+        model.addAttribute("documents", documentManagementService.listForAppointment(id));
         model.addAttribute("backUrl", sanitizeBack(back));
         return "admin/appointments/detail";
+    }
+
+    @PostMapping("/{id}/documents")
+    public String uploadDocuments(@PathVariable Long id, @RequestParam("files") List<MultipartFile> files,
+                                   @RequestParam(required = false) String back,
+                                   Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            documentManagementService.upload(id, files, authentication.getName());
+            redirectAttributes.addFlashAttribute("success", "Document(s) uploaded.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return redirectToDetail(id, back);
+    }
+
+    @GetMapping("/{id}/documents/{documentId}/download")
+    public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, @PathVariable Long documentId) {
+        return documentManagementService.download(id, documentId);
+    }
+
+    @PostMapping("/{id}/documents/{documentId}/delete")
+    public String deleteDocument(@PathVariable Long id, @PathVariable Long documentId,
+                                  @RequestParam(required = false) String back,
+                                  Authentication authentication, RedirectAttributes redirectAttributes) {
+        documentManagementService.delete(id, documentId, authentication.getName());
+        redirectAttributes.addFlashAttribute("success", "Document șters.");
+        return redirectToDetail(id, back);
     }
 
     @PostMapping("/{id}/schedule")

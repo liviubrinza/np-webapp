@@ -21,7 +21,11 @@ public class PathLocaleResolver implements LocaleResolver {
 
     @Override
     public Locale resolveLocale(HttpServletRequest request) {
-        String path = request.getRequestURI().substring(request.getContextPath().length());
+        // On Spring Boot's error-page forward, getRequestURI() may reflect "/error" rather than
+        // the original failing path, so prefer the original URI the servlet container records.
+        Object originalUri = request.getAttribute("jakarta.servlet.error.request_uri");
+        String uri = originalUri instanceof String s ? s : request.getRequestURI();
+        String path = uri.substring(request.getContextPath().length());
         String[] segments = path.split("/", 3);
         if (segments.length > 1) {
             String candidate = segments[1];
