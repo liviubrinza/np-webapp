@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head(${adminId} != null ? 'Editează Admin' : 'Admin Nou', null)}"></head>
+<head th:replace="~{admin/fragments :: head(${adminId} != null ? 'Editează Utilizator' : 'Utilizator Nou', null)}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -8,7 +8,7 @@
 <main class="container my-4" style="max-width: 480px;">
     <a th:href="@{/admin/users}" class="d-inline-block mb-3">&larr; Înapoi la utilizatori admin</a>
 
-    <h1 class="h3 mb-4" th:text="${adminId} != null ? 'Editează Admin' : 'Admin Nou'"></h1>
+    <h1 class="h3 mb-4" th:text="${adminId} != null ? 'Editează Utilizator' : 'Utilizator Nou'"></h1>
 
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
@@ -18,6 +18,14 @@
             <label class="form-label">Nume de utilizator</label>
             <input type="text" th:field="*{username}" class="form-control"/>
             <div class="text-danger small" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Rol</label>
+            <select th:field="*{role}" class="form-select">
+                <option value="ADMIN">ADMIN</option>
+                <option value="TECHNICIAN">TECHNICIAN</option>
+            </select>
+            <div class="text-danger small" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></div>
         </div>
         <div class="mb-3">
             <label class="form-label">Parolă</label>

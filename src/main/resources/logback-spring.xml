@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Directory the rotating log files live in; configurable via app.logging.dir in application.yml -->
+    <springProperty scope="context" name="LOG_DIR" source="app.logging.dir" defaultValue="./logs"/>
+
+    <!-- "TIMESTAMP: [correlationId] [Name_of_class_creating_the_log_entry] LOG_LEVEL: LOG_MESSAGE"
+         correlationId is empty outside of an HTTP request (e.g. startup seeders). -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}: [%X{correlationId}] [%logger{0}] %level: %msg%n"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Active log file is always named "log"; on rollover it's renamed to log_dd_MMM_yyyy (previous day's date) -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/log_%d{dd_MMM_yyyy}</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

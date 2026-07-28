@@ -9,10 +9,12 @@ target/
 
 # Logs
 *.log
+/logs/
 
 # H2 local dev database files
 *.mv.db
 *.trace.db
+*.lock.db
 
 # Uploaded document storage (local dev)
 /persistent/
@@ -33,11 +35,7 @@ target/
 *.ipr
 
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
 /dist/
-/nbdist/
-/.nb-gradle/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/

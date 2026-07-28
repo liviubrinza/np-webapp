@@ -1,10 +1,11 @@
 package com.brinza.notary.service;
 
-import com.brinza.notary.domain.AdminRole;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.dto.AdminUserForm;
 import com.brinza.notary.dto.AdminUserView;
 import com.brinza.notary.repository.AdminUserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,8 @@ import java.util.NoSuchElementException;
 
 @org.springframework.stereotype.Service
 public class AdminUserManagementService {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminUserManagementService.class);
 
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -24,25 +27,26 @@ public class AdminUserManagementService {
 
     @Transactional(readOnly = true)
     public List<AdminUserView> listAdmins() {
-        return adminUserRepository.findAllByRoleOrderByUsernameAsc(AdminRole.ADMIN).stream()
-                .map(u -> new AdminUserView(u.getId(), u.getUsername(), u.getCreatedAt(), u.getLastLogin()))
+        return adminUserRepository.findAllByOrderByUsernameAsc().stream()
+                .map(AdminUserManagementService::toView)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public AdminUserView getAdmin(Long id) {
-        AdminUser adminUser = getAdminEntity(id);
-        return new AdminUserView(adminUser.getId(), adminUser.getUsername(), adminUser.getCreatedAt(), adminUser.getLastLogin());
+        return toView(getAdminEntity(id));
     }
 
     @Transactional
     public void create(AdminUserForm form) {
         if (adminUserRepository.findByUsername(form.getUsername()).isPresent()) {
+            log.debug("Rejected create: username={} already in use", form.getUsername());
             throw new IllegalArgumentException("Numele de utilizator este deja folosit.");
         }
         String rawPassword = validatePassword(form.getPassword(), true);
-        AdminUser adminUser = new AdminUser(form.getUsername(), passwordEncoder.encode(rawPassword), AdminRole.ADMIN);
+        AdminUser adminUser = new AdminUser(form.getUsername(), passwordEncoder.encode(rawPassword), form.getRole());
         adminUserRepository.save(adminUser);
+        log.debug("Created admin user id={} username={} role={}", adminUser.getId(), adminUser.getUsername(), adminUser.getRole());
     }
 
     @Transactional
@@ -55,24 +59,33 @@ public class AdminUserManagementService {
                 });
 
         adminUser.setUsername(form.getUsername());
+        adminUser.setRole(form.getRole());
         String rawPassword = validatePassword(form.getPassword(), false);
         if (rawPassword != null) {
             adminUser.setPasswordHash(passwordEncoder.encode(rawPassword));
+            log.debug("Password updated for admin user id={}", id);
         }
+        log.debug("Updated admin user id={} username={} role={}", id, adminUser.getUsername(), adminUser.getRole());
     }
 
     @Transactional
-    public void delete(Long id) {
-        adminUserRepository.delete(getAdminEntity(id));
+    public void delete(Long id, String currentUsername) {
+        AdminUser adminUser = getAdminEntity(id);
+        if (adminUser.getUsername().equals(currentUsername)) {
+            log.debug("Rejected delete: id={} is the currently logged-in user ({})", id, currentUsername);
+            throw new IllegalArgumentException("Nu vă puteți șterge propriul cont.");
+        }
+        adminUserRepository.delete(adminUser);
     }
 
     private AdminUser getAdminEntity(Long id) {
-        AdminUser adminUser = adminUserRepository.findById(id)
+        return adminUserRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No admin user with id " + id));
-        if (adminUser.getRole() != AdminRole.ADMIN) {
-            throw new NoSuchElementException("No admin user with id " + id);
-        }
-        return adminUser;
+    }
+
+    private static AdminUserView toView(AdminUser adminUser) {
+        return new AdminUserView(adminUser.getId(), adminUser.getUsername(), adminUser.getRole(),
+                adminUser.getCreatedAt(), adminUser.getLastLogin());
     }
 
     private String validatePassword(String rawPassword, boolean required) {
@@ -83,6 +96,7 @@ public class AdminUserManagementService {
             return null;
         }
         if (rawPassword.length() < 4) {
+            log.debug("Rejected password: shorter than minimum length");
             throw new IllegalArgumentException("Parola trebuie să aibă cel puțin 4 caractere.");
         }
         return rawPassword;

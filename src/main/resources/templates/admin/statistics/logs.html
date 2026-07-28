@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Statistici · Activitate Admin', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Statistici · Loguri', null)}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
 
 <main class="container my-4">
     <h1 class="h3 mb-4">Statistici</h1>
-    <div th:replace="~{admin/fragments :: statisticsNav('activity')}"></div>
+    <div th:replace="~{admin/fragments :: statisticsNav('logs')}"></div>
 
     <div class="alert alert-secondary" th:if="${availableDates.isEmpty()}">
         Niciun fișier de log nu a fost găsit încă.
@@ -15,7 +15,7 @@
 
     <div class="card bg-light mb-4" th:unless="${availableDates.isEmpty()}">
         <div class="card-body">
-            <form method="get" th:action="@{/admin/statistics/activity}" class="row g-2 align-items-end">
+            <form method="get" th:action="@{/admin/statistics/logs}" class="row g-2 align-items-end">
                 <div class="col-auto">
                     <label class="form-label mb-0"><b>Dată</b></label>
                     <select name="date" class="form-select form-select-sm">
@@ -25,14 +25,22 @@
                     </select>
                 </div>
                 <div class="col-auto">
-                    <label class="form-label mb-0"><b>Utilizator</b></label>
-                    <input type="text" name="username" class="form-control form-control-sm"
-                           placeholder="ex: titi" th:value="${username}"/>
-                </div>
-                <div class="col-auto">
                     <label class="form-label mb-0"><b>Correlation ID</b></label>
                     <input type="text" name="correlationId" class="form-control form-control-sm"
                            placeholder="ex: 8363b488-..." th:value="${correlationId}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Nivel</b></label>
+                    <select name="level" class="form-select form-select-sm">
+                        <option value="" th:selected="${level == null or level.isBlank()}">Toate</option>
+                        <option th:each="l : ${levels}" th:value="${l}" th:text="${l}"
+                                th:selected="${l == level}"></option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Clasă</b></label>
+                    <input type="text" name="className" class="form-control form-control-sm"
+                           placeholder="ex: AppointmentBookingService" th:value="${className}"/>
                 </div>
                 <div class="col-auto">
                     <label class="form-label mb-0"><b>Text</b></label>
@@ -40,15 +48,8 @@
                            placeholder="caută în orice câmp" th:value="${text}"/>
                 </div>
                 <div class="col-auto">
-                    <label class="form-label mb-0"><b>Sortare</b></label>
-                    <select name="sort" class="form-select form-select-sm">
-                        <option value="time" th:selected="${sort == 'time'}">Timp</option>
-                        <option value="username" th:selected="${sort == 'username'}">Utilizator</option>
-                    </select>
-                </div>
-                <div class="col-auto">
                     <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
-                    <a th:href="@{/admin/statistics/activity}" class="btn btn-outline-secondary btn-sm">Resetează</a>
+                    <a th:href="@{/admin/statistics/logs}" class="btn btn-outline-secondary btn-sm">Resetează</a>
                 </div>
             </form>
         </div>
@@ -64,13 +65,15 @@
                     <colgroup>
                         <col class="col-timestamp"/>
                         <col class="col-correlation"/>
-                        <col class="col-user"/>
+                        <col class="col-class"/>
+                        <col class="col-level"/>
                     </colgroup>
                     <thead>
                     <tr>
                         <th>Timp</th>
                         <th>Correlation ID</th>
-                        <th>Utilizator</th>
+                        <th>Clasă</th>
+                        <th>Nivel</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -79,14 +82,23 @@
                         <tr class="log-entry-header">
                             <td class="text-muted" th:title="${e.timestamp()}" th:text="${timeOnly}"></td>
                             <td class="text-muted"><code th:text="${e.correlationId()}"></code></td>
-                            <td class="text-muted text-end" th:title="${e.username()}" th:text="${e.username()}"></td>
+                            <td class="text-muted text-end" th:title="${e.className()}" th:text="${e.className()}"></td>
+                            <td>
+                                <span th:switch="${e.level()}">
+                                    <span th:case="'DEBUG'" class="badge bg-secondary">DEBUG</span>
+                                    <span th:case="'INFO'" class="badge bg-info text-dark">INFO</span>
+                                    <span th:case="'WARN'" class="badge bg-warning text-dark">WARN</span>
+                                    <span th:case="'ERROR'" class="badge bg-danger">ERROR</span>
+                                    <span th:case="*" class="badge bg-light text-dark" th:text="${e.level()}"></span>
+                                </span>
+                            </td>
                         </tr>
                         <tr class="log-entry-message">
-                            <td colspan="3"><pre class="mb-0 log-message" th:text="${e.action()}"></pre></td>
+                            <td colspan="4"><pre class="mb-0 log-message" th:text="${e.message()}"></pre></td>
                         </tr>
                     </th:block>
                     <tr th:if="${entries.isEmpty()}">
-                        <td colspan="3" class="text-muted text-center py-4">Nicio activitate nu corespunde acestor filtre.</td>
+                        <td colspan="4" class="text-muted text-center py-4">Nicio intrare de log nu corespunde acestor filtre.</td>
                     </tr>
                     </tbody>
                 </table>

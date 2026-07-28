@@ -4,6 +4,8 @@ import com.brinza.notary.dto.BookingRequest;
 import com.brinza.notary.service.AppointmentBookingService;
 import com.brinza.notary.service.ServiceCatalogService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +24,8 @@ import java.util.List;
 @RequestMapping("/{lang:en|ro|hu}/book")
 public class BookingController {
 
+    private static final Logger log = LoggerFactory.getLogger(BookingController.class);
+
     private static final int OPENING_HOUR = 9;
     private static final int CLOSING_HOUR = 17;
 
@@ -36,6 +40,7 @@ public class BookingController {
 
     @GetMapping
     public String showForm(Model model) {
+        log.info("showForm called");
         model.addAttribute("bookingRequest", new BookingRequest());
         model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
         model.addAttribute("timeSlots", buildTimeSlots());
@@ -48,7 +53,9 @@ public class BookingController {
                           Model model,
                           @PathVariable String lang,
                           RedirectAttributes redirectAttributes) {
+        log.info("submit called for lang={}", lang);
         if (bindingResult.hasErrors()) {
+            log.debug("Booking form has {} validation error(s)", bindingResult.getErrorCount());
             model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
             model.addAttribute("timeSlots", buildTimeSlots());
             return "public/book";

@@ -1,6 +1,8 @@
 package com.brinza.notary.web.controller;
 
 import com.brinza.notary.service.ServiceCatalogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/{lang:en|ro|hu}")
 public class ServicesController {
 
+    private static final Logger log = LoggerFactory.getLogger(ServicesController.class);
+
     private final ServiceCatalogService serviceCatalogService;
 
     public ServicesController(ServiceCatalogService serviceCatalogService) {
@@ -19,6 +23,7 @@ public class ServicesController {
 
     @GetMapping("/services")
     public String services(Model model) {
+        log.info("services called");
         model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
         return "public/services";
     }
