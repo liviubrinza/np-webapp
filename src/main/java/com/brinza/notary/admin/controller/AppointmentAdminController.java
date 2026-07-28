@@ -138,8 +138,7 @@ public class AppointmentAdminController {
                                 @RequestParam(required = false) String back,
                                 Authentication authentication, RedirectAttributes redirectAttributes) {
         appointmentManagementService.updateStatus(id, status, authentication.getName(), sendConfirmationEmail);
-        adminActivityLogger.log("Changed appointment #%d status to %s%s".formatted(
-                id, status, sendConfirmationEmail ? " (confirmation email sent)" : ""));
+        adminActivityLogger.log("Changed appointment #%d status to %s%s".formatted(id, status, sendConfirmationEmail ? " (confirmation email sent)" : ""));
         redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
         return redirectToDetail(id, back);
     }
