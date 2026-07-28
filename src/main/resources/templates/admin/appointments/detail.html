@@ -71,9 +71,12 @@
     <!-- State -->
     <div class="card mb-4">
         <div class="card-body">
-            <form th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
-                  class="row g-3 align-items-end">
+            <form id="statusForm" th:action="@{/admin/appointments/{id}/status(id=${appointment.id()})}" method="post"
+                  class="row g-3 align-items-end"
+                  th:attr="data-current-status=${appointment.status()}, data-mail-enabled=${mailEnabled},
+                            data-client-name=${appointment.clientName()}, data-client-email=${appointment.email()}">
                 <input type="hidden" name="back" th:value="${backUrl}"/>
+                <input type="hidden" name="sendConfirmationEmail" id="sendConfirmationEmailInput" value="false"/>
                 <div class="col-md-4">
                     <label class="form-label">Stare</label>
                     <select name="status" class="form-select">
@@ -191,6 +194,29 @@
             }
         });
     });
+
+    var statusForm = document.getElementById('statusForm');
+    if (statusForm) {
+        statusForm.addEventListener('submit', function () {
+            var currentStatus = statusForm.dataset.currentStatus;
+            var mailEnabled = statusForm.dataset.mailEnabled === 'true';
+            var newStatus = statusForm.querySelector('select[name="status"]').value;
+            var sendEmailInput = document.getElementById('sendConfirmationEmailInput');
+
+            // The status change itself always proceeds either way - this only decides whether
+            // a confirmation email also goes out, so the form is never prevented from submitting.
+            if (mailEnabled && currentStatus === 'PENDING' && newStatus === 'CONFIRMED') {
+                var clientName = statusForm.dataset.clientName;
+                var clientEmail = statusForm.dataset.clientEmail;
+                var message = 'Confirmați faptul că se va trimite un email de confirmare către '
+                        + clientName + ' (' + clientEmail + '), înștiințându-l/înștiințând-o că '
+                        + 'programarea sa a fost confirmată.\n\nTrimiteți acest email?';
+                sendEmailInput.value = confirm(message) ? 'true' : 'false';
+            } else {
+                sendEmailInput.value = 'false';
+            }
+        });
+    }
 </script>
 </body>
 </html>
