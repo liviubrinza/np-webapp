@@ -5,9 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -38,21 +36,28 @@ public class AppointmentEmailService {
         EMAIL_LANGUAGES.put(Locale.of("hu"), "MAGYAR");
     }
 
-    private final JavaMailSender mailSender;
     private final MessageSource messageSource;
     private final ServiceCatalogService serviceCatalogService;
+    private final AsyncEmailSender asyncEmailSender;
     private final boolean mailEnabled;
     private final String fromAddress;
+    private final String contactAddress;
+    private final String contactPhone;
 
-    public AppointmentEmailService(JavaMailSender mailSender, MessageSource messageSource,
+    public AppointmentEmailService(MessageSource messageSource,
                                     ServiceCatalogService serviceCatalogService,
+                                    AsyncEmailSender asyncEmailSender,
                                     @Value("${app.mail.enabled:false}") boolean mailEnabled,
-                                    @Value("${app.mail.from:}") String fromAddress) {
-        this.mailSender = mailSender;
+                                    @Value("${app.mail.from:}") String fromAddress,
+                                    @Value("${app.contact.address}") String contactAddress,
+                                    @Value("${app.contact.phone}") String contactPhone) {
         this.messageSource = messageSource;
         this.serviceCatalogService = serviceCatalogService;
+        this.asyncEmailSender = asyncEmailSender;
         this.mailEnabled = mailEnabled;
         this.fromAddress = fromAddress;
+        this.contactAddress = contactAddress;
+        this.contactPhone = contactPhone;
     }
 
     public void sendBookingReceivedEmail(Appointment appointment) {
@@ -70,23 +75,22 @@ public class AppointmentEmailService {
             log.debug("Email sending disabled (app.mail.enabled=false); skipping appointmentId={}", appointment.getId());
             return;
         }
+        SimpleMailMessage message = buildMessage(appointment, subjectKey, bodyKey);
+        asyncEmailSender.sendAsync(message, appointment.getId());
+    }
 
+    private SimpleMailMessage buildMessage(Appointment appointment, String subjectKey, String bodyKey) {
         String subject = buildTrilingualSubject(subjectKey);
         String body = buildTrilingualBody(appointment, bodyKey);
         log.debug("Composed email for appointmentId={} recipient={} subject={}\n{}",
                 appointment.getId(), appointment.getEmail(), subject, body);
 
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromAddress);
-            message.setTo(appointment.getEmail());
-            message.setSubject(subject);
-            message.setText(body);
-            mailSender.send(message);
-            log.debug("Sent email for appointmentId={}", appointment.getId());
-        } catch (MailException e) {
-            log.error("Failed to send email for appointmentId={}: {}", appointment.getId(), e.getMessage());
-        }
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromAddress);
+        message.setTo(appointment.getEmail());
+        message.setSubject(subject);
+        message.setText(body);
+        return message;
     }
 
     private String buildTrilingualSubject(String subjectKey) {
@@ -108,9 +112,13 @@ public class AppointmentEmailService {
             String requestedAt = appointment.getRequestedAt()
                     .format(DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm", locale));
             Object[] args = {appointment.getClientName(), serviceName, requestedAt};
+            Object[] contactArgs = {this.contactAddress, this.contactPhone};
 
-            body.append("--- ").append(entry.getValue()).append(" ---\n");
+            body.append("\n");
+            body.append(">>> ").append(entry.getValue()).append(" <<<\n\n");
             body.append(messageSource.getMessage(bodyKey, args, locale));
+            body.append("\n\n");
+            body.append(messageSource.getMessage("email.contactInfo", contactArgs, locale));
             body.append("\n\n");
         }
         return body.toString().strip();
