@@ -9,8 +9,95 @@
     <h1 class="h3 mb-4">Statistici</h1>
     <div th:replace="~{admin/fragments :: statisticsNav('requests')}"></div>
 
-    <div class="alert alert-secondary">Statisticile cererilor nu sunt încă implementate. Reveniți în curând.</div>
+    <div class="card bg-light mb-4">
+        <div class="card-body">
+            <form method="get" th:action="@{/admin/statistics}" class="row g-2 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>De la luna</b></label>
+                    <input type="month" name="from" class="form-control form-control-sm" th:value="${from}"/>
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0"><b>Până la luna</b></label>
+                    <input type="month" name="to" class="form-control form-control-sm" th:value="${to}"/>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
+                    <a th:href="@{/admin/statistics}" class="btn btn-outline-secondary btn-sm">Resetează</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Lună</th>
+                        <th class="text-center">În așteptare</th>
+                        <th class="text-center">Confirmate</th>
+                        <th class="text-center">Anulate</th>
+                        <th class="text-center">Finalizate</th>
+                        <th class="text-center">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${monthlyStats}">
+                        <td class="text-capitalize" th:text="${#temporals.format(m.month(), 'MMMM yyyy')}"></td>
+                        <td class="text-center"><span class="badge bg-warning text-dark" th:text="${m.pending()}"></span></td>
+                        <td class="text-center"><span class="badge bg-success" th:text="${m.confirmed()}"></span></td>
+                        <td class="text-center"><span class="badge bg-danger" th:text="${m.cancelled()}"></span></td>
+                        <td class="text-center"><span class="badge bg-secondary" th:text="${m.completed()}"></span></td>
+                        <td class="text-center fw-semibold" th:text="${m.total()}"></td>
+                    </tr>
+                    <tr th:if="${monthlyStats.isEmpty()}">
+                        <td colspan="6" class="text-muted text-center py-4">Nicio programare nu corespunde acestor filtre.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4" th:unless="${monthlyStats.isEmpty()}">
+        <div class="card-header"><b>Evoluție lunară</b></div>
+        <div class="card-body">
+            <div class="chart-scroll">
+                <div th:style="'width: ' + (${monthlyStats.size() * 110 < 600 ? 600 : monthlyStats.size() * 110}) + 'px; height: 320px;'">
+                    <canvas id="requestsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:inline="javascript" th:unless="${monthlyStats.isEmpty()}">
+    document.addEventListener('DOMContentLoaded', function () {
+        var chartData = /*[(${monthlyStatsChartJson})]*/ {labels: [], confirmed: [], cancelled: [], completed: []};
+
+        new Chart(document.getElementById('requestsChart'), {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {label: 'Confirmate', data: chartData.confirmed, backgroundColor: '#198754'},
+                    {label: 'Anulate', data: chartData.cancelled, backgroundColor: '#dc3545'},
+                    {label: 'Finalizate', data: chartData.completed, backgroundColor: '#6c757d'}
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {ticks: {autoSkip: false}},
+                    y: {beginAtZero: true, ticks: {precision: 0}}
+                }
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

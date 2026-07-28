@@ -29,6 +29,10 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/admin/login").permitAll()
                         .requestMatchers("/admin/appointments/**").hasAnyRole("ADMIN", "TECHNICIAN")
+                        // Exact match, evaluated before the "/admin/statistics/**" rule below: the
+                        // Requests (Cereri) tab is open to both roles, every other statistics tab
+                        // (traffic/activity/logs) stays TECHNICIAN-only.
+                        .requestMatchers("/admin/statistics").hasAnyRole("ADMIN", "TECHNICIAN")
                         .requestMatchers("/admin/statistics/**", "/admin/users/**").hasRole("TECHNICIAN")
                         .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll()

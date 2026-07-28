@@ -26,7 +26,7 @@
             <li class="nav-item me-3">
                 <a class="nav-link text-white" th:href="@{/admin/calendar}">Calendar</a>
             </li>
-            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
+            <li class="nav-item me-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
                 <a class="nav-link text-white" th:href="@{/admin/statistics}">Statistici</a>
             </li>
             <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
@@ -46,15 +46,15 @@
         <a class="nav-link" th:classappend="${active == 'requests'} ? 'active'"
            th:href="@{/admin/statistics}">Cereri</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" sec:authorize="hasRole('TECHNICIAN')">
         <a class="nav-link" th:classappend="${active == 'traffic'} ? 'active'"
            th:href="@{/admin/statistics/traffic}">Trafic</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" sec:authorize="hasRole('TECHNICIAN')">
         <a class="nav-link" th:classappend="${active == 'activity'} ? 'active'"
            th:href="@{/admin/statistics/activity}">Activitate Admin</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" sec:authorize="hasRole('TECHNICIAN')">
         <a class="nav-link" th:classappend="${active == 'logs'} ? 'active'"
            th:href="@{/admin/statistics/logs}">Loguri</a>
     </li>
