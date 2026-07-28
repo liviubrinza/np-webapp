@@ -2,6 +2,8 @@ package com.brinza.notary.admin.controller;
 
 import com.brinza.notary.dto.DayAvailability;
 import com.brinza.notary.service.AppointmentManagementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +18,8 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin/calendar")
 public class CalendarAdminController {
+
+    private static final Logger log = LoggerFactory.getLogger(CalendarAdminController.class);
 
     private final AppointmentManagementService appointmentManagementService;
 

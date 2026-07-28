@@ -2,6 +2,8 @@ package com.brinza.notary.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.Locale;
  * locale-aware routing scheme.
  */
 public class PathLocaleResolver implements LocaleResolver {
+
+    private static final Logger log = LoggerFactory.getLogger(PathLocaleResolver.class);
 
     public static final Locale DEFAULT_LOCALE = Locale.of("ro");
 
@@ -35,6 +39,7 @@ public class PathLocaleResolver implements LocaleResolver {
                 }
             }
         }
+        log.debug("No supported locale matched path={}, falling back to default locale={}", path, DEFAULT_LOCALE);
         return DEFAULT_LOCALE;
     }
 

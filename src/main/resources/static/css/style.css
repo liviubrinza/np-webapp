@@ -363,3 +363,73 @@ a:hover {
 .timeline-block-completed {
     background-color: #6c757d;
 }
+
+/* Admin statistics — Logs / Admin activity tables.
+   Bootstrap's .table is width: 100% with auto layout, which hands any leftover space to
+   whichever column has the least-constrained content. table-layout: fixed plus explicit
+   column widths below stops that: each column is exactly as wide as it needs to be for its
+   content and never grows, regardless of how wide the full-width message row wants to be.
+   .table-responsive's horizontal scrollbar takes over once the row doesn't fit the viewport. */
+.log-table {
+    table-layout: fixed;
+    width: auto;
+    font-size: .9rem;
+}
+
+.log-table .col-timestamp {
+    width: 8rem;
+}
+
+.log-table .col-correlation {
+    width: 20rem;
+}
+
+.log-table .col-class {
+    width: 16rem;
+}
+
+.log-table .col-level {
+    width: 6rem;
+}
+
+.log-table .col-user {
+    width: 12rem;
+}
+
+/* Metadata (time/id/class/level/user) recedes; the message is what a technician actually reads. */
+.log-table thead th {
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--brand-text-muted);
+}
+
+.log-table tbody tr:not(.log-entry-message) td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.log-entry-header td {
+    padding-top: .65rem;
+    padding-bottom: .15rem;
+    font-size: .8em;
+}
+
+/* Each entry is one visual block: header row sits close above its own message, with real
+   air (border-top) only between one entry and the next. */
+.log-entry-message td {
+    border-top: none;
+    padding-top: 0;
+    padding-bottom: .65rem;
+}
+
+.log-message {
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-left: .25rem;
+    padding-left: .5rem;
+    border-left: 3px solid var(--brand-border);
+    font-size: 1rem;
+    color: var(--brand-text);
+}

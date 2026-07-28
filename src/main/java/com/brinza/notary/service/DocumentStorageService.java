@@ -1,5 +1,7 @@
 package com.brinza.notary.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -23,6 +25,8 @@ import java.util.NoSuchElementException;
 @Component
 public class DocumentStorageService {
 
+    private static final Logger log = LoggerFactory.getLogger(DocumentStorageService.class);
+
     private final Path documentsRoot;
 
     public DocumentStorageService(@Value("${app.storage.documents-dir}") String documentsDir) {
@@ -30,6 +34,7 @@ public class DocumentStorageService {
     }
 
     public String store(MultipartFile file, String clientName, String serviceName) {
+        log.info("store called for filename={} clientName={} serviceName={}", file.getOriginalFilename(), clientName, serviceName);
         LocalDate today = LocalDate.now();
         Path targetDir = documentsRoot
                 .resolve(String.valueOf(today.getYear()))
@@ -43,8 +48,11 @@ public class DocumentStorageService {
             String filename = uniqueFilename(targetDir, sanitizeFilename(file.getOriginalFilename()));
             Path targetFile = targetDir.resolve(filename);
             file.transferTo(targetFile);
-            return documentsRoot.relativize(targetFile).toString().replace('\\', '/');
+            String relativePath = documentsRoot.relativize(targetFile).toString().replace('\\', '/');
+            log.debug("Stored file at relativePath={}", relativePath);
+            return relativePath;
         } catch (IOException e) {
+            log.debug("Failed to store uploaded file {}: {}", file.getOriginalFilename(), e.getMessage());
             throw new UncheckedIOException("Failed to store uploaded file " + file.getOriginalFilename(), e);
         }
     }
@@ -55,19 +63,24 @@ public class DocumentStorageService {
      * folders created for a document don't linger once it's the last file removed from them.
      */
     public void delete(String relativePath) {
+        log.info("delete called for relativePath={}", relativePath);
         Path file = documentsRoot.resolve(relativePath).normalize();
         if (!file.startsWith(documentsRoot)) {
+            log.debug("Rejected delete: resolved path escapes storage root for relativePath={}", relativePath);
             throw new SecurityException("Resolved document path escapes the storage root: " + relativePath);
         }
         try {
-            Files.deleteIfExists(file);
+            boolean deleted = Files.deleteIfExists(file);
+            log.debug("File deletion for {} succeeded={}", file, deleted);
             removeEmptyAncestors(file.getParent());
         } catch (IOException e) {
+            log.debug("Failed to delete document file {}: {}", relativePath, e.getMessage());
             throw new UncheckedIOException("Failed to delete document file " + relativePath, e);
         }
     }
 
     private void removeEmptyAncestors(Path dir) throws IOException {
+        log.debug("removeEmptyAncestors called starting at dir={}", dir);
         while (dir != null && dir.startsWith(documentsRoot) && !dir.equals(documentsRoot)) {
             try (var listing = Files.list(dir)) {
                 if (listing.findAny().isPresent()) {
@@ -80,13 +93,16 @@ public class DocumentStorageService {
     }
 
     public Resource loadAsResource(String relativePath) {
+        log.info("loadAsResource called for relativePath={}", relativePath);
         Path file = documentsRoot.resolve(relativePath).normalize();
         if (!file.startsWith(documentsRoot)) {
+            log.debug("Rejected loadAsResource: resolved path escapes storage root for relativePath={}", relativePath);
             throw new SecurityException("Resolved document path escapes the storage root: " + relativePath);
         }
         try {
             Resource resource = new UrlResource(file.toUri());
             if (!resource.exists() || !resource.isReadable()) {
+                log.debug("Document file not found or unreadable on disk: {}", file);
                 throw new NoSuchElementException("Document file not found on disk: " + relativePath);
             }
             return resource;

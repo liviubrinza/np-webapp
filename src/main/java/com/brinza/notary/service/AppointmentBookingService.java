@@ -44,6 +44,7 @@ public class AppointmentBookingService {
                 request.getNotes()
         );
         Appointment saved = appointmentRepository.save(appointment);
+        log.debug("Saved appointment id={} with status={}", saved.getId(), saved.getStatus());
         notifyClient(saved);
 
         String serviceName = serviceCatalogService.resolveName(service, locale);
@@ -52,7 +53,7 @@ public class AppointmentBookingService {
 
     private void notifyClient(Appointment appointment) {
         // TODO: send a booking confirmation email once spring-boot-starter-mail/SMTP is configured.
-        log.info("Appointment {} created for {} - confirmation email not sent (SMTP not configured)",
+        log.debug("Appointment {} created for {} - confirmation email not sent (SMTP not configured)",
                 appointment.getId(), appointment.getEmail());
     }
 }

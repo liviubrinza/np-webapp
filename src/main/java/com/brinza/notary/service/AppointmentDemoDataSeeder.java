@@ -50,10 +50,11 @@ public class AppointmentDemoDataSeeder implements CommandLineRunner {
     @Transactional
     public void run(String... args) {
         if (!enabled) {
+            log.debug("Demo appointment loading disabled via app.demo-data.appointments.enabled");
             return;
         }
         if (appointmentRepository.count() > 0) {
-            log.info("Skipping demo appointment loading - appointments table is not empty.");
+            log.debug("Skipping demo appointment loading - appointments table is not empty.");
             return;
         }
 
@@ -77,6 +78,6 @@ public class AppointmentDemoDataSeeder implements CommandLineRunner {
         }
 
         appointmentRepository.saveAll(appointments);
-        log.info("Loaded {} demo appointments from appointments.yml.", appointments.size());
+        log.debug("Loaded {} demo appointments from appointments.yml.", appointments.size());
     }
 }

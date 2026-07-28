@@ -1,6 +1,5 @@
 package com.brinza.notary.repository;
 
-import com.brinza.notary.domain.AdminRole;
 import com.brinza.notary.domain.AdminUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,5 +10,5 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long> {
 
     Optional<AdminUser> findByUsername(String username);
 
-    List<AdminUser> findAllByRoleOrderByUsernameAsc(AdminRole role);
+    List<AdminUser> findAllByOrderByUsernameAsc();
 }

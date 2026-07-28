@@ -54,6 +54,10 @@
         <a class="nav-link" th:classappend="${active == 'activity'} ? 'active'"
            th:href="@{/admin/statistics/activity}">Activitate Admin</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" th:classappend="${active == 'logs'} ? 'active'"
+           th:href="@{/admin/statistics/logs}">Loguri</a>
+    </li>
 </ul>
 
 <table th:fragment="appointmentsTable(appointments, emptyMessage, showStatus)" class="table table-striped table-hover align-middle">

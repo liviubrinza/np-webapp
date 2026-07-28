@@ -1,8 +1,11 @@
 package com.brinza.notary.admin.controller;
 
 import com.brinza.notary.domain.AppointmentStatus;
+import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -29,16 +32,21 @@ import java.util.List;
 @RequestMapping("/admin/appointments")
 public class AppointmentAdminController {
 
+    private static final Logger log = LoggerFactory.getLogger(AppointmentAdminController.class);
+
     private static final LocalTime SCHEDULE_START = LocalTime.of(9, 0);
     private static final LocalTime SCHEDULE_END = LocalTime.of(18, 0);
 
     private final AppointmentManagementService appointmentManagementService;
     private final DocumentManagementService documentManagementService;
+    private final AdminActivityLogger adminActivityLogger;
 
     public AppointmentAdminController(AppointmentManagementService appointmentManagementService,
-                                       DocumentManagementService documentManagementService) {
+                                       DocumentManagementService documentManagementService,
+                                       AdminActivityLogger adminActivityLogger) {
         this.appointmentManagementService = appointmentManagementService;
         this.documentManagementService = documentManagementService;
+        this.adminActivityLogger = adminActivityLogger;
     }
 
     @GetMapping
@@ -77,8 +85,10 @@ public class AppointmentAdminController {
                                    Authentication authentication, RedirectAttributes redirectAttributes) {
         try {
             documentManagementService.upload(id, files, authentication.getName());
+            adminActivityLogger.log("Uploaded %d document(s) to appointment #%d".formatted(files == null ? 0 : files.size(), id));
             redirectAttributes.addFlashAttribute("success", "Document(s) uploaded.");
         } catch (IllegalArgumentException e) {
+            log.debug("Could not upload documents for id={}: {}", id, e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return redirectToDetail(id, back);
@@ -94,6 +104,7 @@ public class AppointmentAdminController {
                                   @RequestParam(required = false) String back,
                                   Authentication authentication, RedirectAttributes redirectAttributes) {
         documentManagementService.delete(id, documentId, authentication.getName());
+        adminActivityLogger.log("Deleted document #%d from appointment #%d".formatted(documentId, id));
         redirectAttributes.addFlashAttribute("success", "Document șters.");
         return redirectToDetail(id, back);
     }
@@ -106,10 +117,11 @@ public class AppointmentAdminController {
                                   @RequestParam(required = false) String back,
                                   Authentication authentication, RedirectAttributes redirectAttributes) {
         try {
-            appointmentManagementService.updateSchedule(id, LocalDateTime.of(date, startTime), LocalDateTime.of(date, endTime),
-                    authentication.getName());
+            appointmentManagementService.updateSchedule(id, LocalDateTime.of(date, startTime), LocalDateTime.of(date, endTime), authentication.getName());
+            adminActivityLogger.log("Rescheduled appointment #%d to %s %s-%s".formatted(id, date, startTime, endTime));
             redirectAttributes.addFlashAttribute("success", "Programare actualizată.");
         } catch (IllegalArgumentException e) {
+            log.debug("Could not update schedule for id={}: {}", id, e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
         return redirectToDetail(id, back);
@@ -120,6 +132,7 @@ public class AppointmentAdminController {
                                 @RequestParam(required = false) String back,
                                 Authentication authentication, RedirectAttributes redirectAttributes) {
         appointmentManagementService.updateStatus(id, status, authentication.getName());
+        adminActivityLogger.log("Changed appointment #%d status to %s".formatted(id, status));
         redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
         return redirectToDetail(id, back);
     }
@@ -129,10 +142,12 @@ public class AppointmentAdminController {
                            @RequestParam(required = false) String back,
                            Authentication authentication, RedirectAttributes redirectAttributes) {
         if (note == null || note.isBlank()) {
+            log.debug("Could not add note for id={}: blank note", id);
             redirectAttributes.addFlashAttribute("error", "Nota nu poate fi goală.");
             return redirectToDetail(id, back);
         }
         appointmentManagementService.addInternalNote(id, authentication.getName(), note);
+        adminActivityLogger.log("Added an internal note to appointment #%d".formatted(id));
         redirectAttributes.addFlashAttribute("success", "Notă adăugată.");
         return redirectToDetail(id, back);
     }
@@ -147,8 +162,10 @@ public class AppointmentAdminController {
      * client-supplied (query param), so it must never be trusted as an arbitrary redirect target.
      */
     private static String sanitizeBack(String back) {
-        if (back != null && (back.equals("/admin/appointments") || back.startsWith("/admin/appointments?")
-                || back.equals("/admin/calendar") || back.startsWith("/admin/calendar?"))) {
+        if (back != null && (back.equals("/admin/appointments") 
+             || back.startsWith("/admin/appointments?")
+             || back.equals("/admin/calendar") 
+             || back.startsWith("/admin/calendar?"))) {
             return back;
         }
         return "/admin/appointments";

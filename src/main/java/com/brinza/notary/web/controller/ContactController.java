@@ -1,5 +1,7 @@
 package com.brinza.notary.web.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/{lang:en|ro|hu}")
 public class ContactController {
+
+    private static final Logger log = LoggerFactory.getLogger(ContactController.class);
 
     private final String address;
     private final String phone;
@@ -34,6 +38,7 @@ public class ContactController {
 
     @GetMapping("/contact")
     public String contact(Model model) {
+        log.info("contact called");
         model.addAttribute("address", address);
         model.addAttribute("phone", phone);
         model.addAttribute("email", email);

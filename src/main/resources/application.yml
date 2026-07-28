@@ -14,9 +14,15 @@ spring:
       max-file-size: 10MB
       max-request-size: 40MB
 
+logging:
+  level:
+    root: INFO
+
 app:
   storage:
     documents-dir: ./persistent
+  logging:
+    dir: ./logs
   demo-data:
     appointments:
       enabled: true
@@ -70,3 +76,5 @@ spring:
 app:
   storage:
     documents-dir: ${STORAGE_DOCUMENTS_DIR:/data/persistent}
+  logging:
+    dir: ${LOGGING_DIR:/data/logs}
