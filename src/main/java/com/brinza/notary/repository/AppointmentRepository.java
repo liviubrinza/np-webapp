@@ -25,4 +25,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                               @Param("from") LocalDateTime from,
                               @Param("to") LocalDateTime to,
                               @Param("name") String name);
+
+    @Query("""
+            SELECT a FROM Appointment a
+            WHERE (:from IS NULL OR a.createdAt >= :from)
+              AND (:to IS NULL OR a.createdAt <= :to)
+            """)
+    List<Appointment> findAllByCreatedAtRange(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

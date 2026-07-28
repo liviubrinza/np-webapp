@@ -1,7 +1,9 @@
 package com.brinza.notary.admin.controller;
 
 import com.brinza.notary.dto.AdminActivityEntryView;
+import com.brinza.notary.dto.AppointmentMonthlyStatsView;
 import com.brinza.notary.dto.LogEntryView;
+import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.LogViewerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/admin/statistics")
@@ -24,14 +29,52 @@ public class StatisticsAdminController {
     private static final List<String> LOG_LEVELS = List.of("DEBUG", "INFO", "WARN", "ERROR");
 
     private final LogViewerService logViewerService;
+    private final AppointmentManagementService appointmentManagementService;
 
-    public StatisticsAdminController(LogViewerService logViewerService) {
+    public StatisticsAdminController(LogViewerService logViewerService, AppointmentManagementService appointmentManagementService) {
         this.logViewerService = logViewerService;
+        this.appointmentManagementService = appointmentManagementService;
     }
 
     @GetMapping
-    public String requests() {
+    public String requests(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth from,
+                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth to,
+                            Model model) {
+        List<AppointmentMonthlyStatsView> monthlyStats = appointmentManagementService.monthlyStatusSummary(from, to);
+        log.debug("Rendering {} month(s) of request statistics", monthlyStats.size());
+
+        model.addAttribute("monthlyStats", monthlyStats);
+        model.addAttribute("monthlyStatsChartJson", toChartJson(monthlyStats));
+        model.addAttribute("from", from);
+        model.addAttribute("to", to);
         return "admin/statistics/requests";
+    }
+
+    /**
+     * Builds the bar-chart data as JSON, chronological (oldest first) rather than the table's
+     * newest-first order, since that's the natural reading direction for a time-axis chart.
+     */
+    private static String toChartJson(List<AppointmentMonthlyStatsView> monthlyStats) {
+        DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("MMM yyyy", Locale.of("ro"));
+        StringBuilder labels = new StringBuilder();
+        StringBuilder confirmed = new StringBuilder();
+        StringBuilder cancelled = new StringBuilder();
+        StringBuilder completed = new StringBuilder();
+        boolean first = true;
+        for (AppointmentMonthlyStatsView m : monthlyStats.reversed()) {
+            if (!first) {
+                labels.append(',');
+                confirmed.append(',');
+                cancelled.append(',');
+                completed.append(',');
+            }
+            labels.append('"').append(monthFormat.format(m.month())).append('"');
+            confirmed.append(m.confirmed());
+            cancelled.append(m.cancelled());
+            completed.append(m.completed());
+            first = false;
+        }
+        return "{\"labels\":[" + labels + "],\"confirmed\":[" + confirmed + "],\"cancelled\":[" + cancelled + "],\"completed\":[" + completed + "]}";
     }
 
     @GetMapping("/traffic")

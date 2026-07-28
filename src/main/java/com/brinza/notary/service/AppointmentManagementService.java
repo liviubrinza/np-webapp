@@ -6,6 +6,7 @@ import com.brinza.notary.domain.InternalNote;
 import com.brinza.notary.dto.AppointmentDetailView;
 import com.brinza.notary.dto.AppointmentListItemView;
 import com.brinza.notary.dto.AppointmentListView;
+import com.brinza.notary.dto.AppointmentMonthlyStatsView;
 import com.brinza.notary.dto.DayAvailability;
 import com.brinza.notary.dto.InternalNoteView;
 import com.brinza.notary.repository.AppointmentRepository;
@@ -135,6 +136,38 @@ public class AppointmentManagementService {
         }
 
         return (mergedStart <= startOfDay && mergedEnd >= endOfDay) ? DayAvailability.FULL : DayAvailability.PARTIAL;
+    }
+
+    /**
+     * Appointment counts by status, grouped by the month the appointment was created in
+     * (not the requested/scheduled date), for the admin statistics "Cereri" tab. {@code from}/
+     * {@code to} bound the creation month (inclusive on both ends); either or both may be null
+     * to leave that end open, and both null returns every month on record.
+     */
+    @Transactional(readOnly = true)
+    public List<AppointmentMonthlyStatsView> monthlyStatusSummary(YearMonth from, YearMonth to) {
+        log.info("monthlyStatusSummary called for from={} to={}", from, to);
+        LocalDateTime fromDateTime = from != null ? from.atDay(1).atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atEndOfMonth().atTime(LocalTime.MAX) : null;
+
+        Map<YearMonth, List<Appointment>> byMonth = appointmentRepository.findAllByCreatedAtRange(fromDateTime, toDateTime).stream()
+                .collect(Collectors.groupingBy(a -> YearMonth.from(a.getCreatedAt())));
+        log.debug("Grouped appointments into {} month(s)", byMonth.size());
+
+        return byMonth.entrySet().stream()
+                .map(entry -> {
+                    Map<AppointmentStatus, Long> counts = entry.getValue().stream()
+                            .collect(Collectors.groupingBy(Appointment::getStatus, Collectors.counting()));
+                    return new AppointmentMonthlyStatsView(
+                            entry.getKey().atDay(1),
+                            counts.getOrDefault(AppointmentStatus.PENDING, 0L),
+                            counts.getOrDefault(AppointmentStatus.CONFIRMED, 0L),
+                            counts.getOrDefault(AppointmentStatus.CANCELLED, 0L),
+                            counts.getOrDefault(AppointmentStatus.COMPLETED, 0L),
+                            (long) entry.getValue().size());
+                })
+                .sorted(Comparator.comparing(AppointmentMonthlyStatsView::month).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)

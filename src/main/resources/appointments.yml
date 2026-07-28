@@ -306,3 +306,189 @@ app:
       duration: 30
       status: CONFIRMED
       notes: "Prefers a morning slot next time."
+
+    # --- Historical data for the statistics "Cereri" tab (grouped by booked-date/created-at) ---
+
+    # May 2026 - closed out, COMPLETED or CANCELLED only.
+    - client-name: "Vasile Constantin"
+      email: "vasile.constantin4@gmail.com"
+      phone: "0721456789"
+      booked-service: document-authentication
+      requested-at: "2026-05-05T09:00:00"
+      booked-date: "2026-05-02T10:00:00"
+      duration: 30
+      status: COMPLETED
+    - client-name: "Andreea Pop"
+      email: "andreea.pop18@yahoo.com"
+      phone: "0745123698"
+      booked-service: power-of-attorney
+      requested-at: "2026-05-07T10:30:00"
+      booked-date: "2026-05-04T09:15:00"
+      duration: 45
+      status: COMPLETED
+    - client-name: "Levente Kiss"
+      email: "levente.kiss62@outlook.com"
+      phone: "0762345891"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-05-11T09:00:00"
+      booked-date: "2026-05-06T11:30:00"
+      duration: 120
+      status: CANCELLED
+      notes: "Client rescheduled indefinitely."
+    - client-name: "Simona Ilie"
+      email: "simona.ilie37@gmail.com"
+      phone: "0788456123"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-05-12T14:15:00"
+      booked-date: "2026-05-09T13:00:00"
+      duration: 20
+      status: COMPLETED
+    - client-name: "Tibor Balogh"
+      email: "tibor.balogh51@yahoo.com"
+      phone: "0731987456"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-14T09:00:00"
+      booked-date: "2026-05-11T10:45:00"
+      duration: 180
+      status: CANCELLED
+      notes: "Family could not agree on a date."
+    - client-name: "Georgeta Manea"
+      email: "georgeta.manea9@outlook.com"
+      phone: "0756789234"
+      booked-service: document-authentication
+      requested-at: "2026-05-19T11:00:00"
+      booked-date: "2026-05-14T09:30:00"
+      duration: 30
+      status: COMPLETED
+    - client-name: "Norbert Papp"
+      email: "norbert.papp26@gmail.com"
+      phone: "0723456912"
+      booked-service: power-of-attorney
+      requested-at: "2026-05-21T15:30:00"
+      booked-date: "2026-05-18T14:00:00"
+      duration: 45
+      status: CANCELLED
+
+    # June 2026 - closed out, COMPLETED or CANCELLED only.
+    - client-name: "Diana Barbu"
+      email: "diana.barbu63@yahoo.com"
+      phone: "0741236789"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-04T09:00:00"
+      booked-date: "2026-06-01T09:45:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Ferenc Nagy"
+      email: "ferenc.nagy84@outlook.com"
+      phone: "0769123457"
+      booked-service: document-authentication
+      requested-at: "2026-06-08T10:00:00"
+      booked-date: "2026-06-03T11:15:00"
+      duration: 30
+      status: CANCELLED
+      notes: "Client was unreachable to confirm."
+    - client-name: "Raluca Stoica"
+      email: "raluca.stoica22@gmail.com"
+      phone: "0787654321"
+      booked-service: power-of-attorney
+      requested-at: "2026-06-12T13:30:00"
+      booked-date: "2026-06-08T10:00:00"
+      duration: 45
+      status: COMPLETED
+    - client-name: "Zoltán Varga"
+      email: "zoltan.varga47@yahoo.com"
+      phone: "0734567812"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-06-16T15:00:00"
+      booked-date: "2026-06-12T14:00:00"
+      duration: 20
+      status: COMPLETED
+    - client-name: "Cristina Enache"
+      email: "cristina.enache8@outlook.com"
+      phone: "0778912345"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-22T09:00:00"
+      booked-date: "2026-06-17T12:30:00"
+      duration: 180
+      status: CANCELLED
+      notes: "Estate moved to a different notary office."
+
+    # July 2026 - a couple of cancellations.
+    - client-name: "Béla Szász"
+      email: "bela.szasz39@gmail.com"
+      phone: "0765432198"
+      booked-service: power-of-attorney
+      requested-at: "2026-07-13T11:00:00"
+      booked-date: "2026-07-06T09:30:00"
+      duration: 45
+      status: CANCELLED
+      notes: "Client no longer needs the service."
+    - client-name: "Melinda Kocsis"
+      email: "melinda.kocsis14@yahoo.com"
+      phone: "0792345678"
+      booked-service: document-authentication
+      requested-at: "2026-07-17T14:00:00"
+      booked-date: "2026-07-10T15:15:00"
+      duration: 30
+      status: CANCELLED
+
+    # August 2026 - a mix of confirmed and cancelled (avoids 3/5/18 Aug, already fully booked above).
+    - client-name: "Robert Ionescu"
+      email: "robert.ionescu28@gmail.com"
+      phone: "0743216598"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-08-07T09:00:00"
+      booked-date: "2026-08-01T09:00:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Timea Kovács"
+      email: "timea.kovacs59@outlook.com"
+      phone: "0756123489"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-10T11:00:00"
+      booked-date: "2026-08-03T13:15:00"
+      duration: 45
+      status: CONFIRMED
+      notes: "Returning client."
+    - client-name: "Adrian Vasilescu"
+      email: "adrian.vasilescu71@yahoo.com"
+      phone: "0789456712"
+      booked-service: document-authentication
+      requested-at: "2026-08-12T10:30:00"
+      booked-date: "2026-08-06T10:00:00"
+      duration: 30
+      status: CONFIRMED
+    - client-name: "Boglárka Szabó"
+      email: "boglarka.szabo33@gmail.com"
+      phone: "0724789356"
+      booked-service: certified-translation-notarization
+      requested-at: "2026-08-14T15:00:00"
+      booked-date: "2026-08-09T11:45:00"
+      duration: 20
+      status: CONFIRMED
+    - client-name: "Marius Dobre"
+      email: "marius.dobre46@outlook.com"
+      phone: "0767891234"
+      booked-service: probate-proceedings
+      requested-at: "2026-08-11T09:00:00"
+      booked-date: "2026-08-05T14:30:00"
+      duration: 180
+      status: CANCELLED
+      notes: "Heirs postponed the proceedings."
+    - client-name: "Erzsébet Molnár"
+      email: "erzsebet.molnar17@yahoo.com"
+      phone: "0738912567"
+      booked-service: power-of-attorney
+      requested-at: "2026-08-13T13:00:00"
+      booked-date: "2026-08-08T09:15:00"
+      duration: 45
+      status: CANCELLED
+    - client-name: "Sorin Petrescu"
+      email: "sorin.petrescu52@gmail.com"
+      phone: "0712345967"
+      booked-service: document-authentication
+      requested-at: "2026-08-19T10:00:00"
+      booked-date: "2026-08-12T16:00:00"
+      duration: 30
+      status: CANCELLED
+      notes: "Client found another provider."
