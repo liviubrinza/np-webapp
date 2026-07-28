@@ -19,6 +19,9 @@ target/
 # Uploaded document storage (local dev)
 /persistent/
 
+# Local-only SMTP credentials (real Gmail account, never committed)
+application-local-dev.yml
+
 ### STS ###
 .apt_generated
 .classpath

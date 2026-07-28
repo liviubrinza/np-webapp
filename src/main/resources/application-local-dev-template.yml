@@ -1,0 +1,14 @@
+# Local-only overrides - fill in your own real Gmail
+# credentials below to actually send email during local development.
+#
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${REAL_ACCOUNT_NAME}
+    password: ${REAL_ACCOUNT_PASSWORD}
+
+app:
+  mail:
+    enabled: true
+    from: ${REAL_ACCOUNT_NAME}

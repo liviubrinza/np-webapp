@@ -6,6 +6,7 @@ import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -40,13 +41,16 @@ public class AppointmentAdminController {
     private final AppointmentManagementService appointmentManagementService;
     private final DocumentManagementService documentManagementService;
     private final AdminActivityLogger adminActivityLogger;
+    private final boolean mailEnabled;
 
     public AppointmentAdminController(AppointmentManagementService appointmentManagementService,
                                        DocumentManagementService documentManagementService,
-                                       AdminActivityLogger adminActivityLogger) {
+                                       AdminActivityLogger adminActivityLogger,
+                                       @Value("${app.mail.enabled:false}") boolean mailEnabled) {
         this.appointmentManagementService = appointmentManagementService;
         this.documentManagementService = documentManagementService;
         this.adminActivityLogger = adminActivityLogger;
+        this.mailEnabled = mailEnabled;
     }
 
     @GetMapping
@@ -76,6 +80,7 @@ public class AppointmentAdminController {
         model.addAttribute("timeSlots", buildTimeSlots());
         model.addAttribute("documents", documentManagementService.listForAppointment(id));
         model.addAttribute("backUrl", sanitizeBack(back));
+        model.addAttribute("mailEnabled", mailEnabled);
         return "admin/appointments/detail";
     }
 
@@ -129,10 +134,12 @@ public class AppointmentAdminController {
 
     @PostMapping("/{id}/status")
     public String updateStatus(@PathVariable Long id, @RequestParam AppointmentStatus status,
+                                @RequestParam(required = false, defaultValue = "false") boolean sendConfirmationEmail,
                                 @RequestParam(required = false) String back,
                                 Authentication authentication, RedirectAttributes redirectAttributes) {
-        appointmentManagementService.updateStatus(id, status, authentication.getName());
-        adminActivityLogger.log("Changed appointment #%d status to %s".formatted(id, status));
+        appointmentManagementService.updateStatus(id, status, authentication.getName(), sendConfirmationEmail);
+        adminActivityLogger.log("Changed appointment #%d status to %s%s".formatted(
+                id, status, sendConfirmationEmail ? " (confirmation email sent)" : ""));
         redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
         return redirectToDetail(id, back);
     }

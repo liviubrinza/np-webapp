@@ -20,13 +20,16 @@ public class AppointmentBookingService {
     private final AppointmentRepository appointmentRepository;
     private final ServiceRepository serviceRepository;
     private final ServiceCatalogService serviceCatalogService;
+    private final AppointmentEmailService appointmentEmailService;
 
     public AppointmentBookingService(AppointmentRepository appointmentRepository,
                                       ServiceRepository serviceRepository,
-                                      ServiceCatalogService serviceCatalogService) {
+                                      ServiceCatalogService serviceCatalogService,
+                                      AppointmentEmailService appointmentEmailService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceRepository = serviceRepository;
         this.serviceCatalogService = serviceCatalogService;
+        this.appointmentEmailService = appointmentEmailService;
     }
 
     @Transactional
@@ -52,8 +55,6 @@ public class AppointmentBookingService {
     }
 
     private void notifyClient(Appointment appointment) {
-        // TODO: send a booking confirmation email once spring-boot-starter-mail/SMTP is configured.
-        log.debug("Appointment {} created for {} - confirmation email not sent (SMTP not configured)",
-                appointment.getId(), appointment.getEmail());
+        appointmentEmailService.sendBookingReceivedEmail(appointment);
     }
 }

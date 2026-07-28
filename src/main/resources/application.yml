@@ -13,6 +13,20 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 40MB
+  # Real values come from either application-local-dev.yml (local dev, gitignored - see that
+  # file) or the SMTP_* env vars under the docker profile. The bracketed placeholders below are
+  # never meant to work as-is - they're a visible reminder that this needs to be configured.
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:{REAL_ACCOUNT_NAME}}
+    password: ${SMTP_PASSWORD:{REAL_ACCOUNT_PASSWORD}}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 logging:
   level:
@@ -23,6 +37,12 @@ app:
     documents-dir: ./persistent
   logging:
     dir: ./logs
+  mail:
+    # Off by default so a stock checkout never tries to send real email. Enabled explicitly
+    # either via application-local-dev.yml (see that file) for local development, or via the
+    # MAIL_ENABLED env var under the docker profile.
+    enabled: false
+    from: "{REAL_ACCOUNT_NAME}"
   demo-data:
     appointments:
       enabled: true
@@ -78,3 +98,6 @@ app:
     documents-dir: ${STORAGE_DOCUMENTS_DIR:/data/persistent}
   logging:
     dir: ${LOGGING_DIR:/data/logs}
+  mail:
+    enabled: ${MAIL_ENABLED:true}
+    from: ${MAIL_FROM:{REAL_ACCOUNT_NAME}}

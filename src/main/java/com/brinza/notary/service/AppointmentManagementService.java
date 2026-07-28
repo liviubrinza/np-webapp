@@ -39,11 +39,14 @@ public class AppointmentManagementService {
 
     private final AppointmentRepository appointmentRepository;
     private final ServiceCatalogService serviceCatalogService;
+    private final AppointmentEmailService appointmentEmailService;
 
     public AppointmentManagementService(AppointmentRepository appointmentRepository,
-                                         ServiceCatalogService serviceCatalogService) {
+                                         ServiceCatalogService serviceCatalogService,
+                                         AppointmentEmailService appointmentEmailService) {
         this.appointmentRepository = appointmentRepository;
         this.serviceCatalogService = serviceCatalogService;
+        this.appointmentEmailService = appointmentEmailService;
     }
 
     @Transactional(readOnly = true)
@@ -178,9 +181,15 @@ public class AppointmentManagementService {
         return toDetailView(appointment);
     }
 
+    /**
+     * {@code sendConfirmationEmail} only has an effect for the PENDING -&gt; CONFIRMED transition -
+     * it's the admin/technician's explicit answer to the "send a confirmation email?" prompt shown
+     * client-side for that specific transition (see {@code admin/appointments/detail.html}), not a
+     * generic per-call override of {@link AppointmentEmailService}'s own {@code app.mail.enabled} gate.
+     */
     @Transactional
-    public void updateStatus(Long id, AppointmentStatus status, String authorUsername) {
-        log.info("updateStatus called for id={} status={} author={}", id, status, authorUsername);
+    public void updateStatus(Long id, AppointmentStatus status, String authorUsername, boolean sendConfirmationEmail) {
+        log.info("updateStatus called for id={} status={} author={} sendConfirmationEmail={}", id, status, authorUsername, sendConfirmationEmail);
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No appointment with id " + id));
         AppointmentStatus previousStatus = appointment.getStatus();
@@ -192,6 +201,14 @@ public class AppointmentManagementService {
         String note = "Stare schimbată: %s -> %s".formatted(previousStatus.getDisplayName(), status.getDisplayName());
         appointment.addInternalNote(new InternalNote(authorUsername, note));
         log.debug("Appointment id={} status changed {} -> {}", id, previousStatus, status);
+
+        if (previousStatus == AppointmentStatus.PENDING && status == AppointmentStatus.CONFIRMED) {
+            if (sendConfirmationEmail) {
+                appointmentEmailService.sendConfirmedEmail(appointment);
+            } else {
+                log.debug("Confirmation email declined by {} for appointment id={}", authorUsername, id);
+            }
+        }
     }
 
     @Transactional

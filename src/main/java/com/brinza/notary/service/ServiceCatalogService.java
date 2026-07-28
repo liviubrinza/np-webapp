@@ -29,7 +29,6 @@ public class ServiceCatalogService {
 
     @Transactional(readOnly = true)
     public List<ServiceView> findActiveServices(Locale locale) {
-        log.info("findActiveServices called for locale={}", locale);
         List<ServiceView> views = serviceRepository.findByActiveTrue().stream()
                 .map(service -> toView(service, locale))
                 .toList();
@@ -52,7 +51,6 @@ public class ServiceCatalogService {
      * outside the current one, since {@code translations} is lazy-loaded.
      */
     public String resolveName(Service service, Locale locale) {
-        log.info("resolveName called for serviceId={} locale={}", service.getId(), locale);
         return resolveTranslation(service, locale).getName();
     }
 
