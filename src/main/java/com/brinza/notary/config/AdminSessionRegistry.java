@@ -1,5 +1,6 @@
 package com.brinza.notary.config;
 
+import com.brinza.notary.config.filters.AdminSessionCorrelationFilter;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
