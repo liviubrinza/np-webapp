@@ -1,4 +1,4 @@
-package com.brinza.notary.config;
+package com.brinza.notary.config.filters;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

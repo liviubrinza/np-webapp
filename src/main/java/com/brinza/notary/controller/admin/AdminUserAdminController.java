@@ -1,4 +1,4 @@
-package com.brinza.notary.admin.controller;
+package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.domain.AdminRole;
 import com.brinza.notary.dto.AdminUserForm;

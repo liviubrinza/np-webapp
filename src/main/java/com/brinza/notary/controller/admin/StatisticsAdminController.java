@@ -1,4 +1,4 @@
-package com.brinza.notary.admin.controller;
+package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.dto.AdminActivityEntryView;
 import com.brinza.notary.dto.AppointmentMonthlyStatsView;

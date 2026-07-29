@@ -1,6 +1,6 @@
-package com.brinza.notary.service;
+package com.brinza.notary.config.seeders;
 
-import com.brinza.notary.config.AdminUserSeedProperties;
+import com.brinza.notary.config.properties.AdminUserSeedProperties;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.repository.AdminUserRepository;
 import org.slf4j.Logger;

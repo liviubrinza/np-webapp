@@ -1,4 +1,4 @@
-package com.brinza.notary.web.controller;
+package com.brinza.notary.controller.web;
 
 import com.brinza.notary.dto.BookingRequest;
 import com.brinza.notary.service.AppointmentBookingService;

@@ -1,6 +1,6 @@
-package com.brinza.notary.service;
+package com.brinza.notary.config.seeders;
 
-import com.brinza.notary.config.ServiceSeedProperties;
+import com.brinza.notary.config.properties.ServiceSeedProperties;
 import com.brinza.notary.domain.Service;
 import com.brinza.notary.domain.ServiceTranslation;
 import com.brinza.notary.repository.ServiceRepository;

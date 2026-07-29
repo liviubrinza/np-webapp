@@ -1,6 +1,6 @@
-package com.brinza.notary.service;
+package com.brinza.notary.config.seeders;
 
-import com.brinza.notary.config.AppointmentSeedProperties;
+import com.brinza.notary.config.properties.AppointmentSeedProperties;
 import com.brinza.notary.domain.Appointment;
 import com.brinza.notary.domain.Service;
 import com.brinza.notary.repository.AppointmentRepository;

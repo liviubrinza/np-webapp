@@ -1,4 +1,4 @@
-package com.brinza.notary.config;
+package com.brinza.notary.config.properties;
 
 import com.brinza.notary.domain.AdminRole;
 import org.springframework.boot.context.properties.ConfigurationProperties;

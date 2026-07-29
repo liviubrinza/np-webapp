@@ -1,4 +1,4 @@
-package com.brinza.notary.admin.controller;
+package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.service.AdminActivityLogger;

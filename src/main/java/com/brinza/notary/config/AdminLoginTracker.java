@@ -1,5 +1,6 @@
 package com.brinza.notary.config;
 
+import com.brinza.notary.config.filters.CorrelationIdFilter;
 import com.brinza.notary.repository.AdminUserRepository;
 import com.brinza.notary.service.AdminActivityLogger;
 import jakarta.servlet.http.HttpServletRequest;
