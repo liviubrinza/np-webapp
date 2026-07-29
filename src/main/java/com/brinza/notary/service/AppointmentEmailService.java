@@ -1,5 +1,6 @@
 package com.brinza.notary.service;
 
+import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.domain.Appointment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,12 @@ import java.util.Map;
  * separated by a "--- LANGUAGE ---" marker - since an {@link Appointment} doesn't record which
  * locale the client originally booked in.
  *
- * <p>Gated by {@code app.mail.enabled}, off by default so a stock checkout never attempts to
- * send real email; see {@code application.yml} and {@code application-local-dev.yml}. A send
- * failure (bad credentials, unreachable SMTP server, etc.) is logged and swallowed - it must
- * never fail the appointment operation that triggered it.
+ * <p>Gated by {@link SystemSettings#isMailEnabled()}, off by default (defaults to
+ * {@code app.mail.enabled}, which is {@code false} unless overridden - see
+ * {@code application.yml} and {@code application-local-dev.yml}) so a stock checkout never
+ * attempts to send real email. Runtime-toggleable from the Configurare admin page without a
+ * restart. A send failure (bad credentials, unreachable SMTP server, etc.) is logged and
+ * swallowed - it must never fail the appointment operation that triggered it.
  */
 @org.springframework.stereotype.Service
 public class AppointmentEmailService {
@@ -39,7 +42,7 @@ public class AppointmentEmailService {
     private final MessageSource messageSource;
     private final ServiceCatalogService serviceCatalogService;
     private final AsyncEmailSender asyncEmailSender;
-    private final boolean mailEnabled;
+    private final SystemSettings systemSettings;
     private final String fromAddress;
     private final String contactAddress;
     private final String contactPhone;
@@ -47,14 +50,14 @@ public class AppointmentEmailService {
     public AppointmentEmailService(MessageSource messageSource,
                                     ServiceCatalogService serviceCatalogService,
                                     AsyncEmailSender asyncEmailSender,
-                                    @Value("${app.mail.enabled:false}") boolean mailEnabled,
+                                    SystemSettings systemSettings,
                                     @Value("${app.mail.from:}") String fromAddress,
                                     @Value("${app.contact.address}") String contactAddress,
                                     @Value("${app.contact.phone}") String contactPhone) {
         this.messageSource = messageSource;
         this.serviceCatalogService = serviceCatalogService;
         this.asyncEmailSender = asyncEmailSender;
-        this.mailEnabled = mailEnabled;
+        this.systemSettings = systemSettings;
         this.fromAddress = fromAddress;
         this.contactAddress = contactAddress;
         this.contactPhone = contactPhone;
@@ -71,8 +74,8 @@ public class AppointmentEmailService {
     }
 
     private void send(Appointment appointment, String subjectKey, String bodyKey) {
-        if (!mailEnabled) {
-            log.debug("Email sending disabled (app.mail.enabled=false); skipping appointmentId={}", appointment.getId());
+        if (!systemSettings.isMailEnabled()) {
+            log.debug("Email sending disabled (system setting mail.enabled=false); skipping appointmentId={}", appointment.getId());
             return;
         }
         SimpleMailMessage message = buildMessage(appointment, subjectKey, bodyKey);

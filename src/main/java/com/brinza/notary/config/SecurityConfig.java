@@ -33,7 +33,7 @@ public class SecurityConfig {
                         // Requests (Cereri) tab is open to both roles, every other statistics tab
                         // (traffic/activity/logs) stays TECHNICIAN-only.
                         .requestMatchers("/admin/statistics").hasAnyRole("ADMIN", "TECHNICIAN")
-                        .requestMatchers("/admin/statistics/**", "/admin/users/**").hasRole("TECHNICIAN")
+                        .requestMatchers("/admin/statistics/**", "/admin/users/**", "/admin/settings/**").hasRole("TECHNICIAN")
                         .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )

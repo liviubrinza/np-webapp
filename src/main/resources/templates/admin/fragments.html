@@ -32,6 +32,9 @@
             <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
                 <a class="nav-link text-white" th:href="@{/admin/users}">Utilizatori Admin</a>
             </li>
+            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
+                <a class="nav-link text-white" th:href="@{/admin/settings}">Configurare</a>
+            </li>
         </ul>
         <form th:action="@{/admin/logout}" method="post" class="d-flex align-items-center mb-0">
             <span class="navbar-text text-white me-3" sec:authentication="name">admin</span>
