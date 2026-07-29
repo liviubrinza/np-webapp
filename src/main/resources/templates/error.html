@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:with="isAdmin=${#authorization.expression('isAuthenticated()')}, notFound=${status == 404}">
+      th:with="isAdmin=${#authorization.expression('isAuthenticated()')}, notFound=${status == 404}, forbidden=${status == 403}">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title th:text="${isAdmin} ? (${notFound} ? 'Pagină inexistentă' : 'Eroare tehnică') : (${notFound} ? #{error.notfound.heading} : #{error.heading})">Error</title>
+    <title th:text="${isAdmin} ? (${notFound} ? 'Pagină inexistentă' : (${forbidden} ? 'Acces interzis' : 'Eroare tehnică')) : (${notFound} ? #{error.notfound.heading} : #{error.heading})">Error</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
@@ -19,8 +19,14 @@
                 <p class="mb-4">Nu știu concret unde vrei să navighezi, dar pagina asta nu există</p>
             </th:block>
 
+            <!-- Logged-in admin, not authorized for this page -->
+            <th:block th:if="${isAdmin and forbidden}">
+                <h1 class="h4 mb-3">Acces interzis</h1>
+                <p class="mb-4">Utilizatorul dumneavoastră nu are drepturile necesare pentru a vizualiza această pagină.</p>
+            </th:block>
+
             <!-- Logged-in admin, any other error -->
-            <th:block th:if="${isAdmin and !notFound}">
+            <th:block th:if="${isAdmin and !notFound and !forbidden}">
                 <h1 class="h4 mb-3">Eroare tehnică</h1>
                 <p class="mb-4">A apărut o eroare tehnică. Contactează tehnicianul dacă problema apare din nou.</p>
             </th:block>

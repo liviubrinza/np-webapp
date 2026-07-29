@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Configurare', null)}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4">
+    <h1 class="h3 mb-4">Configurare</h1>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <table class="table table-hover align-middle">
+        <thead>
+        <tr>
+            <th>Setare</th>
+            <th>Descriere</th>
+            <th class="text-end">Valoare</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Trimitere email-uri</td>
+            <td class="text-muted">Trimite efectiv email-uri despre starea programărilor către clienți</td>
+            <td class="text-end">
+                <form th:action="@{/admin/settings/mail-enabled}" method="post" class="d-inline-flex align-items-center justify-content-end">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" name="enabled" value="true"
+                               th:checked="${mailEnabled}" onchange="this.form.submit()"/>
+                    </div>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>
