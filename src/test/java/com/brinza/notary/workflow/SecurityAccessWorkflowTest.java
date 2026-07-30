@@ -8,11 +8,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,6 +30,19 @@ class SecurityAccessWorkflowTest {
         mockMvc.perform(get("/admin/appointments"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/login"));
+    }
+
+    // admin/login is served by a plain WebConfig#addViewController, not a @Controller, so no
+    // @WebMvcTest slice covers it - this is the only page in the app without render coverage
+    // elsewhere. Also confirms th:action (not a raw action=) actually gets the CSRF token
+    // injected, which is what the CI raw-action= guard assumes is true for every POST form.
+    @Test
+    void anonymousCanRenderLoginPage() throws Exception {
+        mockMvc.perform(get("/admin/login"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/login"))
+                .andExpect(content().string(containsString("Autentificare Admin")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")));
     }
 
     // The rendered "Acces interzis" error page (see error.html) was verified manually against a

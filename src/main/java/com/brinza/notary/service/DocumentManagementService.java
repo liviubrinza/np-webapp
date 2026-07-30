@@ -61,10 +61,11 @@ public class DocumentManagementService {
             throw new IllegalArgumentException("Select at least one file to upload.");
         }
         for (MultipartFile file : selected) {
-            if (!ALLOWED_EXTENSIONS.contains(extensionOf(file.getOriginalFilename()))) {
-                log.debug("Rejected upload for appointmentId={}: unsupported file type {}", appointmentId, file.getOriginalFilename());
+            String originalFilename = stripControlChars(file.getOriginalFilename());
+            if (!ALLOWED_EXTENSIONS.contains(extensionOf(originalFilename))) {
+                log.debug("Rejected upload for appointmentId={}: unsupported file type {}", appointmentId, originalFilename);
                 throw new IllegalArgumentException(
-                        "Unsupported file type: " + file.getOriginalFilename() + ". Only PDF, DOC, and DOCX files are allowed.");
+                        "Unsupported file type: " + originalFilename + ". Only PDF, DOC, and DOCX files are allowed.");
             }
         }
 
@@ -74,11 +75,12 @@ public class DocumentManagementService {
 
         List<String> uploadedNames = new ArrayList<>();
         for (MultipartFile file : selected) {
+            String originalFilename = stripControlChars(file.getOriginalFilename());
             String relativePath = documentStorageService.store(file, appointment.getClientName(), serviceName);
-            Document document = new Document(file.getOriginalFilename(), null, relativePath,
-                    file.getOriginalFilename(), file.getContentType(), appointment);
+            Document document = new Document(originalFilename, null, relativePath,
+                    originalFilename, file.getContentType(), appointment);
             documentRepository.save(document);
-            uploadedNames.add(file.getOriginalFilename());
+            uploadedNames.add(originalFilename);
         }
         log.debug("Stored {} document(s) for appointmentId={}: {}", uploadedNames.size(), appointmentId, uploadedNames);
 
@@ -130,5 +132,13 @@ public class DocumentManagementService {
         }
         int dot = filename.lastIndexOf('.');
         return dot >= 0 ? filename.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
+    }
+
+    // The client-supplied filename is kept as-is for display (unlike the storage path, which
+    // DocumentStorageService sanitizes separately) but flows into log lines, internal notes, and
+    // the Content-Disposition header on download - stripping control characters here closes off
+    // log-forging and HTTP header injection via a crafted upload filename at the one place it enters.
+    private static String stripControlChars(String value) {
+        return value == null ? null : value.replaceAll("[\\p{Cntrl}]", "");
     }
 }

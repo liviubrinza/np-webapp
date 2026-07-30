@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter xmlns="https://github.com/spotbugs/filter/3.0.0"
+                 xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/master/spotbugs/etc/findbugsfilter.xsd"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- Defensive-copy nitpick against JPA entities, @ConfigurationProperties records, and DTO
+         records that pass mutable collections/associations by reference. Standard, idiomatic in
+         this stack (Hibernate needs direct field references; records inherently expose their
+         components) and near-zero real value here - suppressed wholesale rather than annotating
+         every entity/DTO getter. -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+
+    <!-- find-security-bugs flags any parameterized log call whose argument can be traced back to
+         a tainted source (HTTP params, multipart filenames, form fields), but its taint tracker
+         doesn't recognize custom sanitizer methods as clearing that taint - it still flags calls
+         after code has actually been fixed to strip CR/LF. The two real sources it caught here
+         were addressed in code instead of suppressed:
+           - DocumentManagementService: uploaded filenames are stripped of control characters
+             before they reach logs, internal notes, or the download Content-Disposition header
+             (see stripControlChars()).
+           - AdminUserForm.username now has a @Pattern restricting it to a safe charset, since
+             admin usernames get logged on every action they perform.
+         Everything else this rule flags in this codebase is a Long id, enum, LocalDateTime, or a
+         path variable already constrained by its route regex (BookingController's
+         "{lang:en|ro|hu}") - none of which can carry a literal CR/LF. -->
+    <Match>
+        <Bug pattern="CRLF_INJECTION_LOGS"/>
+    </Match>
+
+    <!-- Path.getFileName() can return null for a root-only path, which is what this rule is
+         built to catch - but every Path here comes from Files.list(logDir) iteration, so it's
+         always logDir-resolve(something) and structurally always has a filename component. The
+         same finding against DocumentStorageService.sanitizeFilename() (which resolves a
+         client-supplied string and genuinely can hit this) was fixed in code, not suppressed. -->
+    <Match>
+        <Class name="com.brinza.notary.service.LogViewerService"/>
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
+    </Match>
+
+</FindBugsFilter>

@@ -1,0 +1,42 @@
+name: Security Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  security:
+    name: Static analysis and Thymeleaf security guards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Static analysis (SpotBugs + find-security-bugs)
+        run: ./mvnw --batch-mode --no-transfer-progress clean compile spotbugs:check
+
+      - name: Guard against unescaped Thymeleaf output
+        run: |
+          # th:utext and bare [(...)] render without HTML-escaping - flag both. The
+          # /*[(...)]*/ form is excluded: it's Thymeleaf's standard idiom for embedding a
+          # server-built JSON literal into an inline <script> block, which is JS context,
+          # not HTML, and is already in use (calendar.html, statistics/requests.html).
+          if grep -rn 'th:utext' src/main/resources/templates || grep -rn '\[(' src/main/resources/templates | grep -v '/\*\[('; then
+            echo "::error::Found th:utext or unescaped [(...)] output above - this renders client-controlled data without HTML-escaping and is an XSS risk. Use th:text / [[...]] instead (or the /*[(...)]*/ script idiom if this is trusted server-built JSON going into a <script> block)."
+            exit 1
+          fi
+
+      - name: Guard against raw action= on Thymeleaf forms
+        run: |
+          if grep -rn 'action="' src/main/resources/templates | grep -v 'th:action'; then
+            echo "::error::Found a raw action= attribute above - Spring Security's CSRF token is only auto-injected into forms using th:action. Use th:action instead."
+            exit 1
+          fi

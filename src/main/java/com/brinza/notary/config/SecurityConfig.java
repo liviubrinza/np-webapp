@@ -9,11 +9,33 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 @Configuration
 public class SecurityConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+
+    // H2 console's own UI relies on inline scripts/styles and framing that a strict CSP would
+    // break, and it's a dev-only tool anyway (see the CSRF exemption below), so it's excluded
+    // rather than loosened for everyone.
+    private static final String CSP_DIRECTIVES = String.join("; ",
+            "default-src 'self'",
+            // 'unsafe-inline' is still needed for script-src/style-src: templates carry inline
+            // <script th:inline="javascript"> blocks (map/calendar/chart init) and Bootstrap/Google
+            // Fonts inject inline styles. Tightening this to a nonce-based policy is follow-up work.
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "img-src 'self' data: https://cdn.jsdelivr.net https://*.tile.openstreetmap.org",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "frame-ancestors 'self'",
+            "form-action 'self'");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -24,7 +46,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                        .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                                new NegatedRequestMatcher(PathPatternRequestMatcher.pathPattern("/h2-console/**")),
+                                new ContentSecurityPolicyHeaderWriter(CSP_DIRECTIVES))))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/admin/login").permitAll()
