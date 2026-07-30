@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head(${serviceId} != null ? 'Editează Serviciu' : 'Serviciu Nou', null)}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 720px;">
+    <a th:href="@{/admin/settings/services}" class="d-inline-block mb-3">&larr; Înapoi la servicii</a>
+
+    <h1 class="h3 mb-4" th:text="${serviceId} != null ? 'Editează Serviciu' : 'Serviciu Nou'"></h1>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="${serviceId} != null ? @{/admin/settings/services/{id}(id=${serviceId})} : @{/admin/settings/services}"
+          th:object="${serviceForm}" method="post">
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <label class="form-label">Cod</label>
+                <input type="text" th:field="*{code}" class="form-control"/>
+                <div class="text-danger small" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Durată (minute)</label>
+                <input type="number" th:field="*{durationMinutes}" class="form-control"/>
+                <div class="text-danger small" th:if="${#fields.hasErrors('durationMinutes')}" th:errors="*{durationMinutes}"></div>
+            </div>
+        </div>
+
+        <div class="form-check form-switch mb-4">
+            <input class="form-check-input" type="checkbox" role="switch" th:field="*{active}"/>
+            <label class="form-check-label">Activ</label>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Traducere (Engleză)</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Nume</label>
+                    <input type="text" th:field="*{nameEn}" class="form-control"/>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('nameEn')}" th:errors="*{nameEn}"></div>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Descriere</label>
+                    <textarea th:field="*{descriptionEn}" class="form-control" rows="2"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('descriptionEn')}" th:errors="*{descriptionEn}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Traducere (Română)</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Nume</label>
+                    <input type="text" th:field="*{nameRo}" class="form-control"/>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('nameRo')}" th:errors="*{nameRo}"></div>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Descriere</label>
+                    <textarea th:field="*{descriptionRo}" class="form-control" rows="2"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('descriptionRo')}" th:errors="*{descriptionRo}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">Traducere (Maghiară)</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Nume</label>
+                    <input type="text" th:field="*{nameHu}" class="form-control"/>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('nameHu')}" th:errors="*{nameHu}"></div>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Descriere</label>
+                    <textarea th:field="*{descriptionHu}" class="form-control" rows="2"></textarea>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('descriptionHu')}" th:errors="*{descriptionHu}"></div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvează</button>
+    </form>
+</main>
+
+</body>
+</html>

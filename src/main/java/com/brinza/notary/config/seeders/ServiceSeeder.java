@@ -11,15 +11,15 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * Syncs the {@code services} table to {@code services.yml} on every startup: services
- * are matched by their stable {@code code}, not database id, so entries can be freely
- * reordered/added in the YAML. A service removed from the YAML is deactivated rather
- * than deleted, since existing appointments may still reference it.
+ * Creates the initial services from {@code services.yml} on startup, matched by their
+ * stable {@code code}. Unlike its previous behavior, this only ever creates missing
+ * services — an existing one (including one since edited through the admin Services
+ * screen) is left untouched, since that screen is now a live source of truth this
+ * seeder must not clobber on every restart. Mirrors {@link AdminUserSeeder}'s approach
+ * to the same problem.
  *
  * <p>Ordered ahead of other seeders ({@link AppointmentDemoDataSeeder}) that need
  * services to already exist.
@@ -41,45 +41,19 @@ public class ServiceSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        Set<String> codesInYaml = new HashSet<>();
-
         for (ServiceSeedProperties.ServiceDefinition definition : properties.services()) {
-            codesInYaml.add(definition.code());
-            boolean isNew = serviceRepository.findByCode(definition.code()).isEmpty();
-            Service service = serviceRepository.findByCode(definition.code())
-                    .orElseGet(() -> {
-                        Service created = new Service(definition.durationMinutes(), true);
-                        created.setCode(definition.code());
-                        return created;
-                    });
-            service.setDurationMinutes(definition.durationMinutes());
-            service.setActive(true);
-            syncTranslations(service, definition.translations());
+            if (serviceRepository.findByCode(definition.code()).isPresent()) {
+                log.debug("Skipping service code={}: already exists", definition.code());
+                continue;
+            }
+            Service service = new Service(definition.durationMinutes(), true);
+            service.setCode(definition.code());
+            for (Map.Entry<String, ServiceSeedProperties.Translation> entry : definition.translations().entrySet()) {
+                ServiceSeedProperties.Translation translation = entry.getValue();
+                service.addTranslation(new ServiceTranslation(entry.getKey(), translation.name(), translation.description()));
+            }
             serviceRepository.save(service);
-            log.debug("{} service code={}", isNew ? "Created" : "Updated", definition.code());
+            log.debug("Seeded service code={}", definition.code());
         }
-
-        for (Service service : serviceRepository.findAll()) {
-            if (!codesInYaml.contains(service.getCode())) {
-                service.setActive(false);
-                log.debug("Deactivated service code={} (no longer present in services.yml)", service.getCode());
-            }
-        }
-    }
-
-    private void syncTranslations(Service service, Map<String, ServiceSeedProperties.Translation> translations) {
-        log.debug("syncTranslations called for serviceCode={} locales={}", service.getCode(), translations.keySet());
-        translations.forEach((locale, translation) -> {
-            ServiceTranslation existing = service.getTranslations().stream()
-                    .filter(t -> t.getLocale().equals(locale))
-                    .findFirst()
-                    .orElse(null);
-            if (existing == null) {
-                service.addTranslation(new ServiceTranslation(locale, translation.name(), translation.description()));
-            } else {
-                existing.setName(translation.name());
-                existing.setDescription(translation.description());
-            }
-        });
     }
 }
