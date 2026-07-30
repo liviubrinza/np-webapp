@@ -1,5 +1,6 @@
 package com.brinza.notary.service;
 
+import com.brinza.notary.config.LoginAttemptService;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.dto.AdminUserForm;
 import com.brinza.notary.dto.AdminUserView;
@@ -19,10 +20,13 @@ public class AdminUserManagementService {
 
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
 
-    public AdminUserManagementService(AdminUserRepository adminUserRepository, PasswordEncoder passwordEncoder) {
+    public AdminUserManagementService(AdminUserRepository adminUserRepository, PasswordEncoder passwordEncoder,
+                                       LoginAttemptService loginAttemptService) {
         this.adminUserRepository = adminUserRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Transactional(readOnly = true)
@@ -70,6 +74,15 @@ public class AdminUserManagementService {
     }
 
     @Transactional
+    public void unlock(Long id) {
+        AdminUser adminUser = getAdminEntity(id);
+        adminUser.setLocked(false);
+        adminUser.setLockUntil(null);
+        loginAttemptService.recordSuccess(adminUser.getUsername());
+        log.debug("Unlocked admin user id={} username={}", id, adminUser.getUsername());
+    }
+
+    @Transactional
     public void delete(Long id, String currentUsername) {
         AdminUser adminUser = getAdminEntity(id);
         if (adminUser.getUsername().equals(currentUsername)) {
@@ -86,7 +99,7 @@ public class AdminUserManagementService {
 
     private static AdminUserView toView(AdminUser adminUser) {
         return new AdminUserView(adminUser.getId(), adminUser.getUsername(), adminUser.getFullName(), adminUser.getRole(),
-                adminUser.getCreatedAt(), adminUser.getLastLogin());
+                adminUser.getCreatedAt(), adminUser.getLastLogin(), adminUser.isLocked(), adminUser.getLockUntil());
     }
 
     private String validatePassword(String rawPassword, boolean required) {

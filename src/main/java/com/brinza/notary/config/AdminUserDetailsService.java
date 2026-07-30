@@ -17,9 +17,11 @@ public class AdminUserDetailsService implements UserDetailsService {
     private static final Logger log = LoggerFactory.getLogger(AdminUserDetailsService.class);
 
     private final AdminUserRepository adminUserRepository;
+    private final LoginAttemptService loginAttemptService;
 
-    public AdminUserDetailsService(AdminUserRepository adminUserRepository) {
+    public AdminUserDetailsService(AdminUserRepository adminUserRepository, LoginAttemptService loginAttemptService) {
         this.adminUserRepository = adminUserRepository;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
@@ -30,10 +32,12 @@ public class AdminUserDetailsService implements UserDetailsService {
                     return new UsernameNotFoundException("Unknown admin user: " + username);
                 });
 
-        log.debug("AdminUser found for username={}, role={}", username, adminUser.getRole());
+        boolean locked = loginAttemptService.isLocked(username);
+        log.debug("AdminUser found for username={}, role={}, locked={}", username, adminUser.getRole(), locked);
         return User.withUsername(adminUser.getUsername())
                 .password(adminUser.getPasswordHash())
                 .authorities(new SimpleGrantedAuthority("ROLE_" + adminUser.getRole().name()))
+                .accountLocked(locked)
                 .build();
     }
 }

@@ -4,11 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -36,6 +38,15 @@ public class SecurityConfig {
             "base-uri 'self'",
             "frame-ancestors 'self'",
             "form-action 'self'");
+
+    // Delegating to Spring Security's own handler (rather than a raw response.sendRedirect(...))
+    // keeps the redirect target a plain literal, with no HttpServletRequest-derived value in the
+    // call - a manual sendRedirect built from request data trips SpotBugs/find-security-bugs'
+    // UNVALIDATED_REDIRECT check even when, as here, the value is actually a hardcoded constant.
+    private static final SimpleUrlAuthenticationFailureHandler LOCKED_FAILURE_HANDLER =
+            new SimpleUrlAuthenticationFailureHandler("/admin/login?locked");
+    private static final SimpleUrlAuthenticationFailureHandler DEFAULT_FAILURE_HANDLER =
+            new SimpleUrlAuthenticationFailureHandler("/admin/login?error");
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -67,7 +78,16 @@ public class SecurityConfig {
                         .loginPage("/admin/login")
                         .loginProcessingUrl("/admin/login")
                         .defaultSuccessUrl("/admin", true)
-                        .failureUrl("/admin/login?error")
+                        // A locked account gets its own query param/message (surfaced on
+                        // login.html) rather than the generic wrong-credentials one, per explicit
+                        // request - note this does mean a locked username is now distinguishable
+                        // from a merely-wrong-password one.
+                        .failureHandler((request, response, exception) -> {
+                            var handler = exception instanceof LockedException
+                                    ? LOCKED_FAILURE_HANDLER
+                                    : DEFAULT_FAILURE_HANDLER;
+                            handler.onAuthenticationFailure(request, response, exception);
+                        })
                         .permitAll()
                 )
                 .logout(logout -> logout

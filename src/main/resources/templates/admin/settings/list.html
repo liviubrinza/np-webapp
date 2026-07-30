@@ -34,6 +34,26 @@
                 </form>
             </td>
         </tr>
+        <tr>
+            <td>Blocare autentificare</td>
+            <td class="text-muted">Numărul de autentificări eșuate consecutive după care contul se blochează temporar, și durata blocării</td>
+            <td class="text-end">
+                <form th:action="@{/admin/settings/login-lockout}" method="post"
+                      class="d-inline-flex align-items-center justify-content-end gap-2">
+                    <div class="input-group input-group-sm" style="width: 180px;">
+                        <span class="input-group-text">Încercări</span>
+                        <input type="number" name="maxAttempts" min="1" class="form-control"
+                               th:value="${loginLockoutMaxAttempts}"/>
+                    </div>
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <span class="input-group-text">Minute</span>
+                        <input type="number" name="lockDurationMinutes" min="1" class="form-control"
+                               th:value="${loginLockoutLockDurationMinutes}"/>
+                    </div>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Salvează</button>
+                </form>
+            </td>
+        </tr>
         </tbody>
     </table>
 </main>

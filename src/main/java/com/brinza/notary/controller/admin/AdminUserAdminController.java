@@ -107,6 +107,14 @@ public class AdminUserAdminController {
         return "redirect:/admin/users";
     }
 
+    @PostMapping("/{id}/unlock")
+    public String unlock(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        adminUserManagementService.unlock(id);
+        adminActivityLogger.log("Unlocked user #%d".formatted(id));
+        redirectAttributes.addFlashAttribute("success", "Cont deblocat.");
+        return "redirect:/admin/users/" + id;
+    }
+
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
         try {

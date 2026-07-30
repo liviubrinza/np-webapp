@@ -1,5 +1,6 @@
 package com.brinza.notary.service;
 
+import com.brinza.notary.config.LoginAttemptService;
 import com.brinza.notary.domain.AdminRole;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.dto.AdminUserForm;
@@ -32,10 +33,13 @@ class AdminUserManagementServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private LoginAttemptService loginAttemptService;
+
     private AdminUserManagementService service;
 
     private AdminUserManagementService service() {
-        return new AdminUserManagementService(adminUserRepository, passwordEncoder);
+        return new AdminUserManagementService(adminUserRepository, passwordEncoder, loginAttemptService);
     }
 
     @Test
@@ -132,6 +136,29 @@ class AdminUserManagementServiceTest {
         service.update(1L, formFor("titi", null, "Updated Full Name", AdminRole.TECHNICIAN));
 
         assertThat(existing.getFullName()).isEqualTo("Updated Full Name");
+    }
+
+    @Test
+    void unlockClearsLockedStateAndResetsLoginAttempts() {
+        service = service();
+        AdminUser existing = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
+        existing.setLocked(true);
+        existing.setLockUntil(java.time.LocalDateTime.now().plusMinutes(15));
+        when(adminUserRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        service.unlock(1L);
+
+        assertThat(existing.isLocked()).isFalse();
+        assertThat(existing.getLockUntil()).isNull();
+        verify(loginAttemptService).recordSuccess("titi");
+    }
+
+    @Test
+    void unlockThrowsWhenNotFound() {
+        service = service();
+        when(adminUserRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.unlock(99L)).isInstanceOf(java.util.NoSuchElementException.class);
     }
 
     @Test

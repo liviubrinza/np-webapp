@@ -20,6 +20,9 @@
             <div class="alert alert-danger py-2" th:if="${param.error}">
                 Nume de utilizator sau parolă incorectă.
             </div>
+            <div class="alert alert-warning py-2" th:if="${param.locked}">
+                Momentan nu aveți dreptul să vă logați. Încercați mai târziu.
+            </div>
             <div class="alert alert-info py-2" th:if="${param.logout}">
                 V-ați deconectat.
             </div>
