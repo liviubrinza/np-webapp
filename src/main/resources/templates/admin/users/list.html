@@ -37,7 +37,7 @@
             <td th:text="${#temporals.format(a.createdAt(), 'dd MMM yyyy, HH:mm')}"></td>
             <td th:text="${a.lastLogin() != null} ? ${#temporals.format(a.lastLogin(), 'dd MMM yyyy, HH:mm')} : 'Niciodată'"></td>
             <td class="text-end">
-                <a th:href="@{/admin/users/{id}/edit(id=${a.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
+                <a th:href="@{/admin/users/{id}(id=${a.id()})}" class="btn btn-outline-primary btn-sm">Detalii</a>
                 <form th:action="@{/admin/users/{id}/delete(id=${a.id()})}" method="post" class="d-inline"
                       onsubmit="return confirm('Ștergeți acest cont?');">
                     <button type="submit" class="btn btn-outline-danger btn-sm">Șterge</button>

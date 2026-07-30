@@ -44,7 +44,7 @@ public class AdminUserManagementService {
             throw new IllegalArgumentException("Numele de utilizator este deja folosit.");
         }
         String rawPassword = validatePassword(form.getPassword(), true);
-        AdminUser adminUser = new AdminUser(form.getUsername(), passwordEncoder.encode(rawPassword), form.getRole());
+        AdminUser adminUser = new AdminUser(form.getUsername(), passwordEncoder.encode(rawPassword), form.getFullName(), form.getRole());
         adminUserRepository.save(adminUser);
         log.debug("Created admin user id={} username={} role={}", adminUser.getId(), adminUser.getUsername(), adminUser.getRole());
     }
@@ -59,6 +59,7 @@ public class AdminUserManagementService {
                 });
 
         adminUser.setUsername(form.getUsername());
+        adminUser.setFullName(form.getFullName());
         adminUser.setRole(form.getRole());
         String rawPassword = validatePassword(form.getPassword(), false);
         if (rawPassword != null) {
@@ -84,7 +85,7 @@ public class AdminUserManagementService {
     }
 
     private static AdminUserView toView(AdminUser adminUser) {
-        return new AdminUserView(adminUser.getId(), adminUser.getUsername(), adminUser.getRole(),
+        return new AdminUserView(adminUser.getId(), adminUser.getUsername(), adminUser.getFullName(), adminUser.getRole(),
                 adminUser.getCreatedAt(), adminUser.getLastLogin());
     }
 

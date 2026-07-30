@@ -11,7 +11,9 @@ app:
   admin-users:
     - username: admin
       password: admin
+      fullname: Admin Adminov
       role: ADMIN
     - username: titi
       password: titi
+      fullname: Liviu Flavius Brinza
       role: TECHNICIAN

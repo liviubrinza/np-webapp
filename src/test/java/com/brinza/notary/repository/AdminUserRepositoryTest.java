@@ -24,7 +24,7 @@ class AdminUserRepositoryTest {
 
     @Test
     void findByUsernameReturnsMatchingUser() {
-        repository.save(new AdminUser("titi", "hash", AdminRole.TECHNICIAN));
+        repository.save(new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN));
 
         assertThat(repository.findByUsername("titi")).isPresent();
         assertThat(repository.findByUsername("ghost")).isEmpty();
@@ -32,8 +32,8 @@ class AdminUserRepositoryTest {
 
     @Test
     void findAllByOrderByUsernameAscSortsAlphabetically() {
-        repository.save(new AdminUser("zed", "hash", AdminRole.ADMIN));
-        repository.save(new AdminUser("alpha", "hash", AdminRole.ADMIN));
+        repository.save(new AdminUser("zed", "hash", "Zed Full Name", AdminRole.ADMIN));
+        repository.save(new AdminUser("alpha", "hash", "Alpha Full Name", AdminRole.ADMIN));
 
         List<AdminUser> all = repository.findAllByOrderByUsernameAsc();
 

@@ -38,7 +38,7 @@ class ProfileServiceTest {
 
     @Test
     void rejectsWrongCurrentPassword() {
-        AdminUser user = new AdminUser("titi", "hash", AdminRole.TECHNICIAN);
+        AdminUser user = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
 
@@ -48,7 +48,7 @@ class ProfileServiceTest {
 
     @Test
     void updatesPasswordHashOnSuccess() {
-        AdminUser user = new AdminUser("titi", "oldHash", AdminRole.TECHNICIAN);
+        AdminUser user = new AdminUser("titi", "oldHash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("current", "oldHash")).thenReturn(true);
         when(passwordEncoder.encode("newpw")).thenReturn("newHash");

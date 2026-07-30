@@ -34,6 +34,7 @@ class AdminUserFormTest {
         AdminUserForm form = new AdminUserForm();
         form.setUsername("titi");
         form.setPassword("secret");
+        form.setFullName("Titi Full Name");
         form.setRole(AdminRole.TECHNICIAN);
 
         assertThat(validator.validate(form)).isEmpty();
@@ -43,6 +44,7 @@ class AdminUserFormTest {
     void blankUsernameIsRejected() {
         AdminUserForm form = new AdminUserForm();
         form.setUsername(" ");
+        form.setFullName("Full Name");
         form.setRole(AdminRole.ADMIN);
 
         Set<ConstraintViolation<AdminUserForm>> violations = validator.validate(form);
@@ -54,6 +56,7 @@ class AdminUserFormTest {
     void oversizedUsernameIsRejected() {
         AdminUserForm form = new AdminUserForm();
         form.setUsername("a".repeat(101));
+        form.setFullName("Full Name");
         form.setRole(AdminRole.ADMIN);
 
         Set<ConstraintViolation<AdminUserForm>> violations = validator.validate(form);
@@ -62,9 +65,34 @@ class AdminUserFormTest {
     }
 
     @Test
+    void blankFullNameIsRejected() {
+        AdminUserForm form = new AdminUserForm();
+        form.setUsername("titi");
+        form.setFullName(" ");
+        form.setRole(AdminRole.ADMIN);
+
+        Set<ConstraintViolation<AdminUserForm>> violations = validator.validate(form);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("fullName"));
+    }
+
+    @Test
+    void oversizedFullNameIsRejected() {
+        AdminUserForm form = new AdminUserForm();
+        form.setUsername("titi");
+        form.setFullName("a".repeat(256));
+        form.setRole(AdminRole.ADMIN);
+
+        Set<ConstraintViolation<AdminUserForm>> violations = validator.validate(form);
+
+        assertThat(violations).anyMatch(v -> v.getPropertyPath().toString().equals("fullName"));
+    }
+
+    @Test
     void nullRoleIsRejected() {
         AdminUserForm form = new AdminUserForm();
         form.setUsername("titi");
+        form.setFullName("Full Name");
         form.setRole(null);
 
         Set<ConstraintViolation<AdminUserForm>> violations = validator.validate(form);
