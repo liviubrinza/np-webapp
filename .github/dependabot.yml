@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Routine version-chasing PRs are disabled - Spring Boot/Framework/Hibernate bumps on this
+    # stack are exactly the kind of thing that can break without warning. CVE-driven PRs still
+    # come through separately via the repo's "Dependabot security updates" setting, which is
+    # independent of this file and targets only the minimum version needed to fix the CVE.
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
