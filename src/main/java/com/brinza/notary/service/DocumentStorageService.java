@@ -132,7 +132,10 @@ public class DocumentStorageService {
     }
 
     private static String sanitizeFilename(String originalFilename) {
-        String name = originalFilename == null ? "document" : Path.of(originalFilename).getFileName().toString();
+        // getFileName() returns null for a root-only path (e.g. a crafted "/" or "\" upload
+        // filename), not just for a blank one - fall back to the same default in that case too.
+        Path fileNamePath = originalFilename == null ? null : Path.of(originalFilename).getFileName();
+        String name = fileNamePath == null ? "document" : fileNamePath.toString();
         return sanitize(name);
     }
 
