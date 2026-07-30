@@ -135,7 +135,7 @@ a:hover {
     flex: 1 0 auto;
     min-height: 320px;
     padding: 1rem;
-    background: var(--brand-bg) url('/images/background.png') center center / contain no-repeat;
+    background: var(--brand-bg) url('/images/background_2.png') center center / contain no-repeat;
     text-align: center;
     display: flex;
     align-items: center;
