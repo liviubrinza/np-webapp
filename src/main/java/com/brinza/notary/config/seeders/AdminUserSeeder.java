@@ -46,6 +46,7 @@ public class AdminUserSeeder implements CommandLineRunner {
             adminUserRepository.save(new AdminUser(
                     definition.username(),
                     passwordEncoder.encode(definition.password()),
+                    definition.fullName(),
                     definition.role()));
             log.debug("Seeded admin user username={} role={}", definition.username(), definition.role());
         }

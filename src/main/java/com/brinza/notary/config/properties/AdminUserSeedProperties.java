@@ -8,6 +8,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "app")
 public record AdminUserSeedProperties(List<AdminUserDefinition> adminUsers) {
 
-    public record AdminUserDefinition(String username, String password, AdminRole role) {
+    public record AdminUserDefinition(String username, String password, String fullName, AdminRole role) {
     }
 }

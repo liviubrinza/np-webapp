@@ -13,8 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,10 +37,11 @@ class AdminUserCrudWorkflowTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void createPersistsAccountWithEncodedPassword() throws Exception {
+    void createPersistsAccountWithEncodedPasswordAndFullName() throws Exception {
         mockMvc.perform(post("/admin/users").with(csrf())
                         .param("username", "workflow-new-user")
                         .param("password", "secretpw")
+                        .param("fullName", "Workflow New User")
                         .param("role", "ADMIN"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/users"));
@@ -46,6 +50,7 @@ class AdminUserCrudWorkflowTest {
         assertThat(created.getPasswordHash()).isNotEqualTo("secretpw");
         assertThat(passwordEncoder.matches("secretpw", created.getPasswordHash())).isTrue();
         assertThat(created.getRole()).isEqualTo(AdminRole.ADMIN);
+        assertThat(created.getFullName()).isEqualTo("Workflow New User");
     }
 
     @Test
@@ -53,6 +58,7 @@ class AdminUserCrudWorkflowTest {
         mockMvc.perform(post("/admin/users").with(csrf())
                         .param("username", "titi")
                         .param("password", "secretpw")
+                        .param("fullName", "Duplicate Attempt")
                         .param("role", "ADMIN"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/users/form"));
@@ -61,18 +67,31 @@ class AdminUserCrudWorkflowTest {
     }
 
     @Test
-    void editUpdatesRole() throws Exception {
+    void editUpdatesRoleAndFullName() throws Exception {
         AdminUser existing = adminUserRepository.save(
-                new AdminUser("workflow-editable", passwordEncoder.encode("pw"), AdminRole.ADMIN));
+                new AdminUser("workflow-editable", passwordEncoder.encode("pw"), "Original Full Name", AdminRole.ADMIN));
 
         mockMvc.perform(post("/admin/users/" + existing.getId()).with(csrf())
                         .param("username", "workflow-editable")
+                        .param("fullName", "Updated Full Name")
                         .param("role", "TECHNICIAN"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/users"));
 
         AdminUser reloaded = adminUserRepository.findById(existing.getId()).orElseThrow();
         assertThat(reloaded.getRole()).isEqualTo(AdminRole.TECHNICIAN);
+        assertThat(reloaded.getFullName()).isEqualTo("Updated Full Name");
+    }
+
+    @Test
+    void detailPageRendersFullName() throws Exception {
+        AdminUser existing = adminUserRepository.save(
+                new AdminUser("workflow-detail", passwordEncoder.encode("pw"), "Detail Full Name", AdminRole.ADMIN));
+
+        mockMvc.perform(get("/admin/users/" + existing.getId()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/users/detail"))
+                .andExpect(content().string(containsString("Detail Full Name")));
     }
 
     @Test
@@ -89,7 +108,7 @@ class AdminUserCrudWorkflowTest {
     @Test
     void deletingOtherAccountRemovesIt() throws Exception {
         AdminUser other = adminUserRepository.save(
-                new AdminUser("workflow-deletable", passwordEncoder.encode("pw"), AdminRole.ADMIN));
+                new AdminUser("workflow-deletable", passwordEncoder.encode("pw"), "Deletable User", AdminRole.ADMIN));
 
         mockMvc.perform(post("/admin/users/" + other.getId() + "/delete").with(csrf()))
                 .andExpect(status().is3xxRedirection())

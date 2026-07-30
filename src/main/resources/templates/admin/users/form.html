@@ -20,6 +20,11 @@
             <div class="text-danger small" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
         </div>
         <div class="mb-3">
+            <label class="form-label">Nume complet</label>
+            <input type="text" th:field="*{fullName}" class="form-control"/>
+            <div class="text-danger small" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+        </div>
+        <div class="mb-3">
             <label class="form-label">Rol</label>
             <select th:field="*{role}" class="form-select">
                 <option value="ADMIN">ADMIN</option>

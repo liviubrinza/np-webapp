@@ -41,7 +41,7 @@ class AdminUserManagementServiceTest {
     @Test
     void createRejectsDuplicateUsername() {
         service = service();
-        AdminUserForm form = formFor("titi", "secret", AdminRole.TECHNICIAN);
+        AdminUserForm form = formFor("titi", "secret", "Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(mock(AdminUser.class)));
 
         assertThatThrownBy(() -> service.create(form)).isInstanceOf(IllegalArgumentException.class);
@@ -51,7 +51,7 @@ class AdminUserManagementServiceTest {
     @Test
     void createRejectsBlankPassword() {
         service = service();
-        AdminUserForm form = formFor("newuser", " ", AdminRole.ADMIN);
+        AdminUserForm form = formFor("newuser", " ", "Full Name", AdminRole.ADMIN);
         when(adminUserRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(form)).isInstanceOf(IllegalArgumentException.class);
@@ -60,34 +60,36 @@ class AdminUserManagementServiceTest {
     @Test
     void createRejectsShortPassword() {
         service = service();
-        AdminUserForm form = formFor("newuser", "abc", AdminRole.ADMIN);
+        AdminUserForm form = formFor("newuser", "abc", "Full Name", AdminRole.ADMIN);
         when(adminUserRepository.findByUsername("newuser")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.create(form)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void createSavesEncodedPassword() {
+    void createSavesEncodedPasswordAndFullName() {
         service = service();
-        AdminUserForm form = formFor("newuser", "secretpw", AdminRole.ADMIN);
+        AdminUserForm form = formFor("newuser", "secretpw", "New User", AdminRole.ADMIN);
         when(adminUserRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("secretpw")).thenReturn("ENCODED");
 
         service.create(form);
 
-        verify(adminUserRepository).save(any(AdminUser.class));
+        org.mockito.ArgumentCaptor<AdminUser> captor = org.mockito.ArgumentCaptor.forClass(AdminUser.class);
+        verify(adminUserRepository).save(captor.capture());
+        assertThat(captor.getValue().getFullName()).isEqualTo("New User");
     }
 
     @Test
     void updateRejectsUsernameAlreadyUsedByAnotherAccount() {
         service = service();
-        AdminUser existing = new AdminUser("old", "hash", AdminRole.ADMIN);
-        AdminUser other = new AdminUser("taken", "hash2", AdminRole.ADMIN);
+        AdminUser existing = new AdminUser("old", "hash", "Old Name", AdminRole.ADMIN);
+        AdminUser other = new AdminUser("taken", "hash2", "Other Name", AdminRole.ADMIN);
         setId(other, 2L);
         when(adminUserRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(adminUserRepository.findByUsername("taken")).thenReturn(Optional.of(other));
 
-        AdminUserForm form = formFor("taken", null, AdminRole.ADMIN);
+        AdminUserForm form = formFor("taken", null, "Some Name", AdminRole.ADMIN);
 
         assertThatThrownBy(() -> service.update(1L, form)).isInstanceOf(IllegalArgumentException.class);
     }
@@ -95,12 +97,12 @@ class AdminUserManagementServiceTest {
     @Test
     void updateWithoutPasswordKeepsExistingHash() {
         service = service();
-        AdminUser existing = new AdminUser("titi", "originalHash", AdminRole.TECHNICIAN);
+        AdminUser existing = new AdminUser("titi", "originalHash", "Titi Full Name", AdminRole.TECHNICIAN);
         setId(existing, 1L);
         when(adminUserRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(existing));
 
-        service.update(1L, formFor("titi", null, AdminRole.TECHNICIAN));
+        service.update(1L, formFor("titi", null, "Titi Full Name", AdminRole.TECHNICIAN));
 
         assertThat(existing.getPasswordHash()).isEqualTo("originalHash");
     }
@@ -108,21 +110,34 @@ class AdminUserManagementServiceTest {
     @Test
     void updateWithPasswordReEncodesHash() {
         service = service();
-        AdminUser existing = new AdminUser("titi", "originalHash", AdminRole.TECHNICIAN);
+        AdminUser existing = new AdminUser("titi", "originalHash", "Titi Full Name", AdminRole.TECHNICIAN);
         setId(existing, 1L);
         when(adminUserRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(existing));
         when(passwordEncoder.encode("newpassword")).thenReturn("newHash");
 
-        service.update(1L, formFor("titi", "newpassword", AdminRole.TECHNICIAN));
+        service.update(1L, formFor("titi", "newpassword", "Titi Full Name", AdminRole.TECHNICIAN));
 
         assertThat(existing.getPasswordHash()).isEqualTo("newHash");
     }
 
     @Test
+    void updateChangesFullName() {
+        service = service();
+        AdminUser existing = new AdminUser("titi", "originalHash", "Titi Full Name", AdminRole.TECHNICIAN);
+        setId(existing, 1L);
+        when(adminUserRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(existing));
+
+        service.update(1L, formFor("titi", null, "Updated Full Name", AdminRole.TECHNICIAN));
+
+        assertThat(existing.getFullName()).isEqualTo("Updated Full Name");
+    }
+
+    @Test
     void deleteRejectsDeletingSelf() {
         service = service();
-        AdminUser self = new AdminUser("titi", "hash", AdminRole.TECHNICIAN);
+        AdminUser self = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findById(1L)).thenReturn(Optional.of(self));
 
         assertThatThrownBy(() -> service.delete(1L, "titi")).isInstanceOf(IllegalArgumentException.class);
@@ -131,7 +146,7 @@ class AdminUserManagementServiceTest {
     @Test
     void deleteRemovesOtherAccount() {
         service = service();
-        AdminUser other = new AdminUser("someone-else", "hash", AdminRole.ADMIN);
+        AdminUser other = new AdminUser("someone-else", "hash", "Someone Else", AdminRole.ADMIN);
         when(adminUserRepository.findById(1L)).thenReturn(Optional.of(other));
 
         service.delete(1L, "titi");
@@ -150,19 +165,21 @@ class AdminUserManagementServiceTest {
     @Test
     void listAdminsMapsToViews() {
         service = service();
-        AdminUser user = new AdminUser("titi", "hash", AdminRole.TECHNICIAN);
+        AdminUser user = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findAllByOrderByUsernameAsc()).thenReturn(List.of(user));
 
         List<AdminUserView> views = service.listAdmins();
 
         assertThat(views).hasSize(1);
         assertThat(views.get(0).username()).isEqualTo("titi");
+        assertThat(views.get(0).fullName()).isEqualTo("Titi Full Name");
     }
 
-    private static AdminUserForm formFor(String username, String password, AdminRole role) {
+    private static AdminUserForm formFor(String username, String password, String fullName, AdminRole role) {
         AdminUserForm form = new AdminUserForm();
         form.setUsername(username);
         form.setPassword(password);
+        form.setFullName(fullName);
         form.setRole(role);
         return form;
     }

@@ -64,7 +64,7 @@ class AdminLoginTrackerTest {
     void updatesLastLoginSetsMdcAndLogsActivityWhenUserFound() {
         when(request.getSession(true)).thenReturn(session);
         when(adminSessionRegistry.establish(session, "titi")).thenReturn("corr-abc");
-        AdminUser adminUser = new AdminUser("titi", "hash", AdminRole.TECHNICIAN);
+        AdminUser adminUser = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(adminUser));
 
         var event = new AuthenticationSuccessEvent(userDetailsAuthentication("titi"));

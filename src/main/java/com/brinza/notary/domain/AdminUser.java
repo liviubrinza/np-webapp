@@ -26,6 +26,9 @@ public class AdminUser {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AdminRole role;
@@ -39,9 +42,10 @@ public class AdminUser {
     protected AdminUser() {
     }
 
-    public AdminUser(String username, String passwordHash, AdminRole role) {
+    public AdminUser(String username, String passwordHash, String fullName, AdminRole role) {
         this.username = username;
         this.passwordHash = passwordHash;
+        this.fullName = fullName;
         this.role = role;
     }
 
@@ -68,6 +72,14 @@ public class AdminUser {
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public AdminRole getRole() {

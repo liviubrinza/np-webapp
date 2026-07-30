@@ -28,11 +28,11 @@ class AdminUserSeederTest {
 
     @Test
     void createsMissingAccountsOnlyAndLeavesExistingUntouched() {
-        var existingDef = new AdminUserSeedProperties.AdminUserDefinition("titi", "titi", AdminRole.TECHNICIAN);
-        var newDef = new AdminUserSeedProperties.AdminUserDefinition("newuser", "pw", AdminRole.ADMIN);
+        var existingDef = new AdminUserSeedProperties.AdminUserDefinition("titi", "titi", "Titi Full Name", AdminRole.TECHNICIAN);
+        var newDef = new AdminUserSeedProperties.AdminUserDefinition("newuser", "pw", "New User", AdminRole.ADMIN);
         var properties = new AdminUserSeedProperties(List.of(existingDef, newDef));
         when(adminUserRepository.findByUsername("titi"))
-                .thenReturn(Optional.of(new AdminUser("titi", "existingHash", AdminRole.TECHNICIAN)));
+                .thenReturn(Optional.of(new AdminUser("titi", "existingHash", "Titi Full Name", AdminRole.TECHNICIAN)));
         when(adminUserRepository.findByUsername("newuser")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("pw")).thenReturn("encodedPw");
 

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Detalii Utilizator', null)}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 480px;">
+    <a th:href="@{/admin/users}" class="d-inline-block mb-3">&larr; Înapoi la utilizatori admin</a>
+
+    <h1 class="h3 mb-4">Detalii Utilizator</h1>
+
+    <table class="table table-borderless">
+        <tbody>
+        <tr>
+            <th class="text-muted">Nume de utilizator</th>
+            <td th:text="${admin.username()}"></td>
+        </tr>
+        <tr>
+            <th class="text-muted">Nume complet</th>
+            <td th:text="${admin.fullName()}"></td>
+        </tr>
+        <tr>
+            <th class="text-muted">Rol</th>
+            <td th:text="${admin.role()}"></td>
+        </tr>
+        <tr>
+            <th class="text-muted">Creat</th>
+            <td th:text="${#temporals.format(admin.createdAt(), 'dd MMM yyyy, HH:mm')}"></td>
+        </tr>
+        <tr>
+            <th class="text-muted">Ultima autentificare</th>
+            <td th:text="${admin.lastLogin() != null} ? ${#temporals.format(admin.lastLogin(), 'dd MMM yyyy, HH:mm')} : 'Niciodată'"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/admin/users/{id}/edit(id=${admin.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
+</main>
+
+</body>
+</html>

@@ -39,6 +39,12 @@ public class AdminUserAdminController {
         return "admin/users/list";
     }
 
+    @GetMapping("/{id}")
+    public String detail(@PathVariable Long id, Model model) {
+        model.addAttribute("admin", adminUserManagementService.getAdmin(id));
+        return "admin/users/detail";
+    }
+
     @GetMapping("/new")
     public String newForm(Model model) {
         AdminUserForm form = new AdminUserForm();
@@ -72,6 +78,7 @@ public class AdminUserAdminController {
         AdminUserView admin = adminUserManagementService.getAdmin(id);
         AdminUserForm form = new AdminUserForm();
         form.setUsername(admin.username());
+        form.setFullName(admin.fullName());
         form.setRole(admin.role());
         model.addAttribute("adminUserForm", form);
         model.addAttribute("adminId", id);

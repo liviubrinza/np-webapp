@@ -29,7 +29,7 @@ class AdminUserDetailsServiceTest {
 
     @Test
     void loadsUserWithRolePrefixedAuthority() {
-        AdminUser adminUser = new AdminUser("titi", "hash", AdminRole.TECHNICIAN);
+        AdminUser adminUser = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(adminUser));
 
         UserDetails details = service().loadUserByUsername("titi");
