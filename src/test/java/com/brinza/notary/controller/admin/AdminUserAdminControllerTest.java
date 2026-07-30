@@ -46,25 +46,46 @@ class AdminUserAdminControllerTest {
     void listRendersAdminsFromService() throws Exception {
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 0);
         when(adminUserManagementService.listAdmins()).thenReturn(
-                List.of(new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null)));
+                List.of(new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null, false, null)));
 
         mockMvc.perform(get("/admin/users"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/users/list"))
                 .andExpect(model().attribute("admins",
-                        List.of(new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null))));
+                        List.of(new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null, false, null))));
     }
 
     @Test
     void detailRendersAdminFromService() throws Exception {
         LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 0);
         when(adminUserManagementService.getAdmin(1L)).thenReturn(
-                new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null));
+                new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null, false, null));
 
         mockMvc.perform(get("/admin/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/users/detail"))
                 .andExpect(content().string(containsString("Titi Full Name")));
+    }
+
+    @Test
+    void detailRendersLockedStateAndLockUntil() throws Exception {
+        LocalDateTime createdAt = LocalDateTime.of(2026, 1, 1, 9, 0);
+        LocalDateTime lockUntil = LocalDateTime.of(2026, 1, 1, 10, 0);
+        when(adminUserManagementService.getAdmin(1L)).thenReturn(
+                new AdminUserView(1L, "titi", "Titi Full Name", AdminRole.TECHNICIAN, createdAt, null, true, lockUntil));
+
+        mockMvc.perform(get("/admin/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Blocat")))
+                .andExpect(content().string(containsString("Deblochează")));
+    }
+
+    @Test
+    void unlockSuccessRedirectsToDetailWithFlashMessage() throws Exception {
+        mockMvc.perform(post("/admin/users/1/unlock").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/users/1"))
+                .andExpect(flash().attributeExists("success"));
     }
 
     @Test

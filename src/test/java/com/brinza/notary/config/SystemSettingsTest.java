@@ -11,6 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,10 +22,14 @@ class SystemSettingsTest {
     @Mock
     private SystemSettingRepository systemSettingRepository;
 
+    private SystemSettings settings(boolean mailEnabledDefault) {
+        return new SystemSettings(systemSettingRepository, mailEnabledDefault, 5, 15);
+    }
+
     @Test
     void loadFallsBackToDefaultWhenNoRowExists() {
         when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
-        SystemSettings settings = new SystemSettings(systemSettingRepository, false);
+        SystemSettings settings = settings(false);
 
         settings.load();
 
@@ -33,7 +39,7 @@ class SystemSettingsTest {
     @Test
     void loadFallsBackToDefaultTrueWhenNoRowExists() {
         when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
-        SystemSettings settings = new SystemSettings(systemSettingRepository, true);
+        SystemSettings settings = settings(true);
 
         settings.load();
 
@@ -45,7 +51,7 @@ class SystemSettingsTest {
         SystemSetting stored = new SystemSetting("mail.enabled");
         stored.setSettingValue("true");
         when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.of(stored));
-        SystemSettings settings = new SystemSettings(systemSettingRepository, false);
+        SystemSettings settings = settings(false);
 
         settings.load();
 
@@ -55,7 +61,7 @@ class SystemSettingsTest {
     @Test
     void setMailEnabledCreatesRowWhenNoneExistsAndUpdatesCache() {
         when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
-        SystemSettings settings = new SystemSettings(systemSettingRepository, false);
+        SystemSettings settings = settings(false);
 
         settings.setMailEnabled(true);
 
@@ -70,11 +76,83 @@ class SystemSettingsTest {
         SystemSetting existing = new SystemSetting("mail.enabled");
         existing.setSettingValue("false");
         when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.of(existing));
-        SystemSettings settings = new SystemSettings(systemSettingRepository, false);
+        SystemSettings settings = settings(false);
 
         settings.setMailEnabled(true);
 
         verify(systemSettingRepository).save(existing);
         assertThat(existing.getSettingValue()).isEqualTo("true");
+    }
+
+    @Test
+    void loadFallsBackToLoginLockoutDefaultsWhenNoRowsExist() {
+        when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.max-attempts")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.lock-duration-minutes")).thenReturn(Optional.empty());
+        SystemSettings settings = settings(false);
+
+        settings.load();
+
+        assertThat(settings.getLoginLockoutMaxAttempts()).isEqualTo(5);
+        assertThat(settings.getLoginLockoutLockDurationMinutes()).isEqualTo(15);
+    }
+
+    @Test
+    void loadUsesDbValueForLoginLockoutSettingsOverDefault() {
+        SystemSetting maxAttempts = new SystemSetting("login-lockout.max-attempts");
+        maxAttempts.setSettingValue("7");
+        SystemSetting lockDuration = new SystemSetting("login-lockout.lock-duration-minutes");
+        lockDuration.setSettingValue("30");
+        when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.max-attempts")).thenReturn(Optional.of(maxAttempts));
+        when(systemSettingRepository.findBySettingKey("login-lockout.lock-duration-minutes")).thenReturn(Optional.of(lockDuration));
+        SystemSettings settings = settings(false);
+
+        settings.load();
+
+        assertThat(settings.getLoginLockoutMaxAttempts()).isEqualTo(7);
+        assertThat(settings.getLoginLockoutLockDurationMinutes()).isEqualTo(30);
+    }
+
+    @Test
+    void setLoginLockoutMaxAttemptsUpdatesCache() {
+        when(systemSettingRepository.findBySettingKey("login-lockout.max-attempts")).thenReturn(Optional.empty());
+        SystemSettings settings = settings(false);
+
+        settings.setLoginLockoutMaxAttempts(10);
+
+        ArgumentCaptor<SystemSetting> captor = ArgumentCaptor.forClass(SystemSetting.class);
+        verify(systemSettingRepository).save(captor.capture());
+        assertThat(captor.getValue().getSettingValue()).isEqualTo("10");
+        assertThat(settings.getLoginLockoutMaxAttempts()).isEqualTo(10);
+    }
+
+    @Test
+    void setLoginLockoutMaxAttemptsRejectsValuesBelowOne() {
+        SystemSettings settings = settings(false);
+
+        assertThatThrownBy(() -> settings.setLoginLockoutMaxAttempts(0)).isInstanceOf(IllegalArgumentException.class);
+        verify(systemSettingRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void setLoginLockoutLockDurationMinutesUpdatesCache() {
+        when(systemSettingRepository.findBySettingKey("login-lockout.lock-duration-minutes")).thenReturn(Optional.empty());
+        SystemSettings settings = settings(false);
+
+        settings.setLoginLockoutLockDurationMinutes(45);
+
+        ArgumentCaptor<SystemSetting> captor = ArgumentCaptor.forClass(SystemSetting.class);
+        verify(systemSettingRepository).save(captor.capture());
+        assertThat(captor.getValue().getSettingValue()).isEqualTo("45");
+        assertThat(settings.getLoginLockoutLockDurationMinutes()).isEqualTo(45);
+    }
+
+    @Test
+    void setLoginLockoutLockDurationMinutesRejectsValuesBelowOne() {
+        SystemSettings settings = settings(false);
+
+        assertThatThrownBy(() -> settings.setLoginLockoutLockDurationMinutes(0)).isInstanceOf(IllegalArgumentException.class);
+        verify(systemSettingRepository, never()).save(org.mockito.ArgumentMatchers.any());
     }
 }

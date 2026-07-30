@@ -29,6 +29,8 @@ public class SystemSettingsAdminController {
     @GetMapping
     public String show(Model model) {
         model.addAttribute("mailEnabled", systemSettings.isMailEnabled());
+        model.addAttribute("loginLockoutMaxAttempts", systemSettings.getLoginLockoutMaxAttempts());
+        model.addAttribute("loginLockoutLockDurationMinutes", systemSettings.getLoginLockoutLockDurationMinutes());
         return "admin/settings/list";
     }
 
@@ -39,6 +41,21 @@ public class SystemSettingsAdminController {
         systemSettings.setMailEnabled(enabled);
         adminActivityLogger.log("Setat trimitere email-uri pe " + (enabled ? "activat" : "dezactivat"));
         redirectAttributes.addFlashAttribute("success", "Setare actualizată.");
+        return "redirect:/admin/settings";
+    }
+
+    @PostMapping("/login-lockout")
+    public String updateLoginLockout(@RequestParam int maxAttempts, @RequestParam int lockDurationMinutes,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            systemSettings.setLoginLockoutMaxAttempts(maxAttempts);
+            systemSettings.setLoginLockoutLockDurationMinutes(lockDurationMinutes);
+            adminActivityLogger.log("Setat blocare autentificare la %d încercări / %d minute".formatted(maxAttempts, lockDurationMinutes));
+            redirectAttributes.addFlashAttribute("success", "Setare actualizată.");
+        } catch (IllegalArgumentException e) {
+            log.debug("Login lockout setting rejected: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/settings";
     }
 }

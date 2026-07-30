@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -67,7 +68,14 @@ public class SecurityConfig {
                         .loginPage("/admin/login")
                         .loginProcessingUrl("/admin/login")
                         .defaultSuccessUrl("/admin", true)
-                        .failureUrl("/admin/login?error")
+                        // A locked account gets its own query param/message (surfaced on
+                        // login.html) rather than the generic wrong-credentials one, per explicit
+                        // request - note this does mean a locked username is now distinguishable
+                        // from a merely-wrong-password one.
+                        .failureHandler((request, response, exception) -> response.sendRedirect(
+                                request.getContextPath() + (exception instanceof LockedException
+                                        ? "/admin/login?locked"
+                                        : "/admin/login?error")))
                         .permitAll()
                 )
                 .logout(logout -> logout

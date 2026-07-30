@@ -10,6 +10,9 @@
 
     <h1 class="h3 mb-4">Detalii Utilizator</h1>
 
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
     <table class="table table-borderless">
         <tbody>
         <tr>
@@ -32,10 +35,24 @@
             <th class="text-muted">Ultima autentificare</th>
             <td th:text="${admin.lastLogin() != null} ? ${#temporals.format(admin.lastLogin(), 'dd MMM yyyy, HH:mm')} : 'Niciodată'"></td>
         </tr>
+        <tr>
+            <th class="text-muted">Stare</th>
+            <td>
+                <span th:if="${admin.locked()}" class="badge bg-danger">Blocat</span>
+                <span th:unless="${admin.locked()}" class="badge bg-success">Activ</span>
+            </td>
+        </tr>
+        <tr th:if="${admin.locked()}">
+            <th class="text-muted">Blocat până</th>
+            <td th:text="${#temporals.format(admin.lockUntil(), 'dd MMM yyyy, HH:mm')}"></td>
+        </tr>
         </tbody>
     </table>
 
     <a th:href="@{/admin/users/{id}/edit(id=${admin.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
+    <form th:if="${admin.locked()}" th:action="@{/admin/users/{id}/unlock(id=${admin.id()})}" method="post" class="d-inline">
+        <button type="submit" class="btn btn-outline-danger btn-sm">Deblochează</button>
+    </form>
 </main>
 
 </body>

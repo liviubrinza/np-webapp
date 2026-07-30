@@ -39,6 +39,12 @@ public class AdminUser {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    @Column(name = "is_locked", nullable = false)
+    private boolean locked = false;
+
+    @Column(name = "lock_until")
+    private LocalDateTime lockUntil;
+
     protected AdminUser() {
     }
 
@@ -100,5 +106,21 @@ public class AdminUser {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public LocalDateTime getLockUntil() {
+        return lockUntil;
+    }
+
+    public void setLockUntil(LocalDateTime lockUntil) {
+        this.lockUntil = lockUntil;
     }
 }

@@ -1,13 +1,18 @@
 package com.brinza.notary.workflow;
 
+import com.brinza.notary.domain.AdminRole;
+import com.brinza.notary.domain.AdminUser;
+import com.brinza.notary.repository.AdminUserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +29,10 @@ class SecurityAccessWorkflowTest {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private AdminUserRepository adminUserRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void anonymousIsRedirectedToLoginForAdminRoutes() throws Exception {
@@ -43,6 +52,14 @@ class SecurityAccessWorkflowTest {
                 .andExpect(view().name("admin/login"))
                 .andExpect(content().string(containsString("Autentificare Admin")))
                 .andExpect(content().string(containsString("name=\"_csrf\"")));
+    }
+
+    @Test
+    void loginPageRendersLockedMessageForLockedParam() throws Exception {
+        mockMvc.perform(get("/admin/login?locked"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/login"))
+                .andExpect(content().string(containsString("Momentan nu aveți dreptul să vă logați")));
     }
 
     // The rendered "Acces interzis" error page (see error.html) was verified manually against a
@@ -79,5 +96,32 @@ class SecurityAccessWorkflowTest {
                         .param("password", "wrong-password"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/login?error"));
+    }
+
+    // Uses a dedicated throwaway account (never referenced by any other test) purely for
+    // clarity - the lock itself is now persisted on the AdminUser row within this test's own
+    // transaction, so it would actually roll back with everything else regardless.
+    @Test
+    void accountLocksAfterRepeatedFailedAttemptsAndRejectsEvenTheCorrectPassword() throws Exception {
+        AdminUser victim = adminUserRepository.save(new AdminUser("lockout-victim",
+                passwordEncoder.encode("correct-password"), "Lockout Victim", AdminRole.ADMIN));
+
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(post("/admin/login").with(csrf())
+                            .param("username", "lockout-victim")
+                            .param("password", "wrong-password"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/admin/login?error"));
+        }
+
+        AdminUser reloaded = adminUserRepository.findById(victim.getId()).orElseThrow();
+        assertThat(reloaded.isLocked()).isTrue();
+        assertThat(reloaded.getLockUntil()).isNotNull();
+
+        mockMvc.perform(post("/admin/login").with(csrf())
+                        .param("username", "lockout-victim")
+                        .param("password", "correct-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/login?locked"));
     }
 }

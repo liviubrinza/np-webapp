@@ -45,6 +45,43 @@ class SystemSettingsAdminControllerTest {
     }
 
     @Test
+    void showRendersCurrentLoginLockoutValues() throws Exception {
+        when(systemSettings.getLoginLockoutMaxAttempts()).thenReturn(5);
+        when(systemSettings.getLoginLockoutLockDurationMinutes()).thenReturn(15);
+
+        mockMvc.perform(get("/admin/settings"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("loginLockoutMaxAttempts", 5))
+                .andExpect(model().attribute("loginLockoutLockDurationMinutes", 15));
+    }
+
+    @Test
+    void updatingLoginLockoutSettingsCallsSetters() throws Exception {
+        mockMvc.perform(post("/admin/settings/login-lockout").with(csrf())
+                        .param("maxAttempts", "10")
+                        .param("lockDurationMinutes", "30"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/settings"))
+                .andExpect(flash().attributeExists("success"));
+
+        verify(systemSettings).setLoginLockoutMaxAttempts(10);
+        verify(systemSettings).setLoginLockoutLockDurationMinutes(30);
+    }
+
+    @Test
+    void invalidLoginLockoutSettingRedirectsWithFlashError() throws Exception {
+        org.mockito.Mockito.doThrow(new IllegalArgumentException("Numărul de încercări trebuie să fie cel puțin 1."))
+                .when(systemSettings).setLoginLockoutMaxAttempts(0);
+
+        mockMvc.perform(post("/admin/settings/login-lockout").with(csrf())
+                        .param("maxAttempts", "0")
+                        .param("lockDurationMinutes", "15"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/settings"))
+                .andExpect(flash().attributeExists("error"));
+    }
+
+    @Test
     void togglingOnCallsSetMailEnabledTrue() throws Exception {
         mockMvc.perform(post("/admin/settings/mail-enabled").with(csrf())
                         .param("enabled", "true"))

@@ -23,14 +23,18 @@ class AdminUserDetailsServiceTest {
     @Mock
     private AdminUserRepository adminUserRepository;
 
+    @Mock
+    private LoginAttemptService loginAttemptService;
+
     private AdminUserDetailsService service() {
-        return new AdminUserDetailsService(adminUserRepository);
+        return new AdminUserDetailsService(adminUserRepository, loginAttemptService);
     }
 
     @Test
     void loadsUserWithRolePrefixedAuthority() {
         AdminUser adminUser = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
         when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(adminUser));
+        when(loginAttemptService.isLocked("titi")).thenReturn(false);
 
         UserDetails details = service().loadUserByUsername("titi");
 
@@ -38,6 +42,18 @@ class AdminUserDetailsServiceTest {
         assertThat(details.getPassword()).isEqualTo("hash");
         assertThat(details.getAuthorities()).extracting(GrantedAuthority::getAuthority)
                 .containsExactly("ROLE_TECHNICIAN");
+        assertThat(details.isAccountNonLocked()).isTrue();
+    }
+
+    @Test
+    void marksAccountLockedWhenLoginAttemptServiceReportsLocked() {
+        AdminUser adminUser = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
+        when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(adminUser));
+        when(loginAttemptService.isLocked("titi")).thenReturn(true);
+
+        UserDetails details = service().loadUserByUsername("titi");
+
+        assertThat(details.isAccountNonLocked()).isFalse();
     }
 
     @Test

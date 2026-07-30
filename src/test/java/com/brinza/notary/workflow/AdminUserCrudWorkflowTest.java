@@ -95,6 +95,34 @@ class AdminUserCrudWorkflowTest {
     }
 
     @Test
+    void unlockClearsLockBeforeLockUntilIsReachedAndAllowsImmediateLogin() throws Exception {
+        AdminUser locked = adminUserRepository.save(new AdminUser("workflow-locked",
+                passwordEncoder.encode("correct-password"), "Locked User", AdminRole.ADMIN));
+
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(post("/admin/login").with(csrf())
+                    .param("username", "workflow-locked")
+                    .param("password", "wrong-password"));
+        }
+        assertThat(adminUserRepository.findById(locked.getId()).orElseThrow().isLocked()).isTrue();
+
+        mockMvc.perform(post("/admin/users/" + locked.getId() + "/unlock").with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/users/" + locked.getId()))
+                .andExpect(flash().attributeExists("success"));
+
+        AdminUser reloaded = adminUserRepository.findById(locked.getId()).orElseThrow();
+        assertThat(reloaded.isLocked()).isFalse();
+        assertThat(reloaded.getLockUntil()).isNull();
+
+        mockMvc.perform(post("/admin/login").with(csrf())
+                        .param("username", "workflow-locked")
+                        .param("password", "correct-password"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin"));
+    }
+
+    @Test
     void deletingOwnAccountIsRejected() throws Exception {
         AdminUser self = adminUserRepository.findByUsername("titi").orElseThrow();
 
