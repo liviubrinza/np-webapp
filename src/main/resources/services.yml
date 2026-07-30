@@ -1,12 +1,7 @@
-# Source of truth for the services offered by the office.
-#
-# Add a new service by adding a new list entry with a unique `code` (used to
-# match entries across restarts — never reuse a code for a different service,
-# and don't change an existing code unless you mean to replace it).
-#
-# Remove a service by deleting its entry here; the app will deactivate the
-# corresponding row on next startup (existing appointments that reference it
-# are kept, it's just hidden from the public site) rather than deleting it.
+# Initial/dev seed data for the services offered by the office. Only used to create
+# services that don't exist yet (matched by `code`) on startup — the admin Services
+# screen (Configurare > Servicii) is the live source of truth from then on, so editing
+# this file has no effect on a service once it has been created.
 app:
   services:
     - code: document-authentication

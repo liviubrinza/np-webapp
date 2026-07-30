@@ -13,6 +13,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByStatus(AppointmentStatus status);
 
+    boolean existsByServiceId(Long serviceId);
+
     @Query("""
             SELECT a FROM Appointment a
             WHERE (:status IS NULL OR a.status = :status)

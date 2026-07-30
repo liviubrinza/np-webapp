@@ -8,6 +8,8 @@
 <main class="container my-4">
     <h1 class="h3 mb-4">Configurare</h1>
 
+    <div th:replace="~{admin/fragments :: settingsNav('system')}"></div>
+
     <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
