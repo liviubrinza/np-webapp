@@ -37,8 +37,8 @@ public class ContactController {
     }
 
     @GetMapping("/contact")
-    public String contact(Model model) {
-        log.info("contact called");
+    public String showContact(Model model) {
+        log.info("showContact called");
         model.addAttribute("address", address);
         model.addAttribute("phone", phone);
         model.addAttribute("email", email);

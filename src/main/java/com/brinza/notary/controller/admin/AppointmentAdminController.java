@@ -54,7 +54,7 @@ public class AppointmentAdminController {
     }
 
     @GetMapping
-    public String list(@RequestParam(required = false) AppointmentStatus status,
+    public String showList(@RequestParam(required = false) AppointmentStatus status,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                         @RequestParam(required = false) String name,
@@ -74,7 +74,7 @@ public class AppointmentAdminController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, @RequestParam(required = false) String back, Model model) {
+    public String showDetail(@PathVariable Long id, @RequestParam(required = false) String back, Model model) {
         model.addAttribute("appointment", appointmentManagementService.getDetail(id));
         model.addAttribute("statuses", AppointmentStatus.values());
         model.addAttribute("timeSlots", buildTimeSlots());
@@ -101,6 +101,7 @@ public class AppointmentAdminController {
 
     @GetMapping("/{id}/documents/{documentId}/download")
     public ResponseEntity<Resource> downloadDocument(@PathVariable Long id, @PathVariable Long documentId) {
+        adminActivityLogger.log("Downloading document id=%d from appointment id=%d".formatted(documentId, id));
         return documentManagementService.download(id, documentId);
     }
 

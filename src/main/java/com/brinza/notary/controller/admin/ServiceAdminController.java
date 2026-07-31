@@ -33,13 +33,13 @@ public class ServiceAdminController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String showList(Model model) {
         model.addAttribute("services", serviceAdminManagementService.listAll());
         return "admin/settings/services/list";
     }
 
     @GetMapping("/new")
-    public String newForm(Model model) {
+    public String showNewForm(Model model) {
         ServiceForm form = new ServiceForm();
         form.setActive(true);
         model.addAttribute("serviceForm", form);
@@ -66,7 +66,7 @@ public class ServiceAdminController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model) {
         ServiceAdminDetailView view = serviceAdminManagementService.getForEdit(id);
         ServiceForm form = new ServiceForm();
         form.setCode(view.code());
