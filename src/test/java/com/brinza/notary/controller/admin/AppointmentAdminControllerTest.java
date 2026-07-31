@@ -6,6 +6,7 @@ import com.brinza.notary.domain.AppointmentStatus;
 import com.brinza.notary.dto.AppointmentDetailView;
 import com.brinza.notary.dto.AppointmentListItemView;
 import com.brinza.notary.dto.AppointmentListView;
+import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -65,6 +67,8 @@ class AppointmentAdminControllerTest {
     @Test
     void detailRendersMailEnabledFromSystemSettings() throws Exception {
         when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
         when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
         when(systemSettings.isMailEnabled()).thenReturn(true);
 
@@ -112,6 +116,6 @@ class AppointmentAdminControllerTest {
     private static AppointmentDetailView detailView() {
         return new AppointmentDetailView(1L, "Ion Popescu", "ion@example.com", "0700000000", "Autentificare",
                 LocalDateTime.of(2026, 8, 1, 9, 0), LocalDateTime.of(2026, 8, 1, 9, 30),
-                AppointmentStatus.PENDING, "notes", List.of(), LocalDateTime.of(2026, 7, 1, 9, 0));
+                AppointmentStatus.PENDING, false, "notes", List.of(), LocalDateTime.of(2026, 7, 1, 9, 0));
     }
 }

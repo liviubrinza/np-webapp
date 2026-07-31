@@ -2,6 +2,7 @@ package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.domain.AppointmentStatus;
+import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -75,13 +77,24 @@ public class AppointmentAdminController {
 
     @GetMapping("/{id}")
     public String showDetail(@PathVariable Long id, @RequestParam(required = false) String back, Model model) {
-        model.addAttribute("appointment", appointmentManagementService.getDetail(id));
+        var appointment = appointmentManagementService.getDetail(id);
+        List<String> timeSlots = buildTimeSlots();
+        model.addAttribute("appointment", appointment);
         model.addAttribute("statuses", AppointmentStatus.values());
-        model.addAttribute("timeSlots", buildTimeSlots());
+        model.addAttribute("timeSlots", timeSlots);
+        model.addAttribute("busyTimeSlots",
+                appointmentManagementService.findBusyTimeSlots(appointment.requestedAt().toLocalDate(), id, timeSlots));
         model.addAttribute("documents", documentManagementService.listForAppointment(id));
         model.addAttribute("backUrl", sanitizeBack(back));
         model.addAttribute("mailEnabled", systemSettings.isMailEnabled());
         return "admin/appointments/detail";
+    }
+
+    @GetMapping("/{id}/busy-times")
+    @ResponseBody
+    public BusyTimeSlots busyTimes(@PathVariable Long id,
+                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return appointmentManagementService.findBusyTimeSlots(date, id, buildTimeSlots());
     }
 
     @PostMapping("/{id}/documents")
@@ -138,9 +151,14 @@ public class AppointmentAdminController {
                                 @RequestParam(required = false, defaultValue = "false") boolean sendConfirmationEmail,
                                 @RequestParam(required = false) String back,
                                 Authentication authentication, RedirectAttributes redirectAttributes) {
-        appointmentManagementService.updateStatus(id, status, authentication.getName(), sendConfirmationEmail);
-        adminActivityLogger.log("Changed appointment #%d status to %s%s".formatted(id, status, sendConfirmationEmail ? " (confirmation email sent)" : ""));
-        redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
+        try {
+            appointmentManagementService.updateStatus(id, status, authentication.getName(), sendConfirmationEmail);
+            adminActivityLogger.log("Changed appointment #%d status to %s%s".formatted(id, status, sendConfirmationEmail ? " (confirmation email sent)" : ""));
+            redirectAttributes.addFlashAttribute("success", "Stare actualizată.");
+        } catch (IllegalArgumentException e) {
+            log.debug("Could not update status for id={}: {}", id, e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return redirectToDetail(id, back);
     }
 

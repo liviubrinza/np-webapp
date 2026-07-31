@@ -18,6 +18,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     boolean existsByStatus(AppointmentStatus status);
 
     @Query("""
+            SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+            FROM Appointment a
+            WHERE a.status = :status
+              AND a.id <> :excludeId
+              AND a.requestedAt < :endedAt
+              AND a.endedAt > :requestedAt
+            """)
+    boolean existsOverlapping(@Param("status") AppointmentStatus status,
+                              @Param("excludeId") Long excludeId,
+                              @Param("requestedAt") LocalDateTime requestedAt,
+                              @Param("endedAt") LocalDateTime endedAt);
+
+    @Query("""
             SELECT a FROM Appointment a
             WHERE (:status IS NULL OR a.status = :status)
               AND (:from IS NULL OR a.requestedAt >= :from)

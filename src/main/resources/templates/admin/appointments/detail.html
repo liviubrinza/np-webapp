@@ -11,6 +11,9 @@
 
     <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
     <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div class="alert alert-warning" th:if="${appointment.overlapsConfirmed()}">
+        ⚠ Această programare se suprapune cu o programare deja confirmată. Nu poate fi confirmată până când suprapunerea nu este rezolvată.
+    </div>
 
     <h1 class="h3 mb-4" th:text="${appointment.clientName()}">Client Name</h1>
 
@@ -39,27 +42,32 @@
     <!-- Appointment date and time -->
     <div class="card mb-4">
         <div class="card-body">
-            <form th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
-                  class="row g-3 align-items-end">
+            <form id="scheduleForm" th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
+                  class="row g-3 align-items-end" th:attr="data-busy-times-url=@{/admin/appointments/{id}/busy-times(id=${appointment.id()})}">
                 <input type="hidden" name="back" th:value="${backUrl}"/>
                 <div class="col-md-4">
                     <label class="form-label">Data</label>
-                    <input type="date" name="date" class="form-control"
+                    <input type="date" name="date" id="scheduleDateInput" class="form-control"
                            th:value="${#temporals.format(appointment.requestedAt(), 'yyyy-MM-dd')}"/>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Ora început</label>
-                    <select name="startTime" class="form-select">
+                    <select name="startTime" id="startTimeSelect" class="form-select">
                         <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
-                                th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"></option>
+                                th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"
+                                th:disabled="${busyTimeSlots.startTimes().contains(t)}"></option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Ora sfârșit</label>
-                    <select name="endTime" class="form-select">
+                    <select name="endTime" id="endTimeSelect" class="form-select">
                         <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
-                                th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"></option>
+                                th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"
+                                th:disabled="${busyTimeSlots.endTimes().contains(t)}"></option>
                     </select>
+                </div>
+                <div class="col-12">
+                    <small class="text-muted">Orele indisponibile (afișate estompat) se suprapun cu o programare deja confirmată.</small>
                 </div>
                 <div class="col-12 text-end">
                     <button type="submit" class="btn btn-primary">Actualizează programarea</button>
@@ -216,6 +224,36 @@
                 sendEmailInput.value = 'false';
             }
         });
+    }
+
+    var scheduleForm = document.getElementById('scheduleForm');
+    if (scheduleForm) {
+        var dateInput = document.getElementById('scheduleDateInput');
+        var startSelect = document.getElementById('startTimeSelect');
+        var endSelect = document.getElementById('endTimeSelect');
+
+        var applyDisabled = function (select, busyTimes) {
+            Array.from(select.options).forEach(function (option) {
+                option.disabled = busyTimes.indexOf(option.value) !== -1;
+            });
+        };
+
+        var refreshBusyTimes = function () {
+            var url = scheduleForm.dataset.busyTimesUrl + '?date=' + encodeURIComponent(dateInput.value);
+            fetch(url)
+                .then(function (response) {
+                    return response.ok ? response.json() : {startTimes: [], endTimes: []};
+                })
+                .then(function (busyTimeSlots) {
+                    applyDisabled(startSelect, busyTimeSlots.startTimes || []);
+                    applyDisabled(endSelect, busyTimeSlots.endTimes || []);
+                })
+                .catch(function () {
+                    // Leave the previously rendered disabled state as-is if the request fails.
+                });
+        };
+
+        dateInput.addEventListener('change', refreshBusyTimes);
     }
 </script>
 </body>

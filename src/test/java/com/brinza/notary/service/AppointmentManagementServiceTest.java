@@ -7,12 +7,14 @@ import com.brinza.notary.dto.AppointmentDetailView;
 import com.brinza.notary.dto.AppointmentListItemView;
 import com.brinza.notary.dto.AppointmentListView;
 import com.brinza.notary.dto.AppointmentMonthlyStatsView;
+import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.dto.DayAvailability;
 import com.brinza.notary.repository.AppointmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -245,6 +247,44 @@ class AppointmentManagementServiceTest {
                 .containsExactly("second", "first");
     }
 
+    // ---- overlap detection ----
+
+    @Test
+    void searchFlagsPendingAppointmentThatOverlapsAConfirmedAppointment() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment pending = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.search(null, null, null, null)).thenReturn(List.of(pending));
+        when(appointmentRepository.existsOverlapping(eq(AppointmentStatus.CONFIRMED), isNull(),
+                eq(pending.getRequestedAt()), eq(pending.getEndedAt()))).thenReturn(true);
+
+        List<AppointmentListItemView> result = service().search(null, null, null, null);
+
+        assertThat(result).singleElement().extracting(AppointmentListItemView::overlapsConfirmed).isEqualTo(true);
+    }
+
+    @Test
+    void searchDoesNotFlagAppointmentWithNoOverlap() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment pending = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.search(null, null, null, null)).thenReturn(List.of(pending));
+
+        List<AppointmentListItemView> result = service().search(null, null, null, null);
+
+        assertThat(result).singleElement().extracting(AppointmentListItemView::overlapsConfirmed).isEqualTo(false);
+    }
+
+    @Test
+    void getDetailFlagsOverlapWithConfirmedAppointment() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        when(appointmentRepository.existsOverlapping(eq(AppointmentStatus.CONFIRMED), any(), any(), any())).thenReturn(true);
+
+        AppointmentDetailView detail = service().getDetail(1L);
+
+        assertThat(detail.overlapsConfirmed()).isTrue();
+    }
+
     // ---- updateStatus ----
 
     @Test
@@ -299,6 +339,31 @@ class AppointmentManagementServiceTest {
         verify(appointmentEmailService, never()).sendConfirmedEmail(any());
     }
 
+    @Test
+    void updateStatusRejectsConfirmingWhenOverlappingAnAlreadyConfirmedAppointment() {
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        when(appointmentRepository.existsOverlapping(eq(AppointmentStatus.CONFIRMED), any(), any(), any())).thenReturn(true);
+
+        assertThatThrownBy(() -> service().updateStatus(1L, AppointmentStatus.CONFIRMED, "titi", false))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.PENDING);
+        assertThat(appointment.getInternalNotes()).isEmpty();
+        verify(appointmentEmailService, never()).sendConfirmedEmail(any());
+    }
+
+    @Test
+    void updateStatusConfirmsWhenNoOverlapExists() {
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        when(appointmentRepository.existsOverlapping(eq(AppointmentStatus.CONFIRMED), any(), any(), any())).thenReturn(false);
+
+        service().updateStatus(1L, AppointmentStatus.CONFIRMED, "titi", false);
+
+        assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.CONFIRMED);
+    }
+
     // ---- updateSchedule ----
 
     @Test
@@ -334,6 +399,105 @@ class AppointmentManagementServiceTest {
 
         assertThat(appointment.getRequestedAt()).isEqualTo(newStart);
         assertThat(appointment.getInternalNotes()).hasSize(1);
+    }
+
+    @Test
+    void updateScheduleRejectsReschedulingConfirmedAppointmentIntoOverlapWithAnotherConfirmed() {
+        Appointment appointment = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0),
+                LocalDateTime.of(2026, 8, 1, 9, 30));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        LocalDateTime newStart = LocalDateTime.of(2026, 8, 1, 11, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2026, 8, 1, 11, 30);
+        when(appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, 1L, newStart, newEnd)).thenReturn(true);
+
+        assertThatThrownBy(() -> service().updateSchedule(1L, newStart, newEnd, "titi"))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(appointment.getRequestedAt()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
+        assertThat(appointment.getInternalNotes()).isEmpty();
+    }
+
+    @Test
+    void updateScheduleRejectsReschedulingPendingAppointmentIntoOverlapWithAConfirmedOne() {
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0),
+                LocalDateTime.of(2026, 8, 1, 9, 30));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        LocalDateTime newStart = LocalDateTime.of(2026, 8, 1, 11, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2026, 8, 1, 11, 30);
+        when(appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, 1L, newStart, newEnd)).thenReturn(true);
+
+        assertThatThrownBy(() -> service().updateSchedule(1L, newStart, newEnd, "titi"))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(appointment.getRequestedAt()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
+        assertThat(appointment.getInternalNotes()).isEmpty();
+    }
+
+    @Test
+    void updateSchedulePermitsReschedulingPendingAppointmentWhenNoOverlapExists() {
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0),
+                LocalDateTime.of(2026, 8, 1, 9, 30));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+        LocalDateTime newStart = LocalDateTime.of(2026, 8, 1, 11, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2026, 8, 1, 11, 30);
+        when(appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, 1L, newStart, newEnd)).thenReturn(false);
+
+        service().updateSchedule(1L, newStart, newEnd, "titi");
+
+        assertThat(appointment.getRequestedAt()).isEqualTo(newStart);
+    }
+
+    // ---- findBusyTimeSlots ----
+
+    @Test
+    void findBusyTimeSlotsMarksStartSlotsInsideAConfirmedAppointmentAsBusy() {
+        LocalDate date = LocalDate.of(2026, 8, 1);
+        Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
+                LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
+        ReflectionTestUtils.setField(confirmed, "id", 2L);
+        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+                .thenReturn(List.of(confirmed));
+
+        BusyTimeSlots busy = service().findBusyTimeSlots(date, 1L,
+                List.of("09:30", "10:00", "10:30", "11:00", "11:30"));
+
+        // Starting exactly when the confirmed appointment starts (10:00) is already an overlap;
+        // starting exactly when it ends (11:00) is not (it's after, back-to-back).
+        assertThat(busy.startTimes()).containsExactlyInAnyOrder("10:00", "10:30");
+    }
+
+    @Test
+    void findBusyTimeSlotsMarksEndSlotsUsingTheOppositeBoundary() {
+        LocalDate date = LocalDate.of(2026, 8, 1);
+        Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
+                LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
+        ReflectionTestUtils.setField(confirmed, "id", 2L);
+        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+                .thenReturn(List.of(confirmed));
+
+        BusyTimeSlots busy = service().findBusyTimeSlots(date, 1L,
+                List.of("09:30", "10:00", "10:30", "11:00", "11:30"));
+
+        // Ending exactly when the confirmed appointment starts (10:00) is fine (back-to-back, no
+        // overlap); ending exactly when it ends (11:00) always overlaps it, since your own start
+        // must be before that instant.
+        assertThat(busy.endTimes()).containsExactlyInAnyOrder("10:30", "11:00");
+    }
+
+    @Test
+    void findBusyTimeSlotsExcludesTheAppointmentBeingRescheduledItself() {
+        LocalDate date = LocalDate.of(2026, 8, 1);
+        Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
+                LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
+        ReflectionTestUtils.setField(confirmed, "id", 5L);
+        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+                .thenReturn(List.of(confirmed));
+
+        BusyTimeSlots busy = service().findBusyTimeSlots(date, 5L,
+                List.of("09:30", "10:00", "10:30", "11:00", "11:30"));
+
+        assertThat(busy.startTimes()).isEmpty();
+        assertThat(busy.endTimes()).isEmpty();
     }
 
     // ---- addInternalNote ----
