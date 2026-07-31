@@ -206,6 +206,22 @@ class AppointmentManagementServiceTest {
         assertThat(summary.get(0).month()).isEqualTo(LocalDate.of(2026, 7, 1));
     }
 
+    // ---- hasPendingAppointments ----
+
+    @Test
+    void hasPendingAppointmentsReflectsRepository() {
+        when(appointmentRepository.existsByStatus(AppointmentStatus.PENDING)).thenReturn(true);
+
+        assertThat(service().hasPendingAppointments()).isTrue();
+    }
+
+    @Test
+    void hasPendingAppointmentsFalseWhenNoneExist() {
+        when(appointmentRepository.existsByStatus(AppointmentStatus.PENDING)).thenReturn(false);
+
+        assertThat(service().hasPendingAppointments()).isFalse();
+    }
+
     // ---- getDetail ----
 
     @Test
