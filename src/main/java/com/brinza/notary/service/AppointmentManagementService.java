@@ -7,6 +7,7 @@ import com.brinza.notary.dto.AppointmentDetailView;
 import com.brinza.notary.dto.AppointmentListItemView;
 import com.brinza.notary.dto.AppointmentListView;
 import com.brinza.notary.dto.AppointmentMonthlyStatsView;
+import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.dto.DayAvailability;
 import com.brinza.notary.dto.InternalNoteView;
 import com.brinza.notary.repository.AppointmentRepository;
@@ -22,10 +23,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -202,6 +205,10 @@ public class AppointmentManagementService {
             log.debug("Status unchanged for appointment id={} (already {})", id, status);
             return;
         }
+        if (status == AppointmentStatus.CONFIRMED && overlapsConfirmed(appointment)) {
+            log.debug("Rejected status change for id={}: overlaps an already-confirmed appointment", id);
+            throw new IllegalArgumentException("Programarea se suprapune cu o altă programare confirmată și nu poate fi confirmată.");
+        }
         appointment.setStatus(status);
         String note = "Stare schimbată: %s -> %s".formatted(previousStatus.getDisplayName(), status.getDisplayName());
         appointment.addInternalNote(new InternalNote(authorUsername, note));
@@ -231,6 +238,10 @@ public class AppointmentManagementService {
             log.debug("Schedule unchanged for appointment id={}", id);
             return;
         }
+        if (appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, id, requestedAt, endedAt)) {
+            log.debug("Rejected schedule update for id={}: new schedule overlaps a confirmed appointment", id);
+            throw new IllegalArgumentException("Noua dată și oră se suprapun cu o programare deja confirmată.");
+        }
         appointment.setRequestedAt(requestedAt);
         appointment.setEndedAt(endedAt);
         String note = "Stare schimbată: %s-%s -> %s-%s".formatted(
@@ -256,6 +267,7 @@ public class AppointmentManagementService {
                 appointment.getRequestedAt(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
+                overlapsConfirmed(appointment),
                 appointment.getCreatedAt()
         );
     }
@@ -270,11 +282,68 @@ public class AppointmentManagementService {
                 appointment.getRequestedAt(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
+                overlapsConfirmed(appointment),
                 appointment.getNotes(),
                 appointment.getInternalNotes().stream()
                         .map(n -> new InternalNoteView(n.getAuthorUsername(), n.getNote(), n.getCreatedAt()))
                         .toList().reversed(),
                 appointment.getCreatedAt()
         );
+    }
+
+    /**
+     * Whether {@code appointment}'s time range overlaps a different, already-CONFIRMED
+     * appointment. Confirmed appointments never overlap each other (enforced in
+     * {@link #updateStatus} and {@link #updateSchedule}), so this is only ever true for a
+     * non-confirmed appointment that clashes with one that already is.
+     */
+    private boolean overlapsConfirmed(Appointment appointment) {
+        return appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, appointment.getId(),
+                appointment.getRequestedAt(), appointment.getEndedAt());
+    }
+
+    /**
+     * Of {@code candidateTimes} (each an "HH:mm" time-of-day, e.g. the reschedule form's
+     * dropdown options), which ones the reschedule form should grey out in the start dropdown
+     * and which in the end dropdown, on {@code date}. {@code excludeAppointmentId} is the
+     * appointment being rescheduled, so its own current slot never blocks itself when it's the
+     * one already CONFIRMED.
+     *
+     * <p>Start and end use different boundary rules, because touching a confirmed appointment's
+     * boundary is not the same on both sides: starting exactly when a confirmed appointment
+     * starts is already an overlap (your appointment then runs into it), so a start time is busy
+     * when {@code otherStart <= t < otherEnd}. Ending exactly when a confirmed appointment
+     * starts is fine (back-to-back, no overlap) - ending exactly when one *ends* always still
+     * overlaps it (your appointment must have started before that instant), so an end time is
+     * busy when {@code otherStart < t <= otherEnd}.
+     *
+     * <p>This only flags a candidate time that itself falls inside a busy span; it can't by
+     * itself guarantee an arbitrary (start, end) pair never straddles one without either endpoint
+     * landing inside it. {@link #updateSchedule} is the actual guarantee - this is just the UI hint.
+     */
+    @Transactional(readOnly = true)
+    public BusyTimeSlots findBusyTimeSlots(LocalDate date, Long excludeAppointmentId, List<String> candidateTimes) {
+        log.debug("findBusyTimeSlots called for date={} excludeAppointmentId={}", date, excludeAppointmentId);
+        List<Appointment> confirmed = appointmentRepository.search(AppointmentStatus.CONFIRMED,
+                        date.atStartOfDay(), date.atTime(LocalTime.MAX), null).stream()
+                .filter(a -> !a.getId().equals(excludeAppointmentId))
+                .toList();
+
+        Set<String> busyStart = new LinkedHashSet<>();
+        Set<String> busyEnd = new LinkedHashSet<>();
+        for (String candidate : candidateTimes) {
+            LocalTime t = LocalTime.parse(candidate);
+            boolean startBusy = confirmed.stream().anyMatch(a ->
+                    !t.isBefore(a.getRequestedAt().toLocalTime()) && t.isBefore(a.getEndedAt().toLocalTime()));
+            boolean endBusy = confirmed.stream().anyMatch(a ->
+                    t.isAfter(a.getRequestedAt().toLocalTime()) && !t.isAfter(a.getEndedAt().toLocalTime()));
+            if (startBusy) {
+                busyStart.add(candidate);
+            }
+            if (endBusy) {
+                busyEnd.add(candidate);
+            }
+        }
+        return new BusyTimeSlots(busyStart, busyEnd);
     }
 }

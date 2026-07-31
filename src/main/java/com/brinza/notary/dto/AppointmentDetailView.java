@@ -14,6 +14,7 @@ public record AppointmentDetailView(
         LocalDateTime requestedAt,
         LocalDateTime endedAt,
         AppointmentStatus status,
+        boolean overlapsConfirmed,
         String notes,
         List<InternalNoteView> internalNotes,
         LocalDateTime createdAt) {
