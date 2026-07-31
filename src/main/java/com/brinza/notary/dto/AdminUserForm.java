@@ -18,7 +18,7 @@ public class AdminUserForm {
     private String password;
 
     @NotBlank(message = "Numele complet este obligatoriu.")
-    @Size(max = 255, message = "Numele complet trebuie să aibă cel mult 255 de caractere.")
+    @Size(max = 100, message = "Numele complet trebuie să aibă cel mult 100 de caractere.")
     private String fullName;
 
     @NotNull(message = "Rolul este obligatoriu.")

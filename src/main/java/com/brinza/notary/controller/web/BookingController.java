@@ -67,7 +67,7 @@ public class BookingController {
     }
 
     @GetMapping("/confirmation")
-    public String confirmation() {
+    public String showConfirmation() {
         return "public/book-confirmation";
     }
 

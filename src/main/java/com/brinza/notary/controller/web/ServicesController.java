@@ -22,8 +22,8 @@ public class ServicesController {
     }
 
     @GetMapping("/services")
-    public String services(Model model) {
-        log.info("services called");
+    public String showServices(Model model) {
+        log.info("showServices called");
         model.addAttribute("services", serviceCatalogService.findActiveServices(LocaleContextHolder.getLocale()));
         return "public/services";
     }

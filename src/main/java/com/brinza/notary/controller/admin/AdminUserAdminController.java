@@ -34,19 +34,19 @@ public class AdminUserAdminController {
     }
 
     @GetMapping
-    public String list(Model model) {
+    public String showList(Model model) {
         model.addAttribute("admins", adminUserManagementService.listAdmins());
         return "admin/users/list";
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String showDetail(@PathVariable Long id, Model model) {
         model.addAttribute("admin", adminUserManagementService.getAdmin(id));
         return "admin/users/detail";
     }
 
     @GetMapping("/new")
-    public String newForm(Model model) {
+    public String showNewForm(Model model) {
         AdminUserForm form = new AdminUserForm();
         form.setRole(AdminRole.ADMIN);
         model.addAttribute("adminUserForm", form);
@@ -74,7 +74,7 @@ public class AdminUserAdminController {
     }
 
     @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
+    public String showEditForm(@PathVariable Long id, Model model) {
         AdminUserView admin = adminUserManagementService.getAdmin(id);
         AdminUserForm form = new AdminUserForm();
         form.setUsername(admin.username());
@@ -98,7 +98,7 @@ public class AdminUserAdminController {
             adminUserManagementService.update(id, adminUserForm);
             adminActivityLogger.log("Updated user #%d (username '%s', role %s)".formatted(id, adminUserForm.getUsername(), adminUserForm.getRole()));
         } catch (IllegalArgumentException e) {
-            log.debug("Could not update user for id={}: {}", id, e.getMessage());
+            log.debug("Could not update user id={}, name={}: {}", id, adminUserForm.getUsername(), e.getMessage());
             model.addAttribute("error", e.getMessage());
             model.addAttribute("adminId", id);
             return "admin/users/form";

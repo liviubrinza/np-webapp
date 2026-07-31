@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 public class BookingRequest {
 
     @NotBlank(message = "{book.clientName.required}")
-    @Size(max = 255)
+    @Size(max = 100)
     private String clientName;
 
     @NotBlank(message = "{book.email.required}")
     @Email(message = "{book.email.invalid}")
-    @Size(max = 255)
+    @Size(max = 100)
     private String email;
 
     @NotBlank(message = "{book.phone.required}")
-    @Size(max = 50)
+    @Size(max = 20)
     private String phone;
 
     @NotNull(message = "{book.service.required}")

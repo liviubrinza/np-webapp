@@ -37,9 +37,9 @@ public class StatisticsAdminController {
     }
 
     @GetMapping
-    public String requests(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth from,
-                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth to,
-                            Model model) {
+    public String showRequests(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth from,
+                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth to,
+                                Model model) {
         List<AppointmentMonthlyStatsView> monthlyStats = appointmentManagementService.monthlyStatusSummary(from, to);
         log.debug("Rendering {} month(s) of request statistics", monthlyStats.size());
 
@@ -78,12 +78,12 @@ public class StatisticsAdminController {
     }
 
     @GetMapping("/traffic")
-    public String traffic() {
+    public String showTraffic() {
         return "admin/statistics/traffic";
     }
 
     @GetMapping("/activity")
-    public String activity(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+    public String showActivity(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                             @RequestParam(required = false) String username,
                             @RequestParam(required = false) String correlationId,
                             @RequestParam(required = false) String text,
@@ -107,7 +107,7 @@ public class StatisticsAdminController {
     }
 
     @GetMapping("/logs")
-    public String logs(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+    public String showLogs(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                         @RequestParam(required = false) String correlationId,
                         @RequestParam(required = false) String level,
                         @RequestParam(required = false) String className,

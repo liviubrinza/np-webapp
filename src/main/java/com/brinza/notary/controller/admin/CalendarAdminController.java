@@ -28,8 +28,8 @@ public class CalendarAdminController {
     }
 
     @GetMapping
-    public String view(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                        Model model) {
+    public String showView(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                            Model model) {
         LocalDate selectedDate = date != null ? date : LocalDate.now();
         Map<LocalDate, DayAvailability> availability = appointmentManagementService.monthAvailability(YearMonth.from(selectedDate));
 

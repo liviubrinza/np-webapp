@@ -13,8 +13,8 @@ public class HomeController {
     private static final Logger log = LoggerFactory.getLogger(HomeController.class);
 
     @GetMapping({"", "/"})
-    public String home() {
-        log.info("home called");
+    public String showHome() {
+        log.info("showHome called");
         return "public/home";
     }
 }
