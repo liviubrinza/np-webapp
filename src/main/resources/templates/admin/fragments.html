@@ -21,7 +21,10 @@
         <a class="navbar-brand" th:href="@{/admin}">Panou Admin</a>
         <ul class="navbar-nav flex-row me-auto">
             <li class="nav-item me-3">
-                <a class="nav-link text-white" th:href="@{/admin/appointments}">Programări</a>
+                <a class="nav-link text-white" th:href="@{/admin/appointments}">Programări<span
+                        th:if="${hasPendingAppointments}" class="ms-1 fw-bold"
+                        style="display: inline-flex; align-items: center; justify-content: center; width: 1.4rem; height: 1.4rem; border-radius: 50%; background-color: #ffc107; color: #000; font-size: 1rem; line-height: 1;"
+                        title="Există programări în așteptare">!</span></a>
             </li>
             <li class="nav-item me-3">
                 <a class="nav-link text-white" th:href="@{/admin/calendar}">Calendar</a>

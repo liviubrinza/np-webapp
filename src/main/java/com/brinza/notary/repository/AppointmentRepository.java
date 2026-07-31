@@ -15,6 +15,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     boolean existsByServiceId(Long serviceId);
 
+    boolean existsByStatus(AppointmentStatus status);
+
     @Query("""
             SELECT a FROM Appointment a
             WHERE (:status IS NULL OR a.status = :status)

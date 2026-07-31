@@ -174,6 +174,11 @@ public class AppointmentManagementService {
     }
 
     @Transactional(readOnly = true)
+    public boolean hasPendingAppointments() {
+        return appointmentRepository.existsByStatus(AppointmentStatus.PENDING);
+    }
+
+    @Transactional(readOnly = true)
     public AppointmentDetailView getDetail(Long id) {
         log.info("getDetail called for id={}", id);
         Appointment appointment = appointmentRepository.findById(id)
