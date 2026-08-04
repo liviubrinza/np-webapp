@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{contact.heading}, ~{::link})}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+<head th:replace="~{layout/fragments :: head(#{contact.heading}, #{contact.meta.description}, false, ~{::#extraHead})}">
+    <div id="extraHead" th:remove="tag">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css"/>
+        <script type="application/ld+json" th:inline="javascript">/*[(${legalServiceJsonLd})]*/{}</script>
+    </div>
 </head>
 <body>
 
@@ -21,11 +24,11 @@
                         </li>
                         <li class="mb-3">
                             <strong th:text="#{contact.phone.label}">Phone</strong><br/>
-                            <span th:text="${phone}">Phone</span>
+                            <a th:href="'tel:' + ${phone}" th:text="${phone}">Phone</a>
                         </li>
                         <li class="mb-3">
                             <strong th:text="#{contact.email.label}">Email</strong><br/>
-                            <span th:text="${email}">Email</span>
+                            <a th:href="'mailto:' + ${email}" th:text="${email}">Email</a>
                         </li>
                         <li>
                             <strong th:text="#{contact.schedule.label}">Work Schedule</strong><br/>

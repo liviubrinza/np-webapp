@@ -2,6 +2,7 @@ package com.brinza.notary.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -16,7 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addRedirectViewController("/", "/" + PathLocaleResolver.DEFAULT_LOCALE.getLanguage());
+        registry.addRedirectViewController("/", "/" + PathLocaleResolver.DEFAULT_LOCALE.getLanguage())
+                .setStatusCode(HttpStatus.MOVED_PERMANENTLY);
         registry.addViewController("/admin/login").setViewName("admin/login");
     }
 }

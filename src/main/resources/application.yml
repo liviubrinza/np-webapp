@@ -33,6 +33,9 @@ logging:
     root: INFO
 
 app:
+  # TODO: replace with the real production domain before deploy. Used to build absolute
+  # canonical/hreflang URLs and the sitemap.xml/robots.txt Sitemap: line.
+  base-url: "https://example.com"
   storage:
     documents-dir: ./persistent
   logging:
@@ -46,11 +49,20 @@ app:
   demo-data:
     appointments:
       enabled: true
+  # TODO: replace the address/hours placeholders with real values before deploy. These feed both
+  # the Contact page display and the LegalService/OpeningHoursSpecification structured data
+  # (StructuredDataService) - days-of-week must be kept in sync by hand with the separately
+  # translated contact.schedule.days label in messages_*.properties.
   contact:
-    address: "To be added later"
+    street: "Stejarului nr.50"
+    city: "Floresti"
+    postal-code: "407280"
+    country-code: "RO"
     phone: "0777 777 777"
     email: "something@somethingelse.com"
-    hours: "09:00 - 18:00"
+    opening-time: "09:00"
+    closing-time: "18:00"
+    days-of-week: [ Monday, Tuesday, Wednesday, Thursday, Friday ]
     latitude: 46.72982564167728
     longitude: 23.48734642212008
 

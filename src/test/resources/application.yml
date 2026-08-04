@@ -34,6 +34,7 @@ logging:
     root: WARN
 
 app:
+  base-url: "http://localhost:8080"
   storage:
     documents-dir: ./target/test-data/documents
   logging:
@@ -45,9 +46,14 @@ app:
     appointments:
       enabled: false
   contact:
-    address: "Test Address 1"
+    street: "Test Address 1"
+    city: "Test City"
+    postal-code: "111111"
+    country-code: "RO"
     phone: "0700000000"
     email: "test@example.com"
-    hours: "09:00 - 17:00"
+    opening-time: "09:00"
+    closing-time: "17:00"
+    days-of-week: [ Monday, Tuesday, Wednesday, Thursday, Friday ]
     latitude: 46.0
     longitude: 23.0

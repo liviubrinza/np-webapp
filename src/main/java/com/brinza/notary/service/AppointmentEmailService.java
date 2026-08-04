@@ -1,6 +1,7 @@
 package com.brinza.notary.service;
 
 import com.brinza.notary.config.SystemSettings;
+import com.brinza.notary.config.properties.ContactSettings;
 import com.brinza.notary.domain.Appointment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,15 +53,14 @@ public class AppointmentEmailService {
                                     AsyncEmailSender asyncEmailSender,
                                     SystemSettings systemSettings,
                                     @Value("${app.mail.from:}") String fromAddress,
-                                    @Value("${app.contact.address}") String contactAddress,
-                                    @Value("${app.contact.phone}") String contactPhone) {
+                                    ContactSettings contactSettings) {
         this.messageSource = messageSource;
         this.serviceCatalogService = serviceCatalogService;
         this.asyncEmailSender = asyncEmailSender;
         this.systemSettings = systemSettings;
         this.fromAddress = fromAddress;
-        this.contactAddress = contactAddress;
-        this.contactPhone = contactPhone;
+        this.contactAddress = contactSettings.displayAddress();
+        this.contactPhone = contactSettings.phone();
     }
 
     public void sendBookingReceivedEmail(Appointment appointment) {

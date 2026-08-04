@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{nav.book}, ~{::link})}">
+<head th:replace="~{layout/fragments :: head(#{nav.book}, #{book.meta.description}, false, ~{::link})}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
 </head>
 <body>

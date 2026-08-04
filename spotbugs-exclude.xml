@@ -39,4 +39,15 @@
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
     </Match>
 
+    <!-- Same taint-tracker limitation as the CRLF_INJECTION_LOGS suppression above: sitemap.xml's
+         <loc> values are already escaped via SeoController.escapeXml() before being appended, but
+         find-security-bugs doesn't recognize a custom sanitizer method as clearing taint. None of
+         the inputs are user-controlled anyway - baseUrl comes from the app.base-url config
+         property, and the locale/path segments come from PathLocaleResolver.SUPPORTED_LOCALES and
+         SeoController's own hardcoded PUBLIC_PAGE_PATHS list. -->
+    <Match>
+        <Class name="com.brinza.notary.controller.web.SeoController"/>
+        <Bug pattern="POTENTIAL_XML_INJECTION"/>
+    </Match>
+
 </FindBugsFilter>
