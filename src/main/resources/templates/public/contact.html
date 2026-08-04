@@ -10,40 +10,46 @@
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
 
-<main class="container my-5">
-    <h1 th:text="#{contact.heading}">Contact Us</h1>
+<main class="d-flex flex-column">
+    <section class="hero-section">
+        <div class="container">
+            <div class="page-panel">
+                <h1 th:text="#{contact.heading}">Contact Us</h1>
 
-    <div class="row g-4 mt-2">
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-3">
-                            <strong th:text="#{contact.address.label}">Address</strong><br/>
-                            <span th:text="${address}">Address</span>
-                        </li>
-                        <li class="mb-3">
-                            <strong th:text="#{contact.phone.label}">Phone</strong><br/>
-                            <a th:href="'tel:' + ${phone}" th:text="${phone}">Phone</a>
-                        </li>
-                        <li class="mb-3">
-                            <strong th:text="#{contact.email.label}">Email</strong><br/>
-                            <a th:href="'mailto:' + ${email}" th:text="${email}">Email</a>
-                        </li>
-                        <li>
-                            <strong th:text="#{contact.schedule.label}">Work Schedule</strong><br/>
-                            <span th:text="#{contact.schedule.days}">Monday - Friday</span>,
-                            <span th:text="${hours}">09:00 - 18:00</span>
-                        </li>
-                    </ul>
+                <div class="row g-4 mt-2">
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-3">
+                                        <strong th:text="#{contact.address.label}">Address</strong><br/>
+                                        <span th:text="${address}">Address</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong th:text="#{contact.phone.label}">Phone</strong><br/>
+                                        <a th:href="'tel:' + ${phone}" th:text="${phone}">Phone</a>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong th:text="#{contact.email.label}">Email</strong><br/>
+                                        <a th:href="'mailto:' + ${email}" th:text="${email}">Email</a>
+                                    </li>
+                                    <li>
+                                        <strong th:text="#{contact.schedule.label}">Work Schedule</strong><br/>
+                                        <span th:text="#{contact.schedule.days}">Monday - Friday</span>,
+                                        <span th:text="${hours}">09:00 - 18:00</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div id="map" class="map-container rounded border"
+                             th:attr="data-lat=${latitude},data-lng=${longitude}"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
-            <div id="map" class="map-container rounded border"
-                 th:attr="data-lat=${latitude},data-lng=${longitude}"></div>
-        </div>
-    </div>
+    </section>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>

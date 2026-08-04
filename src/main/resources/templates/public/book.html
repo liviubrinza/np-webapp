@@ -7,11 +7,14 @@
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
 
-<main class="container my-5" style="max-width: 640px;">
-    <h1 th:text="#{nav.book}">Book Appointment</h1>
+<main class="d-flex flex-column">
+    <section class="hero-section">
+        <div class="container" style="max-width: 640px;">
+            <div class="page-panel">
+                <h1 th:text="#{nav.book}">Book Appointment</h1>
 
-    <div class="card mt-4">
-    <div class="card-body p-4">
+                <div class="card mt-4">
+                <div class="card-body p-4">
     <form th:action="@{'/' + ${currentLocale} + '/book'}" th:object="${bookingRequest}" method="post" novalidate>
         <div class="mb-3">
             <label class="form-label" th:text="#{book.clientName}">Name</label>
@@ -72,8 +75,11 @@
 
         <button type="submit" class="btn btn-primary" th:text="#{book.submit}">Book Appointment</button>
     </form>
-    </div>
-    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>
