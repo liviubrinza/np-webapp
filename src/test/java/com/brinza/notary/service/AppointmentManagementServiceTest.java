@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -455,7 +456,7 @@ class AppointmentManagementServiceTest {
         Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
                 LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
         ReflectionTestUtils.setField(confirmed, "id", 2L);
-        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+        when(appointmentRepository.search(eq(Set.of(AppointmentStatus.CONFIRMED)), any(), any(), isNull()))
                 .thenReturn(List.of(confirmed));
 
         BusyTimeSlots busy = service().findBusyTimeSlots(date, 1L,
@@ -472,7 +473,7 @@ class AppointmentManagementServiceTest {
         Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
                 LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
         ReflectionTestUtils.setField(confirmed, "id", 2L);
-        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+        when(appointmentRepository.search(eq(Set.of(AppointmentStatus.CONFIRMED)), any(), any(), isNull()))
                 .thenReturn(List.of(confirmed));
 
         BusyTimeSlots busy = service().findBusyTimeSlots(date, 1L,
@@ -490,7 +491,7 @@ class AppointmentManagementServiceTest {
         Appointment confirmed = appointmentWith(AppointmentStatus.CONFIRMED,
                 LocalDateTime.of(2026, 8, 1, 10, 0), LocalDateTime.of(2026, 8, 1, 11, 0));
         ReflectionTestUtils.setField(confirmed, "id", 5L);
-        when(appointmentRepository.search(eq(AppointmentStatus.CONFIRMED), any(), any(), isNull()))
+        when(appointmentRepository.search(eq(Set.of(AppointmentStatus.CONFIRMED)), any(), any(), isNull()))
                 .thenReturn(List.of(confirmed));
 
         BusyTimeSlots busy = service().findBusyTimeSlots(date, 5L,

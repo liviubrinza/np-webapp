@@ -72,6 +72,20 @@ class AppointmentAdminControllerTest {
     }
 
     @Test
+    void listBindsMultipleStatusCheckboxesIntoASetAndForwardsToService() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments").param("status", "CONFIRMED", "CANCELLED"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/list"))
+                .andExpect(model().attribute("selectedStatuses", Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)));
+
+        verify(appointmentManagementService).searchGrouped(
+                eq(Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)), any(), any(), any());
+    }
+
+    @Test
     void detailRendersMailEnabledFromSystemSettings() throws Exception {
         when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
         when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))

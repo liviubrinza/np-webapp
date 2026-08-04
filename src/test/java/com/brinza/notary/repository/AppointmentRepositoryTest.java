@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,9 +56,21 @@ class AppointmentRepositoryTest {
         appointmentWith("Ion", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
         appointmentWith("Maria", AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 2, 9, 0));
 
-        List<Appointment> pending = appointmentRepository.search(AppointmentStatus.PENDING, null, null, null);
+        List<Appointment> pending = appointmentRepository.search(Set.of(AppointmentStatus.PENDING), null, null, null);
 
         assertThat(pending).extracting(Appointment::getClientName).containsExactly("Ion");
+    }
+
+    @Test
+    void searchFiltersByMultipleStatuses() {
+        appointmentWith("Ion", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        appointmentWith("Maria", AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 2, 9, 0));
+        appointmentWith("Vasile", AppointmentStatus.CANCELLED, LocalDateTime.of(2026, 8, 3, 9, 0));
+
+        List<Appointment> result = appointmentRepository.search(
+                Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED), null, null, null);
+
+        assertThat(result).extracting(Appointment::getClientName).containsExactlyInAnyOrder("Maria", "Vasile");
     }
 
     @Test

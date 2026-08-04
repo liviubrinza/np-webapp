@@ -35,8 +35,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/appointments")
@@ -72,7 +75,7 @@ public class AppointmentAdminController {
     }
 
     @GetMapping
-    public String showList(@RequestParam(required = false) AppointmentStatus status,
+    public String showList(@RequestParam(required = false) Set<AppointmentStatus> status,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                         @RequestParam(required = false) String name,
@@ -84,11 +87,21 @@ public class AppointmentAdminController {
         model.addAttribute("pendingAppointments", grouped.pending());
         model.addAttribute("otherAppointments", grouped.others());
         model.addAttribute("statuses", AppointmentStatus.values());
-        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedStatuses", status == null ? Set.of() : status);
+        model.addAttribute("statusFilterLabel", statusFilterLabel(status));
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         model.addAttribute("name", name);
         return "admin/appointments/list";
+    }
+
+    private static String statusFilterLabel(Set<AppointmentStatus> statuses) {
+        if (statuses == null || statuses.isEmpty()) {
+            return "Toate";
+        }
+        return EnumSet.copyOf(statuses).stream()
+                .map(AppointmentStatus::getDisplayName)
+                .collect(Collectors.joining(", "));
     }
 
     @GetMapping("/new")
