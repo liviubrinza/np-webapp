@@ -2,10 +2,14 @@ package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.domain.AppointmentStatus;
+import com.brinza.notary.dto.BookingRequest;
 import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.service.AdminActivityLogger;
+import com.brinza.notary.service.AppointmentBookingService;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
+import com.brinza.notary.service.ServiceCatalogService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -14,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/admin/appointments")
@@ -40,19 +47,28 @@ public class AppointmentAdminController {
     private static final LocalTime SCHEDULE_START = LocalTime.of(9, 0);
     private static final LocalTime SCHEDULE_END = LocalTime.of(18, 0);
 
+    private static final int BOOKING_OPENING_HOUR = 9;
+    private static final int BOOKING_CLOSING_HOUR = 17;
+
     private final AppointmentManagementService appointmentManagementService;
     private final DocumentManagementService documentManagementService;
     private final AdminActivityLogger adminActivityLogger;
     private final SystemSettings systemSettings;
+    private final ServiceCatalogService serviceCatalogService;
+    private final AppointmentBookingService appointmentBookingService;
 
     public AppointmentAdminController(AppointmentManagementService appointmentManagementService,
                                        DocumentManagementService documentManagementService,
                                        AdminActivityLogger adminActivityLogger,
-                                       SystemSettings systemSettings) {
+                                       SystemSettings systemSettings,
+                                       ServiceCatalogService serviceCatalogService,
+                                       AppointmentBookingService appointmentBookingService) {
         this.appointmentManagementService = appointmentManagementService;
         this.documentManagementService = documentManagementService;
         this.adminActivityLogger = adminActivityLogger;
         this.systemSettings = systemSettings;
+        this.serviceCatalogService = serviceCatalogService;
+        this.appointmentBookingService = appointmentBookingService;
     }
 
     @GetMapping
@@ -73,6 +89,41 @@ public class AppointmentAdminController {
         model.addAttribute("to", to);
         model.addAttribute("name", name);
         return "admin/appointments/list";
+    }
+
+    @GetMapping("/new")
+    public String showNewForm(Model model) {
+        model.addAttribute("bookingRequest", new BookingRequest());
+        model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
+        model.addAttribute("timeSlots", buildBookingTimeSlots());
+        return "admin/appointments/new";
+    }
+
+    @PostMapping("/new")
+    public String createAppointment(@Valid @ModelAttribute("bookingRequest") BookingRequest bookingRequest,
+                                     BindingResult bindingResult,
+                                     Model model,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            log.debug("New appointment form has {} validation error(s)", bindingResult.getErrorCount());
+            model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
+            model.addAttribute("timeSlots", buildBookingTimeSlots());
+            return "admin/appointments/new";
+        }
+
+        try {
+            Long id = appointmentBookingService.bookAsAdmin(bookingRequest);
+            adminActivityLogger.log("Created appointment #%d for %s".formatted(id, bookingRequest.getClientName()));
+            redirectAttributes.addFlashAttribute("success", "Programare creată.");
+            return "redirect:/admin/appointments/" + id;
+        } catch (IllegalArgumentException e) {
+            log.debug("Could not create appointment: {}", e.getMessage());
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
+            model.addAttribute("timeSlots", buildBookingTimeSlots());
+            return "admin/appointments/new";
+        }
     }
 
     @GetMapping("/{id}")
@@ -200,6 +251,22 @@ public class AppointmentAdminController {
         List<String> slots = new ArrayList<>();
         for (LocalTime t = SCHEDULE_START; !t.isAfter(SCHEDULE_END); t = t.plusMinutes(30)) {
             slots.add(t.toString());
+        }
+        return slots;
+    }
+
+    /**
+     * Matches {@link BookingRequest#isRequestedAtOnHalfHour()} exactly (9:00-17:00), unlike
+     * {@link #buildTimeSlots()} above which covers the wider 9:00-18:00 schedule range used for
+     * appointment start/end times.
+     */
+    private static List<String> buildBookingTimeSlots() {
+        List<String> slots = new ArrayList<>();
+        for (int hour = BOOKING_OPENING_HOUR; hour <= BOOKING_CLOSING_HOUR; hour++) {
+            slots.add(String.format("%02d:00", hour));
+            if (hour != BOOKING_CLOSING_HOUR) {
+                slots.add(String.format("%02d:30", hour));
+            }
         }
         return slots;
     }

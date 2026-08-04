@@ -46,6 +46,9 @@
         <div class="card-header"><b>În așteptare</b></div>
         <div class="card-body">
             <div th:replace="~{admin/fragments :: appointmentsTable(${pendingAppointments}, 'Nu există programări în așteptare.', false)}"></div>
+            <div class="text-end">
+                <a th:href="@{/admin/appointments/new}" class="btn btn-primary btn-sm">+ Adaugă programare</a>
+            </div>
         </div>
     </div>
 

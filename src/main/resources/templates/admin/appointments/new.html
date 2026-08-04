@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Adaugă Programare', null)}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 640px;">
+    <a th:href="@{/admin/appointments}" class="d-inline-block mb-3">&larr; Înapoi la programări</a>
+
+    <h1 class="h3 mb-4">Adaugă Programare</h1>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card">
+        <div class="card-body">
+            <form th:action="@{/admin/appointments/new}" th:object="${bookingRequest}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Nume client</label>
+                    <input type="text" class="form-control" th:field="*{clientName}"
+                           th:classappend="${#fields.hasErrors('clientName')} ? 'is-invalid'"/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('clientName')}" th:errors="*{clientName}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" th:field="*{email}"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Telefon</label>
+                    <input type="text" class="form-control" th:field="*{phone}"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"/>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Serviciu</label>
+                    <select class="form-select" th:field="*{serviceId}"
+                            th:classappend="${#fields.hasErrors('serviceId')} ? 'is-invalid'">
+                        <option value="">Alege un serviciu...</option>
+                        <option th:each="service : ${services}" th:value="${service.id()}" th:text="${service.name()}"></option>
+                    </select>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('serviceId')}" th:errors="*{serviceId}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Dată și oră</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="date" id="requestedAtDate" class="form-control"
+                                   th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
+                        </div>
+                        <div class="col-6">
+                            <select id="requestedAtTime" class="form-select"
+                                    th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'">
+                                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" id="requestedAt" th:field="*{requestedAt}"/>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnHalfHour')}" th:errors="*{requestedAtOnHalfHour}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Notă</label>
+                    <textarea class="form-control" rows="3" th:field="*{notes}"
+                              th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"></textarea>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}"></div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Creează programarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var hidden = document.getElementById('requestedAt');
+        var dateInput = document.getElementById('requestedAtDate');
+        var timeSelect = document.getElementById('requestedAtTime');
+
+        function sync() {
+            hidden.value = dateInput.value ? (dateInput.value + 'T' + timeSelect.value) : '';
+        }
+
+        if (hidden.value) {
+            var parts = hidden.value.split('T');
+            dateInput.value = parts[0];
+            timeSelect.value = parts[1];
+        }
+
+        dateInput.addEventListener('change', sync);
+        timeSelect.addEventListener('change', sync);
+    });
+</script>
+</body>
+</html>
