@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{nav.home}, ${null})}"></head>
+<head th:replace="~{layout/fragments :: head(#{nav.home}, #{home.meta.description}, false, ${null})}"></head>
 <body>
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>

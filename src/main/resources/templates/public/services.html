@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{nav.services}, ${null})}"></head>
+<head th:replace="~{layout/fragments :: head(#{nav.services}, #{services.meta.description}, false, ~{::#extraHead})}">
+    <div id="extraHead" th:remove="tag">
+        <script type="application/ld+json" th:inline="javascript">/*[(${servicesJsonLd})]*/{}</script>
+    </div>
+</head>
 <body>
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
@@ -16,7 +20,7 @@
         <div class="col" th:each="service : ${services}">
             <div class="card h-100">
                 <div class="card-body">
-                    <h5 class="card-title" th:text="${service.name()}">Service name</h5>
+                    <h2 class="h5 card-title" th:text="${service.name()}">Service name</h2>
                     <p class="card-text" th:text="${service.description()}">Description</p>
                 </div>
                 <div class="card-footer text-muted"
@@ -24,6 +28,9 @@
             </div>
         </div>
     </div>
+
+    <a class="btn btn-primary btn-lg px-4 mt-4" th:href="@{'/' + ${currentLocale} + '/book'}"
+       th:text="#{nav.book}">Book Appointment</a>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>

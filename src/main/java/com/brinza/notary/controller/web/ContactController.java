@@ -1,8 +1,10 @@
 package com.brinza.notary.controller.web;
 
+import com.brinza.notary.config.properties.ContactSettings;
+import com.brinza.notary.service.StructuredDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,37 +16,24 @@ public class ContactController {
 
     private static final Logger log = LoggerFactory.getLogger(ContactController.class);
 
-    private final String address;
-    private final String phone;
-    private final String email;
-    private final String hours;
-    private final double latitude;
-    private final double longitude;
+    private final ContactSettings contactSettings;
+    private final StructuredDataService structuredDataService;
 
-    public ContactController(
-            @Value("${app.contact.address}") String address,
-            @Value("${app.contact.phone}") String phone,
-            @Value("${app.contact.email}") String email,
-            @Value("${app.contact.hours}") String hours,
-            @Value("${app.contact.latitude}") double latitude,
-            @Value("${app.contact.longitude}") double longitude) {
-        this.address = address;
-        this.phone = phone;
-        this.email = email;
-        this.hours = hours;
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public ContactController(ContactSettings contactSettings, StructuredDataService structuredDataService) {
+        this.contactSettings = contactSettings;
+        this.structuredDataService = structuredDataService;
     }
 
     @GetMapping("/contact")
     public String showContact(Model model) {
         log.info("showContact called");
-        model.addAttribute("address", address);
-        model.addAttribute("phone", phone);
-        model.addAttribute("email", email);
-        model.addAttribute("hours", hours);
-        model.addAttribute("latitude", latitude);
-        model.addAttribute("longitude", longitude);
+        model.addAttribute("address", contactSettings.displayAddress());
+        model.addAttribute("phone", contactSettings.phone());
+        model.addAttribute("email", contactSettings.email());
+        model.addAttribute("hours", contactSettings.displayHours());
+        model.addAttribute("latitude", contactSettings.latitude());
+        model.addAttribute("longitude", contactSettings.longitude());
+        model.addAttribute("legalServiceJsonLd", structuredDataService.legalServiceJsonLd(LocaleContextHolder.getLocale()));
         return "public/contact";
     }
 }

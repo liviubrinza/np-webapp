@@ -11,12 +11,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -41,6 +43,13 @@ class ProfileControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/profile"))
                 .andExpect(model().attribute("username", "titi"));
+    }
+
+    @Test
+    void adminPageIsNoindexed() throws Exception {
+        mockMvc.perform(get("/admin/profile"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"robots\" content=\"noindex,nofollow\"")));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.brinza.notary.service;
 
 import com.brinza.notary.config.SystemSettings;
+import com.brinza.notary.config.properties.ContactSettings;
 import com.brinza.notary.domain.Appointment;
 import com.brinza.notary.domain.Service;
 import com.brinza.notary.domain.ServiceTranslation;
@@ -36,8 +37,10 @@ class AppointmentEmailServiceTest {
     private ServiceRepository serviceRepository;
 
     private AppointmentEmailService service() {
+        ContactSettings contactSettings = new ContactSettings("Str. Test 1", "Test City", "111111", "RO",
+                "0700000000", "test@example.com", "09:00", "17:00", java.util.List.of("Monday"), 46.0, 23.0);
         return new AppointmentEmailService(messageSource, new ServiceCatalogService(serviceRepository),
-                asyncEmailSender, systemSettings, "office@example.com", "Str. Test 1", "0700000000");
+                asyncEmailSender, systemSettings, "office@example.com", contactSettings);
     }
 
     private Appointment appointment() {

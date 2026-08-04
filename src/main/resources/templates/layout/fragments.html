@@ -2,10 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<head th:fragment="head(title, extraHead)">
+<head th:fragment="head(title, description, noindex, extraHead)">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title th:text="${title} + ' | ' + #{site.title}">Notary Public Office</title>
+    <meta name="description" th:content="${description}" th:if="${description != null}"/>
+    <meta name="robots" content="noindex,nofollow" th:if="${noindex}"/>
+    <link rel="canonical" th:href="${baseUrl} + '/' + ${currentLocale} + ${pathAfterLocale}"/>
+    <link rel="alternate" hreflang="ro" th:href="${baseUrl} + '/ro' + ${pathAfterLocale}"/>
+    <link rel="alternate" hreflang="en" th:href="${baseUrl} + '/en' + ${pathAfterLocale}"/>
+    <link rel="alternate" hreflang="hu" th:href="${baseUrl} + '/hu' + ${pathAfterLocale}"/>
+    <link rel="alternate" hreflang="x-default" th:href="${baseUrl} + '/ro' + ${pathAfterLocale}"/>
+    <script type="application/ld+json" th:inline="javascript" th:if="${breadcrumbJsonLd != null}">/*[(${breadcrumbJsonLd})]*/{}</script>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
@@ -72,6 +80,13 @@
 
 <footer th:fragment="footer" class="site-footer text-center py-4 mt-5">
     <div class="container">
+        <p th:if="${contactSettings != null}" class="mb-2">
+            <span th:text="${contactSettings.displayAddress()}">Str. Exemplu 1, Oraș 000000</span>
+            &middot;
+            <a th:href="'tel:' + ${contactSettings.phone()}" th:text="${contactSettings.phone()}">0777 777 777</a>
+            &middot;
+            <a th:href="'mailto:' + ${contactSettings.email()}" th:text="${contactSettings.email()}">office@example.com</a>
+        </p>
         <span th:text="${T(java.time.Year).now()} + ' ' + #{site.title} + ' — ' + #{footer.rights}">
             2026 Notary Public Office — All rights reserved.
         </span>

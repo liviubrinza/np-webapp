@@ -1,10 +1,12 @@
 package com.brinza.notary.controller.web;
 
 import com.brinza.notary.config.AdminSessionRegistry;
+import com.brinza.notary.config.ContactConfig;
 import com.brinza.notary.config.SecurityConfig;
 import com.brinza.notary.dto.AppointmentConfirmationView;
 import com.brinza.notary.service.AppointmentBookingService;
 import com.brinza.notary.service.ServiceCatalogService;
+import com.brinza.notary.service.StructuredDataService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -15,6 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -22,13 +26,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(BookingController.class)
-@Import({AdminSessionRegistry.class, SecurityConfig.class})
+@Import({AdminSessionRegistry.class, SecurityConfig.class, ContactConfig.class, StructuredDataService.class})
 class BookingControllerTest {
 
     @Autowired
@@ -45,7 +50,8 @@ class BookingControllerTest {
         mockMvc.perform(get("/ro/book"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("public/book"))
-                .andExpect(model().attributeExists("bookingRequest", "services", "timeSlots"));
+                .andExpect(model().attributeExists("bookingRequest", "services", "timeSlots"))
+                .andExpect(content().string(not(containsString("name=\"robots\" content=\"noindex,nofollow\""))));
     }
 
     @Test
@@ -83,5 +89,28 @@ class BookingControllerTest {
         mockMvc.perform(get("/ro/book/confirmation"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("public/book-confirmation"));
+    }
+
+    @Test
+    void confirmationPageIsNoindexed() throws Exception {
+        mockMvc.perform(get("/ro/book/confirmation"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("name=\"robots\" content=\"noindex,nofollow\"")));
+    }
+
+    @Test
+    void bookingFormIncludesBreadcrumbStructuredData() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/ro/book"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"@type\":\"BreadcrumbList\"")));
+    }
+
+    @Test
+    void confirmationPageIncludesThreeLevelBreadcrumb() throws Exception {
+        mockMvc.perform(get("/ro/book/confirmation"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"position\":3")));
     }
 }
