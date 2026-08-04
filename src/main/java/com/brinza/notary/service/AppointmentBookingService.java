@@ -34,6 +34,24 @@ public class AppointmentBookingService {
 
     @Transactional
     public AppointmentConfirmationView book(BookingRequest request, Locale locale) {
+        Appointment saved = createAppointment(request);
+        appointmentEmailService.sendBookingReceivedEmail(saved);
+
+        String serviceName = serviceCatalogService.resolveName(saved.getService(), locale);
+        return new AppointmentConfirmationView(saved.getClientName(), serviceName, saved.getRequestedAt());
+    }
+
+    /**
+     * Same as {@link #book(BookingRequest, Locale)} but for appointments an admin creates
+     * directly on behalf of a client - unlike a public booking, this does not trigger
+     * {@link AppointmentEmailService#sendBookingReceivedEmail}.
+     */
+    @Transactional
+    public Long bookAsAdmin(BookingRequest request) {
+        return createAppointment(request).getId();
+    }
+
+    private Appointment createAppointment(BookingRequest request) {
         Service service = serviceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new IllegalArgumentException("Unknown service id " + request.getServiceId()));
 
@@ -48,13 +66,6 @@ public class AppointmentBookingService {
         );
         Appointment saved = appointmentRepository.save(appointment);
         log.debug("Saved appointment id={} with status={}", saved.getId(), saved.getStatus());
-        notifyClient(saved);
-
-        String serviceName = serviceCatalogService.resolveName(service, locale);
-        return new AppointmentConfirmationView(saved.getClientName(), serviceName, saved.getRequestedAt());
-    }
-
-    private void notifyClient(Appointment appointment) {
-        appointmentEmailService.sendBookingReceivedEmail(appointment);
+        return saved;
     }
 }

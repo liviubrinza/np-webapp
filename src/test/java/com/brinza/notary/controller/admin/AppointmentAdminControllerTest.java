@@ -8,8 +8,10 @@ import com.brinza.notary.dto.AppointmentListItemView;
 import com.brinza.notary.dto.AppointmentListView;
 import com.brinza.notary.dto.BusyTimeSlots;
 import com.brinza.notary.service.AdminActivityLogger;
+import com.brinza.notary.service.AppointmentBookingService;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
+import com.brinza.notary.service.ServiceCatalogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -19,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -52,6 +55,10 @@ class AppointmentAdminControllerTest {
     private AdminActivityLogger adminActivityLogger;
     @MockitoBean
     private SystemSettings systemSettings;
+    @MockitoBean
+    private ServiceCatalogService serviceCatalogService;
+    @MockitoBean
+    private AppointmentBookingService appointmentBookingService;
 
     @Test
     void listRendersGroupedAppointments() throws Exception {
@@ -62,6 +69,20 @@ class AppointmentAdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/appointments/list"))
                 .andExpect(model().attributeExists("pendingAppointments", "otherAppointments", "statuses"));
+    }
+
+    @Test
+    void listBindsMultipleStatusCheckboxesIntoASetAndForwardsToService() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments").param("status", "CONFIRMED", "CANCELLED"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/list"))
+                .andExpect(model().attribute("selectedStatuses", Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)));
+
+        verify(appointmentManagementService).searchGrouped(
+                eq(Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)), any(), any(), any());
     }
 
     @Test
@@ -111,6 +132,53 @@ class AppointmentAdminControllerTest {
                 .andExpect(flash().attributeExists("error"));
 
         verify(appointmentManagementService, org.mockito.Mockito.never()).addInternalNote(anyLong(), any(), any());
+    }
+
+    @Test
+    void newFormRendersBookingRequestAndServices() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/appointments/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/new"))
+                .andExpect(model().attributeExists("bookingRequest", "services", "timeSlots"));
+    }
+
+    @Test
+    void createAppointmentRedirectsToDetailWithoutSendingReceivedEmail() throws Exception {
+        when(appointmentBookingService.bookAsAdmin(any())).thenReturn(7L);
+
+        mockMvc.perform(post("/admin/appointments/new").with(csrf())
+                        .param("clientName", "Ion Popescu")
+                        .param("email", "ion@example.com")
+                        .param("phone", "0700000000")
+                        .param("serviceId", "1")
+                        .param("requestedAt", futureHalfHourDateTime())
+                        .param("notes", "notes"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/appointments/7"))
+                .andExpect(flash().attributeExists("success"));
+
+        verify(appointmentBookingService).bookAsAdmin(any());
+    }
+
+    @Test
+    void createAppointmentRerendersFormOnValidationError() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+
+        mockMvc.perform(post("/admin/appointments/new").with(csrf())
+                        .param("clientName", "")
+                        .param("email", "not-an-email")
+                        .param("phone", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/new"));
+
+        verify(appointmentBookingService, org.mockito.Mockito.never()).bookAsAdmin(any());
+    }
+
+    private static String futureHalfHourDateTime() {
+        return LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0)
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
     }
 
     private static AppointmentDetailView detailView() {

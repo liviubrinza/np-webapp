@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
@@ -32,13 +33,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("""
             SELECT a FROM Appointment a
-            WHERE (:status IS NULL OR a.status = :status)
+            WHERE (:statuses IS NULL OR a.status IN :statuses)
               AND (:from IS NULL OR a.requestedAt >= :from)
               AND (:to IS NULL OR a.requestedAt <= :to)
               AND (:name IS NULL OR LOWER(a.clientName) LIKE LOWER(CONCAT('%', :name, '%')))
             ORDER BY a.requestedAt DESC
             """)
-    List<Appointment> search(@Param("status") AppointmentStatus status,
+    List<Appointment> search(@Param("statuses") Set<AppointmentStatus> statuses,
                               @Param("from") LocalDateTime from,
                               @Param("to") LocalDateTime to,
                               @Param("name") String name);

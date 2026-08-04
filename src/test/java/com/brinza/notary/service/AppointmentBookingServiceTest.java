@@ -68,6 +68,25 @@ class AppointmentBookingServiceTest {
         assertThat(confirmation.serviceName()).isEqualTo("Autentificare");
     }
 
+    @Test
+    void bookAsAdminSavesAppointmentWithoutNotifyingClient() {
+        Service notaryService = new Service(30, true);
+        notaryService.addTranslation(new ServiceTranslation("ro", "Autentificare", "desc"));
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(notaryService));
+        when(appointmentRepository.save(any(Appointment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        BookingRequest request = requestFor(1L);
+        Long id = service().bookAsAdmin(request);
+
+        ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentRepository).save(captor.capture());
+        Appointment saved = captor.getValue();
+        assertThat(saved.getClientName()).isEqualTo("Ion Popescu");
+        assertThat(id).isEqualTo(saved.getId());
+
+        verify(appointmentEmailService, org.mockito.Mockito.never()).sendBookingReceivedEmail(any());
+    }
+
     private static BookingRequest requestFor(Long serviceId) {
         BookingRequest request = new BookingRequest();
         request.setClientName("Ion Popescu");

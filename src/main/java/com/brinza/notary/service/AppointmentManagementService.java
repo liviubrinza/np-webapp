@@ -53,10 +53,11 @@ public class AppointmentManagementService {
     }
 
     @Transactional(readOnly = true)
-    public List<AppointmentListItemView> search(AppointmentStatus status, LocalDateTime from, LocalDateTime to, String clientName) {
-        log.info("search called with status={} from={} to={} clientName={}", status, from, to, clientName);
+    public List<AppointmentListItemView> search(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to, String clientName) {
+        log.info("search called with statuses={} from={} to={} clientName={}", statuses, from, to, clientName);
         String normalizedName = (clientName == null || clientName.isBlank()) ? null : clientName.trim();
-        List<AppointmentListItemView> results = appointmentRepository.search(status, from, to, normalizedName).stream()
+        Set<AppointmentStatus> normalizedStatuses = (statuses == null || statuses.isEmpty()) ? null : statuses;
+        List<AppointmentListItemView> results = appointmentRepository.search(normalizedStatuses, from, to, normalizedName).stream()
                 .map(this::toListItem)
                 .toList();
         log.debug("search matched {} appointment(s)", results.size());
@@ -64,9 +65,9 @@ public class AppointmentManagementService {
     }
 
     @Transactional(readOnly = true)
-    public AppointmentListView searchGrouped(AppointmentStatus status, LocalDateTime from, LocalDateTime to, String clientName) {
-        log.info("searchGrouped called with status={} from={} to={} clientName={}", status, from, to, clientName);
-        List<AppointmentListItemView> all = search(status, from, to, clientName);
+    public AppointmentListView searchGrouped(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to, String clientName) {
+        log.info("searchGrouped called with statuses={} from={} to={} clientName={}", statuses, from, to, clientName);
+        List<AppointmentListItemView> all = search(statuses, from, to, clientName);
 
         List<AppointmentListItemView> pending = all.stream()
                 .filter(a -> a.status() == AppointmentStatus.PENDING)
@@ -324,7 +325,7 @@ public class AppointmentManagementService {
     @Transactional(readOnly = true)
     public BusyTimeSlots findBusyTimeSlots(LocalDate date, Long excludeAppointmentId, List<String> candidateTimes) {
         log.debug("findBusyTimeSlots called for date={} excludeAppointmentId={}", date, excludeAppointmentId);
-        List<Appointment> confirmed = appointmentRepository.search(AppointmentStatus.CONFIRMED,
+        List<Appointment> confirmed = appointmentRepository.search(Set.of(AppointmentStatus.CONFIRMED),
                         date.atStartOfDay(), date.atTime(LocalTime.MAX), null).stream()
                 .filter(a -> !a.getId().equals(excludeAppointmentId))
                 .toList();
