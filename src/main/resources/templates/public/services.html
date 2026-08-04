@@ -9,28 +9,34 @@
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
 
-<main class="container my-5">
-    <h1 th:text="#{nav.services}">Services</h1>
+<main class="d-flex flex-column">
+    <section class="hero-section">
+        <div class="container">
+            <div class="page-panel">
+                <h1 th:text="#{nav.services}">Services</h1>
 
-    <p th:if="${services.isEmpty()}" class="text-muted" th:text="#{services.empty}">
-        No services available at the moment.
-    </p>
+                <p th:if="${services.isEmpty()}" class="text-muted" th:text="#{services.empty}">
+                    No services available at the moment.
+                </p>
 
-    <div class="row row-cols-1 g-4 mt-2">
-        <div class="col" th:each="service : ${services}">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h5 card-title" th:text="${service.name()}">Service name</h2>
-                    <p class="card-text" th:text="${service.description()}">Description</p>
+                <div class="row row-cols-1 g-4 mt-2">
+                    <div class="col" th:each="service : ${services}">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h2 class="h5 card-title" th:text="${service.name()}">Service name</h2>
+                                <p class="card-text" th:text="${service.description()}">Description</p>
+                            </div>
+                            <div class="card-footer text-muted"
+                                 th:text="${service.durationMinutes()} + ' ' + #{services.minutes}">30 min</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-footer text-muted"
-                     th:text="${service.durationMinutes()} + ' ' + #{services.minutes}">30 min</div>
+
+                <a class="btn btn-primary btn-lg px-4 mt-4" th:href="@{'/' + ${currentLocale} + '/book'}"
+                   th:text="#{nav.book}">Book Appointment</a>
             </div>
         </div>
-    </div>
-
-    <a class="btn btn-primary btn-lg px-4 mt-4" th:href="@{'/' + ${currentLocale} + '/book'}"
-       th:text="#{nav.book}">Book Appointment</a>
+    </section>
 </main>
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>

@@ -155,6 +155,22 @@ a:hover {
     margin-right: auto;
 }
 
+/* Services/Contact/Book all reuse .hero-section directly (same markup pattern as home.html) so
+   the background image lines up identically across every public page - no separate background
+   rule per page to drift out of sync with it. Only the panel differs from .hero-panel: block-level
+   and left-aligned (not inline-block/centered) so lists, forms, and other structured content lay
+   out normally instead of shrink-wrapping like the home page's short centered text. */
+.page-panel {
+    background-color: rgba(255, 255, 255, 0.88);
+    border-radius: 0.75rem;
+    /* Extra bottom padding (vs. top) balances out the heading's own margin/line-height space
+       above the content, which otherwise makes the panel look top-heavy - content start and
+       panel edges should read as equally "empty" on both ends. */
+    padding: 2rem 2.5rem 3.5rem;
+    box-shadow: 0 10px 34px rgba(43, 35, 32, 0.18);
+    text-align: left;
+}
+
 /* Cards */
 .card {
     background-color: var(--brand-surface);
