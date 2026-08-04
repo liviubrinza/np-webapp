@@ -68,3 +68,16 @@ app:
         hu:
           name: "Hagyatéki eljárások"
           description: "Hagyatéki eljárás lefolytatása és öröklési bizonyítvány kiállítása."
+
+    - code: legal-consultation
+      duration-minutes: 30
+      translations:
+        en:
+          name: "Legal Consultation"
+          description: "Free-form discussion with the notary about a legal matter. Explanation, clarification, and guidance."
+        ro:
+          name: "Consiliere juridică"
+          description: "Discuție liberă cu notarul privind un caz juridic. Explicare, clarificare și îndrumare."
+        hu:
+          name: "Jogi tanácsadás"
+          description: "Szabad beszélgetés a közjegyzővel egy jogi ügyről. Magyarázat, tisztázás és útmutatás."
