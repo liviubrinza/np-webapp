@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Locale;
 
 @org.springframework.stereotype.Service
@@ -34,7 +36,7 @@ public class AppointmentBookingService {
 
     @Transactional
     public AppointmentConfirmationView book(BookingRequest request, Locale locale) {
-        Appointment saved = createAppointment(request);
+        Appointment saved = createAppointment(request, null);
         appointmentEmailService.sendBookingReceivedEmail(saved);
 
         String serviceName = serviceCatalogService.resolveName(saved.getService(), locale);
@@ -44,16 +46,27 @@ public class AppointmentBookingService {
     /**
      * Same as {@link #book(BookingRequest, Locale)} but for appointments an admin creates
      * directly on behalf of a client - unlike a public booking, this does not trigger
-     * {@link AppointmentEmailService#sendBookingReceivedEmail}.
+     * {@link AppointmentEmailService#sendBookingReceivedEmail}, and the admin picks an explicit
+     * {@code endTime} rather than it being derived from the service's duration.
      */
     @Transactional
-    public Long bookAsAdmin(BookingRequest request) {
-        return createAppointment(request).getId();
+    public Long bookAsAdmin(BookingRequest request, LocalTime endTime) {
+        if (endTime == null) {
+            throw new IllegalArgumentException("Ora de sfârșit este obligatorie.");
+        }
+        return createAppointment(request, endTime).getId();
     }
 
-    private Appointment createAppointment(BookingRequest request) {
+    private Appointment createAppointment(BookingRequest request, LocalTime explicitEndTime) {
         Service service = serviceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new IllegalArgumentException("Unknown service id " + request.getServiceId()));
+
+        LocalDateTime endedAt = explicitEndTime != null
+                ? LocalDateTime.of(request.getRequestedAt().toLocalDate(), explicitEndTime)
+                : request.getRequestedAt().plusMinutes(service.getDurationMinutes());
+        if (!endedAt.isAfter(request.getRequestedAt())) {
+            throw new IllegalArgumentException("Ora de sfârșit trebuie să fie după ora de început.");
+        }
 
         Appointment appointment = new Appointment(
                 request.getClientName(),
@@ -61,7 +74,7 @@ public class AppointmentBookingService {
                 request.getPhone(),
                 service,
                 request.getRequestedAt(),
-                request.getRequestedAt().plusMinutes(service.getDurationMinutes()),
+                endedAt,
                 request.getNotes()
         );
         Appointment saved = appointmentRepository.save(appointment);

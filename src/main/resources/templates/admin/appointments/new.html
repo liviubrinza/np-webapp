@@ -47,22 +47,43 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Dată și oră</label>
+                    <label class="form-label">Dată</label>
+                    <input type="date" id="requestedAtDate" class="form-control"
+                           th:value="${#temporals.format(selectedDate, 'yyyy-MM-dd')}"
+                           th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnHalfHour')}" th:errors="*{requestedAtOnHalfHour}"></div>
+                </div>
+
+                <div class="mb-3">
                     <div class="row g-2">
-                        <div class="col-6">
-                            <input type="date" id="requestedAtDate" class="form-control"
-                                   th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
+                        <div class="col-md-6">
+                            <label class="form-label">Ora început</label>
+                            <select id="requestedAtTime" class="form-select">
+                                <option value="">Alege ora...</option>
+                                <option th:each="t : ${startTimeSlots}" th:value="${t}" th:text="${t}"
+                                        th:disabled="${busyTimeSlots.startTimes().contains(t)}"></option>
+                            </select>
                         </div>
-                        <div class="col-6">
-                            <select id="requestedAtTime" class="form-select"
-                                    th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'">
-                                <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"></option>
+                        <div class="col-md-6">
+                            <label class="form-label">Ora sfârșit</label>
+                            <select id="endTimeSelect" name="endTime" class="form-select">
+                                <option value="">Alege ora...</option>
+                                <option th:each="t : ${endTimeSlots}" th:value="${t}" th:text="${t}"
+                                        th:selected="${selectedEndTime != null and t == selectedEndTime}"
+                                        th:disabled="${busyTimeSlots.endTimes().contains(t)}"></option>
                             </select>
                         </div>
                     </div>
+                    <small class="text-muted">Orele indisponibile (afișate estompat) se suprapun cu o programare deja confirmată.</small>
                     <input type="hidden" id="requestedAt" th:field="*{requestedAt}"/>
-                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
-                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnHalfHour')}" th:errors="*{requestedAtOnHalfHour}"></div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">Programări existente în ziua selectată</div>
+                    <div class="card-body" id="dayTimelineContainer">
+                        <div th:replace="~{admin/fragments :: appointmentsTimeline(${dayAppointments})}"></div>
+                    </div>
                 </div>
 
                 <div class="mb-3">
@@ -85,9 +106,11 @@
         var hidden = document.getElementById('requestedAt');
         var dateInput = document.getElementById('requestedAtDate');
         var timeSelect = document.getElementById('requestedAtTime');
+        var endTimeSelect = document.getElementById('endTimeSelect');
+        var dayTimelineContainer = document.getElementById('dayTimelineContainer');
 
         function sync() {
-            hidden.value = dateInput.value ? (dateInput.value + 'T' + timeSelect.value) : '';
+            hidden.value = (dateInput.value && timeSelect.value) ? (dateInput.value + 'T' + timeSelect.value) : '';
         }
 
         if (hidden.value) {
@@ -96,7 +119,48 @@
             timeSelect.value = parts[1];
         }
 
-        dateInput.addEventListener('change', sync);
+        var applyDisabled = function (select, busyTimes) {
+            Array.from(select.options).forEach(function (option) {
+                option.disabled = busyTimes.indexOf(option.value) !== -1;
+            });
+        };
+
+        var refreshDaySchedule = function () {
+            if (!dateInput.value) {
+                return;
+            }
+            var dateParam = encodeURIComponent(dateInput.value);
+
+            fetch('/admin/appointments/new/busy-times?date=' + dateParam)
+                .then(function (response) {
+                    return response.ok ? response.json() : {startTimes: [], endTimes: []};
+                })
+                .then(function (busyTimeSlots) {
+                    applyDisabled(timeSelect, busyTimeSlots.startTimes || []);
+                    applyDisabled(endTimeSelect, busyTimeSlots.endTimes || []);
+                })
+                .catch(function () {
+                    // Leave the previously rendered disabled state as-is if the request fails.
+                });
+
+            fetch('/admin/appointments/new/day-schedule?date=' + dateParam)
+                .then(function (response) {
+                    return response.ok ? response.text() : null;
+                })
+                .then(function (html) {
+                    if (html !== null) {
+                        dayTimelineContainer.innerHTML = html;
+                    }
+                })
+                .catch(function () {
+                    // Leave the previously rendered timeline as-is if the request fails.
+                });
+        };
+
+        dateInput.addEventListener('change', function () {
+            sync();
+            refreshDaySchedule();
+        });
         timeSelect.addEventListener('change', sync);
     });
 </script>

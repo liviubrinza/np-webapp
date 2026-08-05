@@ -76,15 +76,36 @@ class AppointmentBookingServiceTest {
         when(appointmentRepository.save(any(Appointment.class))).thenAnswer(inv -> inv.getArgument(0));
 
         BookingRequest request = requestFor(1L);
-        Long id = service().bookAsAdmin(request);
+        Long id = service().bookAsAdmin(request, java.time.LocalTime.of(10, 30));
 
         ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentRepository).save(captor.capture());
         Appointment saved = captor.getValue();
         assertThat(saved.getClientName()).isEqualTo("Ion Popescu");
+        assertThat(saved.getEndedAt()).isEqualTo(LocalDateTime.of(2026, 8, 1, 10, 30));
         assertThat(id).isEqualTo(saved.getId());
 
         verify(appointmentEmailService, org.mockito.Mockito.never()).sendBookingReceivedEmail(any());
+    }
+
+    @Test
+    void bookAsAdminRequiresAnEndTime() {
+        BookingRequest request = requestFor(1L);
+
+        assertThatThrownBy(() -> service().bookAsAdmin(request, null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void bookAsAdminRejectsEndTimeNotAfterStartTime() {
+        Service notaryService = new Service(30, true);
+        notaryService.addTranslation(new ServiceTranslation("ro", "Autentificare", "desc"));
+        when(serviceRepository.findById(1L)).thenReturn(Optional.of(notaryService));
+
+        BookingRequest request = requestFor(1L);
+
+        assertThatThrownBy(() -> service().bookAsAdmin(request, java.time.LocalTime.of(9, 0)))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private static BookingRequest requestFor(Long serviceId) {
