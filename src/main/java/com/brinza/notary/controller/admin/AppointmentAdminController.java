@@ -107,36 +107,59 @@ public class AppointmentAdminController {
     @GetMapping("/new")
     public String showNewForm(Model model) {
         model.addAttribute("bookingRequest", new BookingRequest());
-        model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
-        model.addAttribute("timeSlots", buildBookingTimeSlots());
+        populateNewFormModel(model, LocalDate.now(), null);
         return "admin/appointments/new";
     }
 
     @PostMapping("/new")
     public String createAppointment(@Valid @ModelAttribute("bookingRequest") BookingRequest bookingRequest,
                                      BindingResult bindingResult,
+                                     @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime endTime,
                                      Model model,
                                      Authentication authentication,
                                      RedirectAttributes redirectAttributes) {
+        LocalDate formDate = bookingRequest.getRequestedAt() != null
+                ? bookingRequest.getRequestedAt().toLocalDate() : LocalDate.now();
         if (bindingResult.hasErrors()) {
             log.debug("New appointment form has {} validation error(s)", bindingResult.getErrorCount());
-            model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
-            model.addAttribute("timeSlots", buildBookingTimeSlots());
+            populateNewFormModel(model, formDate, endTime);
             return "admin/appointments/new";
         }
 
         try {
-            Long id = appointmentBookingService.bookAsAdmin(bookingRequest);
+            Long id = appointmentBookingService.bookAsAdmin(bookingRequest, endTime);
             adminActivityLogger.log("Created appointment #%d for %s".formatted(id, bookingRequest.getClientName()));
             redirectAttributes.addFlashAttribute("success", "Programare creată.");
             return "redirect:/admin/appointments/" + id;
         } catch (IllegalArgumentException e) {
             log.debug("Could not create appointment: {}", e.getMessage());
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
-            model.addAttribute("timeSlots", buildBookingTimeSlots());
+            populateNewFormModel(model, formDate, endTime);
             return "admin/appointments/new";
         }
+    }
+
+    private void populateNewFormModel(Model model, LocalDate date, LocalTime selectedEndTime) {
+        model.addAttribute("services", serviceCatalogService.findActiveServices(Locale.of("ro")));
+        model.addAttribute("selectedDate", date);
+        model.addAttribute("startTimeSlots", buildBookingTimeSlots());
+        List<String> timeSlots = buildTimeSlots();
+        model.addAttribute("endTimeSlots", timeSlots);
+        model.addAttribute("selectedEndTime", selectedEndTime == null ? null : selectedEndTime.toString());
+        model.addAttribute("dayAppointments", appointmentManagementService.findByDate(date));
+        model.addAttribute("busyTimeSlots", appointmentManagementService.findBusyTimeSlots(date, null, timeSlots));
+    }
+
+    @GetMapping("/new/busy-times")
+    @ResponseBody
+    public BusyTimeSlots newBusyTimes(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return appointmentManagementService.findBusyTimeSlots(date, null, buildTimeSlots());
+    }
+
+    @GetMapping("/new/day-schedule")
+    public String newDaySchedule(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, Model model) {
+        model.addAttribute("appointments", appointmentManagementService.findByDate(date));
+        return "admin/fragments :: appointmentsTimeline(appointments=${appointments})";
     }
 
     @GetMapping("/{id}")

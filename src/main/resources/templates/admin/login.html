@@ -13,35 +13,37 @@
 </head>
 <body>
 
-<div class="container" style="max-width: 400px; margin-top: 8rem;">
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <h1 class="h4 mb-3 text-center">Autentificare Admin</h1>
+<main class="d-flex flex-column">
+    <section class="hero-section">
+        <div class="container" style="max-width: 400px;">
+            <div class="page-panel">
+                <h1 class="h4 mb-3 text-center">Autentificare Admin</h1>
 
-            <div class="alert alert-danger py-2" th:if="${param.error}">
-                Nume de utilizator sau parolă incorectă.
-            </div>
-            <div class="alert alert-warning py-2" th:if="${param.locked}">
-                Momentan nu aveți dreptul să vă logați. Încercați mai târziu.
-            </div>
-            <div class="alert alert-info py-2" th:if="${param.logout}">
-                V-ați deconectat.
-            </div>
+                <div class="alert alert-danger py-2" th:if="${param.error}">
+                    Nume de utilizator sau parolă incorectă.
+                </div>
+                <div class="alert alert-warning py-2" th:if="${param.locked}">
+                    Momentan nu aveți dreptul să vă logați. Încercați mai târziu.
+                </div>
+                <div class="alert alert-info py-2" th:if="${param.logout}">
+                    V-ați deconectat.
+                </div>
 
-            <form th:action="@{/admin/login}" method="post">
-                <div class="mb-3">
-                    <label class="form-label">Nume de utilizator</label>
-                    <input type="text" name="username" class="form-control" required autofocus/>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Parolă</label>
-                    <input type="password" name="password" class="form-control" required/>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Autentificare</button>
-            </form>
+                <form th:action="@{/admin/login}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Nume de utilizator</label>
+                        <input type="text" name="username" class="form-control" required autofocus/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Parolă</label>
+                        <input type="password" name="password" class="form-control" required/>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Autentificare</button>
+                </form>
+            </div>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
 </body>
 </html>

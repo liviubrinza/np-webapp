@@ -28,6 +28,7 @@ import java.util.Set;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,16 +138,21 @@ class AppointmentAdminControllerTest {
     @Test
     void newFormRendersBookingRequestAndServices() throws Exception {
         when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
 
         mockMvc.perform(get("/admin/appointments/new"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/appointments/new"))
-                .andExpect(model().attributeExists("bookingRequest", "services", "timeSlots"));
+                .andExpect(model().attributeExists("bookingRequest", "services", "startTimeSlots", "endTimeSlots",
+                        "dayAppointments", "busyTimeSlots"))
+                .andExpect(model().attribute("selectedDate", java.time.LocalDate.now()));
     }
 
     @Test
     void createAppointmentRedirectsToDetailWithoutSendingReceivedEmail() throws Exception {
-        when(appointmentBookingService.bookAsAdmin(any())).thenReturn(7L);
+        when(appointmentBookingService.bookAsAdmin(any(), any())).thenReturn(7L);
 
         mockMvc.perform(post("/admin/appointments/new").with(csrf())
                         .param("clientName", "Ion Popescu")
@@ -154,17 +160,21 @@ class AppointmentAdminControllerTest {
                         .param("phone", "0700000000")
                         .param("serviceId", "1")
                         .param("requestedAt", futureHalfHourDateTime())
+                        .param("endTime", "11:00")
                         .param("notes", "notes"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/admin/appointments/7"))
                 .andExpect(flash().attributeExists("success"));
 
-        verify(appointmentBookingService).bookAsAdmin(any());
+        verify(appointmentBookingService).bookAsAdmin(any(), any());
     }
 
     @Test
     void createAppointmentRerendersFormOnValidationError() throws Exception {
         when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
 
         mockMvc.perform(post("/admin/appointments/new").with(csrf())
                         .param("clientName", "")
@@ -173,7 +183,47 @@ class AppointmentAdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/appointments/new"));
 
-        verify(appointmentBookingService, org.mockito.Mockito.never()).bookAsAdmin(any());
+        verify(appointmentBookingService, org.mockito.Mockito.never()).bookAsAdmin(any(), any());
+    }
+
+    @Test
+    void createAppointmentRerendersFormOnServiceErrorSuchAsMissingEndTime() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        when(appointmentBookingService.bookAsAdmin(any(), isNull()))
+                .thenThrow(new IllegalArgumentException("Ora de sfârșit este obligatorie."));
+
+        mockMvc.perform(post("/admin/appointments/new").with(csrf())
+                        .param("clientName", "Ion Popescu")
+                        .param("email", "ion@example.com")
+                        .param("phone", "0700000000")
+                        .param("serviceId", "1")
+                        .param("requestedAt", futureHalfHourDateTime())
+                        .param("notes", "notes"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/new"))
+                .andExpect(model().attributeExists("error"));
+    }
+
+    @Test
+    void newBusyTimesReturnsBusyTimeSlotsForGivenDate() throws Exception {
+        when(appointmentManagementService.findBusyTimeSlots(any(), isNull(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of("09:00"), Set.of("09:30")));
+
+        mockMvc.perform(get("/admin/appointments/new/busy-times").param("date", "2026-08-01"))
+                .andExpect(status().isOk());
+
+        verify(appointmentManagementService).findBusyTimeSlots(eq(java.time.LocalDate.of(2026, 8, 1)), isNull(), any());
+    }
+
+    @Test
+    void newDayScheduleRendersTimelineFragmentForGivenDate() throws Exception {
+        when(appointmentManagementService.findByDate(java.time.LocalDate.of(2026, 8, 1))).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/appointments/new/day-schedule").param("date", "2026-08-01"))
+                .andExpect(status().isOk());
     }
 
     private static String futureHalfHourDateTime() {
