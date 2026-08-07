@@ -40,14 +40,14 @@
             <td class="text-end">
                 <form th:action="@{/admin/settings/login-lockout}" method="post"
                       class="d-inline-flex align-items-center justify-content-end gap-2">
-                    <div class="input-group input-group-sm" style="width: 180px;">
+                    <div class="input-group input-group-sm flex-nowrap" style="width: auto;">
                         <span class="input-group-text">Încercări</span>
-                        <input type="number" name="maxAttempts" min="1" class="form-control"
+                        <input type="number" name="maxAttempts" min="1" class="form-control" style="width: 3.5rem;"
                                th:value="${loginLockoutMaxAttempts}"/>
                     </div>
-                    <div class="input-group input-group-sm" style="width: 200px;">
+                    <div class="input-group input-group-sm flex-nowrap" style="width: auto;">
                         <span class="input-group-text">Minute</span>
-                        <input type="number" name="lockDurationMinutes" min="1" class="form-control"
+                        <input type="number" name="lockDurationMinutes" min="1" class="form-control" style="width: 3.5rem;"
                                th:value="${loginLockoutLockDurationMinutes}"/>
                     </div>
                     <button type="submit" class="btn btn-outline-secondary btn-sm">Salvează</button>
