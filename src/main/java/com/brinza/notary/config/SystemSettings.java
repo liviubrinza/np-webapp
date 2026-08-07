@@ -6,6 +6,8 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,24 +29,34 @@ public class SystemSettings {
     private static final String KEY_MAIL_ENABLED = "mail.enabled";
     private static final String KEY_LOGIN_LOCKOUT_MAX_ATTEMPTS = "login-lockout.max-attempts";
     private static final String KEY_LOGIN_LOCKOUT_LOCK_DURATION_MINUTES = "login-lockout.lock-duration-minutes";
+    private static final String KEY_LOG_LEVEL = "log.level";
+
+    /** Base package of the app's own code - the logger scope the runtime-editable log level applies to. */
+    private static final String APP_LOGGER_NAME = "com.brinza.notary";
 
     private final SystemSettingRepository systemSettingRepository;
+    private final LoggingSystem loggingSystem;
     private final boolean mailEnabledDefault;
     private final int loginLockoutMaxAttemptsDefault;
     private final int loginLockoutLockDurationMinutesDefault;
+    private final LogLevel logLevelDefault;
 
     private volatile boolean mailEnabled;
     private volatile int loginLockoutMaxAttempts;
     private volatile int loginLockoutLockDurationMinutes;
+    private volatile LogLevel logLevel;
 
     public SystemSettings(SystemSettingRepository systemSettingRepository,
                            @Value("${app.mail.enabled:false}") boolean mailEnabledDefault,
                            @Value("${app.security.login-lockout.max-attempts:5}") int loginLockoutMaxAttemptsDefault,
-                           @Value("${app.security.login-lockout.lock-duration-minutes:15}") int loginLockoutLockDurationMinutesDefault) {
+                           @Value("${app.security.login-lockout.lock-duration-minutes:15}") int loginLockoutLockDurationMinutesDefault,
+                           @Value("${logging.level.com.brinza.notary:INFO}") LogLevel logLevelDefault) {
         this.systemSettingRepository = systemSettingRepository;
+        this.loggingSystem = LoggingSystem.get(getClass().getClassLoader());
         this.mailEnabledDefault = mailEnabledDefault;
         this.loginLockoutMaxAttemptsDefault = loginLockoutMaxAttemptsDefault;
         this.loginLockoutLockDurationMinutesDefault = loginLockoutLockDurationMinutesDefault;
+        this.logLevelDefault = logLevelDefault;
     }
 
     @PostConstruct
@@ -58,8 +70,12 @@ public class SystemSettings {
         loginLockoutLockDurationMinutes = systemSettingRepository.findBySettingKey(KEY_LOGIN_LOCKOUT_LOCK_DURATION_MINUTES)
                 .map(setting -> Integer.parseInt(setting.getSettingValue()))
                 .orElse(loginLockoutLockDurationMinutesDefault);
-        log.info("System settings loaded: mailEnabled={}, loginLockoutMaxAttempts={}, loginLockoutLockDurationMinutes={}",
-                mailEnabled, loginLockoutMaxAttempts, loginLockoutLockDurationMinutes);
+        logLevel = systemSettingRepository.findBySettingKey(KEY_LOG_LEVEL)
+                .map(setting -> LogLevel.valueOf(setting.getSettingValue()))
+                .orElse(logLevelDefault);
+        loggingSystem.setLogLevel(APP_LOGGER_NAME, logLevel);
+        log.info("System settings loaded: mailEnabled={}, loginLockoutMaxAttempts={}, loginLockoutLockDurationMinutes={}, logLevel={}",
+                mailEnabled, loginLockoutMaxAttempts, loginLockoutLockDurationMinutes, logLevel);
     }
 
     public boolean isMailEnabled() {
@@ -74,6 +90,21 @@ public class SystemSettings {
         systemSettingRepository.save(setting);
         mailEnabled = value;
         log.info("System setting updated: mailEnabled={}", value);
+    }
+
+    public LogLevel getLogLevel() {
+        return logLevel;
+    }
+
+    @Transactional
+    public void setLogLevel(LogLevel value) {
+        SystemSetting setting = systemSettingRepository.findBySettingKey(KEY_LOG_LEVEL)
+                .orElseGet(() -> new SystemSetting(KEY_LOG_LEVEL));
+        setting.setSettingValue(value.name());
+        systemSettingRepository.save(setting);
+        logLevel = value;
+        loggingSystem.setLogLevel(APP_LOGGER_NAME, value);
+        log.info("System setting updated: logLevel={}", value);
     }
 
     public int getLoginLockoutMaxAttempts() {

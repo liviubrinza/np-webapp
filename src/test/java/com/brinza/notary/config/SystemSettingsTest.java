@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.logging.LogLevel;
 
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ class SystemSettingsTest {
     private SystemSettingRepository systemSettingRepository;
 
     private SystemSettings settings(boolean mailEnabledDefault) {
-        return new SystemSettings(systemSettingRepository, mailEnabledDefault, 5, 15);
+        return new SystemSettings(systemSettingRepository, mailEnabledDefault, 5, 15, LogLevel.INFO);
     }
 
     @Test
@@ -154,5 +155,59 @@ class SystemSettingsTest {
 
         assertThatThrownBy(() -> settings.setLoginLockoutLockDurationMinutes(0)).isInstanceOf(IllegalArgumentException.class);
         verify(systemSettingRepository, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
+    void loadFallsBackToLogLevelDefaultWhenNoRowExists() {
+        when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.max-attempts")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.lock-duration-minutes")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("log.level")).thenReturn(Optional.empty());
+        SystemSettings settings = settings(false);
+
+        settings.load();
+
+        assertThat(settings.getLogLevel()).isEqualTo(LogLevel.INFO);
+    }
+
+    @Test
+    void loadUsesDbValueForLogLevelOverDefault() {
+        when(systemSettingRepository.findBySettingKey("mail.enabled")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.max-attempts")).thenReturn(Optional.empty());
+        when(systemSettingRepository.findBySettingKey("login-lockout.lock-duration-minutes")).thenReturn(Optional.empty());
+        SystemSetting stored = new SystemSetting("log.level");
+        stored.setSettingValue("DEBUG");
+        when(systemSettingRepository.findBySettingKey("log.level")).thenReturn(Optional.of(stored));
+        SystemSettings settings = settings(false);
+
+        settings.load();
+
+        assertThat(settings.getLogLevel()).isEqualTo(LogLevel.DEBUG);
+    }
+
+    @Test
+    void setLogLevelCreatesRowWhenNoneExistsAndUpdatesCache() {
+        when(systemSettingRepository.findBySettingKey("log.level")).thenReturn(Optional.empty());
+        SystemSettings settings = settings(false);
+
+        settings.setLogLevel(LogLevel.WARN);
+
+        ArgumentCaptor<SystemSetting> captor = ArgumentCaptor.forClass(SystemSetting.class);
+        verify(systemSettingRepository).save(captor.capture());
+        assertThat(captor.getValue().getSettingValue()).isEqualTo("WARN");
+        assertThat(settings.getLogLevel()).isEqualTo(LogLevel.WARN);
+    }
+
+    @Test
+    void setLogLevelUpdatesExistingRow() {
+        SystemSetting existing = new SystemSetting("log.level");
+        existing.setSettingValue("INFO");
+        when(systemSettingRepository.findBySettingKey("log.level")).thenReturn(Optional.of(existing));
+        SystemSettings settings = settings(false);
+
+        settings.setLogLevel(LogLevel.TRACE);
+
+        verify(systemSettingRepository).save(existing);
+        assertThat(existing.getSettingValue()).isEqualTo("TRACE");
     }
 }

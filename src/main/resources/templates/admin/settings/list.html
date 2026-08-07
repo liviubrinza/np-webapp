@@ -54,6 +54,17 @@
                 </form>
             </td>
         </tr>
+        <tr>
+            <td>Nivel logging aplicație</td>
+            <td class="text-muted">Nivelul de detaliu al log-urilor generate de codul aplicației (nu afectează log-urile framework-urilor)</td>
+            <td class="text-end">
+                <form th:action="@{/admin/settings/log-level}" method="post" class="d-inline-flex align-items-center justify-content-end">
+                    <select name="level" class="form-select form-select-sm" style="width: 140px;" onchange="this.form.submit()">
+                        <option th:each="lvl : ${logLevels}" th:value="${lvl}" th:text="${lvl}" th:selected="${lvl == logLevel}"></option>
+                    </select>
+                </form>
+            </td>
+        </tr>
         </tbody>
     </table>
 </main>
