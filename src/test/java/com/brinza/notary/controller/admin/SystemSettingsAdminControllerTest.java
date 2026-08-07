@@ -5,6 +5,7 @@ import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.service.AdminActivityLogger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -98,5 +99,26 @@ class SystemSettingsAdminControllerTest {
                 .andExpect(status().is3xxRedirection());
 
         verify(systemSettings).setMailEnabled(false);
+    }
+
+    @Test
+    void showRendersCurrentLogLevelValue() throws Exception {
+        when(systemSettings.getLogLevel()).thenReturn(LogLevel.DEBUG);
+
+        mockMvc.perform(get("/admin/settings"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("logLevel", LogLevel.DEBUG))
+                .andExpect(model().attribute("logLevels", LogLevel.values()));
+    }
+
+    @Test
+    void updatingLogLevelCallsSetter() throws Exception {
+        mockMvc.perform(post("/admin/settings/log-level").with(csrf())
+                        .param("level", "WARN"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/settings"))
+                .andExpect(flash().attributeExists("success"));
+
+        verify(systemSettings).setLogLevel(LogLevel.WARN);
     }
 }

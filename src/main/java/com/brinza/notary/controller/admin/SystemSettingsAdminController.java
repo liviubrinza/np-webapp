@@ -4,6 +4,7 @@ import com.brinza.notary.config.SystemSettings;
 import com.brinza.notary.service.AdminActivityLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LogLevel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,17 @@ public class SystemSettingsAdminController {
         model.addAttribute("mailEnabled", systemSettings.isMailEnabled());
         model.addAttribute("loginLockoutMaxAttempts", systemSettings.getLoginLockoutMaxAttempts());
         model.addAttribute("loginLockoutLockDurationMinutes", systemSettings.getLoginLockoutLockDurationMinutes());
+        model.addAttribute("logLevel", systemSettings.getLogLevel());
+        model.addAttribute("logLevels", LogLevel.values());
         return "admin/settings/list";
+    }
+
+    @PostMapping("/log-level")
+    public String updateLogLevel(@RequestParam LogLevel level, RedirectAttributes redirectAttributes) {
+        systemSettings.setLogLevel(level);
+        adminActivityLogger.log("Setat nivel logging aplicație la " + level);
+        redirectAttributes.addFlashAttribute("success", "Setare actualizată.");
+        return "redirect:/admin/settings";
     }
 
     @PostMapping("/mail-enabled")
