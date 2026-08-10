@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Adaugă Programare', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Adaugă Programare', ~{::link})}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -48,7 +50,7 @@
 
                 <div class="mb-3">
                     <label class="form-label">Dată</label>
-                    <input type="date" id="requestedAtDate" class="form-control"
+                    <input type="text" id="requestedAtDate" class="form-control" autocomplete="off" placeholder="dd-Mon-yyyy"
                            th:value="${#temporals.format(selectedDate, 'yyyy-MM-dd')}"
                            th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
                     <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
@@ -101,6 +103,7 @@
     </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var hidden = document.getElementById('requestedAt');
@@ -157,9 +160,14 @@
                 });
         };
 
-        dateInput.addEventListener('change', function () {
-            sync();
-            refreshDaySchedule();
+        flatpickr(dateInput, {
+            altInput: true,
+            altFormat: 'd-M-Y',
+            dateFormat: 'Y-m-d',
+            onChange: function () {
+                sync();
+                refreshDaySchedule();
+            }
         });
         timeSelect.addEventListener('change', sync);
     });
