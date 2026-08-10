@@ -19,6 +19,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
+    <style>
+        @view-transition {
+            navigation: auto;
+        }
+    </style>
     <th:block th:if="${extraHead != null}">
         <th:block th:replace="${extraHead}"></th:block>
     </th:block>
