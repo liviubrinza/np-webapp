@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Programări', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Programări', ~{::link})}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -46,11 +48,13 @@
                 </div>
                 <div class="col-auto">
                     <label class="form-label mb-0"><b>De la</b></label>
-                    <input type="date" name="from" class="form-control form-control-sm" th:value="${from}"/>
+                    <input type="text" name="from" id="fromDateInput" class="form-control form-control-sm"
+                           autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${from}"/>
                 </div>
                 <div class="col-auto">
                     <label class="form-label mb-0"><b>Până la</b></label>
-                    <input type="date" name="to" class="form-control form-control-sm" th:value="${to}"/>
+                    <input type="text" name="to" id="toDateInput" class="form-control form-control-sm"
+                           autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${to}"/>
                 </div>
                 <div class="col-auto">
                     <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
@@ -79,7 +83,11 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
+    flatpickr('#fromDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+    flatpickr('#toDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+
     (function () {
         var allCheckbox = document.getElementById('statusAll');
         var optionCheckboxes = document.querySelectorAll('.status-option');

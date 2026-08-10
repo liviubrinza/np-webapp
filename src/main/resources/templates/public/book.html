@@ -51,7 +51,7 @@
             <label class="form-label" th:text="#{book.requestedAt}">Preferred date/time</label>
             <div class="row g-2">
                 <div class="col-6">
-                    <input type="text" id="requestedAtDate" class="form-control" autocomplete="off"
+                    <input type="text" id="requestedAtDate" class="form-control" autocomplete="off" placeholder="dd-Mon-yyyy"
                            th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
                 </div>
                 <div class="col-6">
