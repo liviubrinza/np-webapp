@@ -70,7 +70,7 @@ class HomeControllerTest {
     void homePageFooterIncludesNapBlock() throws Exception {
         mockMvc.perform(get("/ro"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Test Address 1, Test City 111111")))
+                .andExpect(content().string(containsString("Test Address 1, Test City, County, 111111")))
                 .andExpect(content().string(containsString("href=\"tel:0700000000\"")))
                 .andExpect(content().string(containsString("href=\"mailto:test@example.com\"")));
     }

@@ -268,7 +268,7 @@ public class AppointmentManagementService {
                 appointment.getRequestedAt(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
-                overlapsConfirmed(appointment),
+                overlapsConfirmedForDisplay(appointment),
                 appointment.getCreatedAt()
         );
     }
@@ -283,7 +283,7 @@ public class AppointmentManagementService {
                 appointment.getRequestedAt(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
-                overlapsConfirmed(appointment),
+                overlapsConfirmedForDisplay(appointment),
                 appointment.getNotes(),
                 appointment.getInternalNotes().stream()
                         .map(n -> new InternalNoteView(n.getAuthorUsername(), n.getNote(), n.getCreatedAt()))
@@ -293,10 +293,28 @@ public class AppointmentManagementService {
     }
 
     /**
+     * The overlap flag shown in the list/detail views (red "!" badge, warning box). Conflicts are
+     * only meaningful for appointments still in play - PENDING (needs resolving before it can be
+     * confirmed) or CONFIRMED (should never happen, kept as a safety net). A CANCELLED or COMPLETED
+     * appointment is displayed as-is, with no conflict check run against it at all, regardless of
+     * whether its old time range happens to clash with something now CONFIRMED.
+     */
+    private boolean overlapsConfirmedForDisplay(Appointment appointment) {
+        AppointmentStatus status = appointment.getStatus();
+        if (status != AppointmentStatus.PENDING && status != AppointmentStatus.CONFIRMED) {
+            return false;
+        }
+        return overlapsConfirmed(appointment);
+    }
+
+    /**
      * Whether {@code appointment}'s time range overlaps a different, already-CONFIRMED
-     * appointment. Confirmed appointments never overlap each other (enforced in
-     * {@link #updateStatus} and {@link #updateSchedule}), so this is only ever true for a
-     * non-confirmed appointment that clashes with one that already is.
+     * appointment, regardless of {@code appointment}'s own status. Confirmed appointments never
+     * overlap each other (enforced in {@link #updateStatus} and {@link #updateSchedule}), so this
+     * is only ever true for a non-confirmed appointment that clashes with one that already is.
+     * Used directly (not through {@link #overlapsConfirmedForDisplay}) by {@link #updateStatus},
+     * which must check this on every transition into CONFIRMED - including from CANCELLED - not
+     * just from PENDING.
      */
     private boolean overlapsConfirmed(Appointment appointment) {
         return appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, appointment.getId(),

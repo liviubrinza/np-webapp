@@ -16,6 +16,7 @@ import java.util.List;
 public record ContactSettings(
         String street,
         String city,
+        String county,
         String postalCode,
         String countryCode,
         String phone,
@@ -27,7 +28,7 @@ public record ContactSettings(
         double longitude) {
 
     public String displayAddress() {
-        return street + ", " + city + " " + postalCode;
+        return street + ", " + city + ", " + county + ", " + postalCode;
     }
 
     public String displayHours() {

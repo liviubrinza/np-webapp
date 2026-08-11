@@ -286,6 +286,43 @@ class AppointmentManagementServiceTest {
         assertThat(detail.overlapsConfirmed()).isTrue();
     }
 
+    @Test
+    void searchDoesNotFlagCancelledAppointmentEvenWhenItsTimeRangeOverlapsAConfirmedAppointment() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment cancelled = appointmentWith(AppointmentStatus.CANCELLED, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.search(null, null, null, null)).thenReturn(List.of(cancelled));
+
+        List<AppointmentListItemView> result = service().search(null, null, null, null);
+
+        assertThat(result).singleElement().extracting(AppointmentListItemView::overlapsConfirmed).isEqualTo(false);
+        verify(appointmentRepository, never()).existsOverlapping(any(), any(), any(), any());
+    }
+
+    @Test
+    void searchDoesNotFlagCompletedAppointmentEvenWhenItsTimeRangeOverlapsAConfirmedAppointment() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment completed = appointmentWith(AppointmentStatus.COMPLETED, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.search(null, null, null, null)).thenReturn(List.of(completed));
+
+        List<AppointmentListItemView> result = service().search(null, null, null, null);
+
+        assertThat(result).singleElement().extracting(AppointmentListItemView::overlapsConfirmed).isEqualTo(false);
+        verify(appointmentRepository, never()).existsOverlapping(any(), any(), any(), any());
+    }
+
+    @Test
+    void getDetailDoesNotFlagCancelledAppointment() {
+        lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
+        Appointment appointment = appointmentWith(AppointmentStatus.CANCELLED, LocalDateTime.of(2026, 8, 1, 9, 0));
+        when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+
+        AppointmentDetailView detail = service().getDetail(1L);
+
+        assertThat(detail.overlapsConfirmed()).isFalse();
+        verify(appointmentRepository, never()).existsOverlapping(any(), any(), any(), any());
+    }
+
+
     // ---- updateStatus ----
 
     @Test

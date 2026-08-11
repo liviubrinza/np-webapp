@@ -48,6 +48,7 @@ app:
   contact:
     street: "Test Address 1"
     city: "Test City"
+    county: "County"
     postal-code: "111111"
     country-code: "RO"
     phone: "0700000000"

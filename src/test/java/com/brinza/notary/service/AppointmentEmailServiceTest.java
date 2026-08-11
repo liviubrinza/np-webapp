@@ -37,7 +37,7 @@ class AppointmentEmailServiceTest {
     private ServiceRepository serviceRepository;
 
     private AppointmentEmailService service() {
-        ContactSettings contactSettings = new ContactSettings("Str. Test 1", "Test City", "111111", "RO",
+        ContactSettings contactSettings = new ContactSettings("Str. Test 1", "Test City", "County", "111111", "RO",
                 "0700000000", "test@example.com", "09:00", "17:00", java.util.List.of("Monday"), 46.0, 23.0);
         return new AppointmentEmailService(messageSource, new ServiceCatalogService(serviceRepository),
                 asyncEmailSender, systemSettings, "office@example.com", contactSettings);

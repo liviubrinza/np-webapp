@@ -115,11 +115,11 @@
 <div th:fragment="appointmentsTimeline(appointments)" class="timeline-scroll">
     <table class="timeline-table">
         <tbody>
-        <th:block th:each="hour, hourStat : ${#numbers.sequence(9, 16)}">
+        <th:block th:each="hour, hourStat : ${#numbers.sequence(9, 18)}">
         <tr th:each="minute, minuteStat : ${#numbers.sequence(0, 1)}">
             <td class="timeline-hour-label"
                 th:text="${#numbers.formatInteger(hour, 2)} + (${minute} == 0 ? ':00' : ':30')"></td>
-            <td th:if="${hourStat.first and minuteStat.first}" rowspan="16" class="timeline-track">
+            <td th:if="${hourStat.first and minuteStat.first}" rowspan="20" class="timeline-track">
                 <div class="timeline-block"
                      th:each="a : ${appointments}"
                      th:if="${a.status.name() != 'CANCELLED'}"

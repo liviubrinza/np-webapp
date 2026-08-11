@@ -55,7 +55,8 @@
                 <div class="col-md-4">
                     <label class="form-label">Ora început</label>
                     <select name="startTime" id="startTimeSelect" class="form-select">
-                        <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                        <option th:each="t : ${timeSlots}" th:value="${t}"
+                                th:text="${busyTimeSlots.startTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
                                 th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"
                                 th:disabled="${busyTimeSlots.startTimes().contains(t)}"></option>
                     </select>
@@ -63,7 +64,8 @@
                 <div class="col-md-4">
                     <label class="form-label">Ora sfârșit</label>
                     <select name="endTime" id="endTimeSelect" class="form-select">
-                        <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"
+                        <option th:each="t : ${timeSlots}" th:value="${t}"
+                                th:text="${busyTimeSlots.endTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
                                 th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"
                                 th:disabled="${busyTimeSlots.endTimes().contains(t)}"></option>
                     </select>
@@ -237,7 +239,9 @@
 
         var applyDisabled = function (select, busyTimes) {
             Array.from(select.options).forEach(function (option) {
-                option.disabled = busyTimes.indexOf(option.value) !== -1;
+                var busy = busyTimes.indexOf(option.value) !== -1;
+                option.disabled = busy;
+                option.textContent = busy ? option.value + ' — ocupat' : option.value;
             });
         };
 

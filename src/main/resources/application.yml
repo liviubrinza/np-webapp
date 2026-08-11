@@ -54,11 +54,12 @@ app:
   # (StructuredDataService) - days-of-week must be kept in sync by hand with the separately
   # translated contact.schedule.days label in messages_*.properties.
   contact:
-    street: "Stejarului nr.50"
-    city: "Floresti"
+    street: "str. Stejarului nr.50"
+    city: "sat Floresti"
+    county: "Cluj"
     postal-code: "407280"
     country-code: "RO"
-    phone: "0777 777 777"
+    phone: "(+40) 0777 777 777"
     email: "something@somethingelse.com"
     opening-time: "09:00"
     closing-time: "18:00"

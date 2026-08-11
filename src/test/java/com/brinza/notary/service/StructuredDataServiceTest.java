@@ -26,7 +26,7 @@ class StructuredDataServiceTest {
     private MessageSource messageSource;
 
     private final ContactSettings contactSettings = new ContactSettings(
-            "Str. Test 1", "Test City", "111111", "RO",
+            "Str. Test 1", "Test City", "County", "111111", "RO",
             "0700000000", "office@example.com", "09:00", "17:00",
             List.of("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"),
             46.0, 23.0);
@@ -54,6 +54,7 @@ class StructuredDataServiceTest {
                 .contains("\"url\":\"http://localhost:8080/ro/contact\"")
                 .contains("\"@type\":\"PostalAddress\"")
                 .contains("\"streetAddress\":\"Str. Test 1\"")
+                .contains("\"addressLocality\":\"Test City\"")
                 .contains("\"addressLocality\":\"Test City\"")
                 .contains("\"postalCode\":\"111111\"")
                 .contains("\"addressCountry\":\"RO\"")
