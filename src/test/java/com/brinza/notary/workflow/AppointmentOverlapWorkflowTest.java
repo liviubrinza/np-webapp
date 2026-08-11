@@ -76,6 +76,28 @@ class AppointmentOverlapWorkflowTest {
     }
 
     @Test
+    void listDoesNotMarkCancelledAppointmentThatOverlapsAConfirmedOne() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        appointmentAt(start, AppointmentStatus.CONFIRMED);
+        appointmentAt(start, AppointmentStatus.CANCELLED);
+
+        mockMvc.perform(get("/admin/appointments"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.not(Matchers.containsString(OVERLAP_LIST_MARKER))));
+    }
+
+    @Test
+    void detailPageDoesNotShowOverlapWarningForCancelledAppointment() throws Exception {
+        LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        appointmentAt(start, AppointmentStatus.CONFIRMED);
+        Appointment cancelled = appointmentAt(start, AppointmentStatus.CANCELLED);
+
+        mockMvc.perform(get("/admin/appointments/" + cancelled.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.not(Matchers.containsString(OVERLAP_DETAIL_MARKER))));
+    }
+
+    @Test
     void detailPageShowsOverlapWarningMessage() throws Exception {
         LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
         appointmentAt(start, AppointmentStatus.CONFIRMED);

@@ -30,7 +30,7 @@ class ContactControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("public/contact"))
                 .andExpect(model().attributeExists("address", "phone", "email", "hours", "latitude", "longitude"))
-                .andExpect(model().attribute("address", "Test Address 1, Test City 111111"))
+                .andExpect(model().attribute("address", "Test Address 1, Test City, County, 111111"))
                 .andExpect(model().attribute("hours", "09:00 - 17:00"));
     }
 
