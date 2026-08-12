@@ -45,7 +45,9 @@
     <div class="card mb-4">
         <div class="card-body">
             <form id="scheduleForm" th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
-                  class="row g-3 align-items-end" th:attr="data-busy-times-url=@{/admin/appointments/{id}/busy-times(id=${appointment.id()})}">
+                  class="row g-3 align-items-end"
+                  th:attr="data-busy-times-url=@{/admin/appointments/{id}/busy-times(id=${appointment.id()})},
+                           data-day-schedule-url=@{/admin/appointments/new/day-schedule}">
                 <input type="hidden" name="back" th:value="${backUrl}"/>
                 <div class="col-md-4">
                     <label class="form-label">Data</label>
@@ -79,6 +81,14 @@
                     <button type="submit" class="btn btn-primary">Actualizează programarea</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Day schedule -->
+    <div class="card mb-4">
+        <div class="card-header">Programări existente în ziua selectată</div>
+        <div class="card-body" id="dayTimelineContainer">
+            <div th:replace="~{admin/fragments :: appointmentsTimeline(${dayAppointments})}"></div>
         </div>
     </div>
 
@@ -238,6 +248,7 @@
         var dateInput = document.getElementById('scheduleDateInput');
         var startSelect = document.getElementById('startTimeSelect');
         var endSelect = document.getElementById('endTimeSelect');
+        var dayTimelineContainer = document.getElementById('dayTimelineContainer');
 
         var applyDisabled = function (select, busyTimes) {
             Array.from(select.options).forEach(function (option) {
@@ -265,11 +276,30 @@
                 });
         };
 
+        var refreshDayTimeline = function () {
+            var url = scheduleForm.dataset.dayScheduleUrl + '?date=' + encodeURIComponent(dateInput.value);
+            fetch(url)
+                .then(function (response) {
+                    return response.ok ? response.text() : null;
+                })
+                .then(function (html) {
+                    if (html !== null) {
+                        dayTimelineContainer.innerHTML = html;
+                    }
+                })
+                .catch(function () {
+                    // Leave the previously rendered timeline as-is if the request fails.
+                });
+        };
+
         flatpickr(dateInput, {
             altInput: true,
             altFormat: 'd-M-Y',
             dateFormat: 'Y-m-d',
-            onChange: refreshBusyTimes
+            onChange: function () {
+                refreshBusyTimes();
+                refreshDayTimeline();
+            }
         });
     }
 </script>

@@ -171,6 +171,7 @@ public class AppointmentAdminController {
         model.addAttribute("timeSlots", timeSlots);
         model.addAttribute("busyTimeSlots",
                 appointmentManagementService.findBusyTimeSlots(appointment.requestedAt().toLocalDate(), id, timeSlots));
+        model.addAttribute("dayAppointments", appointmentManagementService.findByDate(appointment.requestedAt().toLocalDate()));
         model.addAttribute("documents", documentManagementService.listForAppointment(id));
         model.addAttribute("backUrl", sanitizeBack(back));
         model.addAttribute("mailEnabled", systemSettings.isMailEnabled());
