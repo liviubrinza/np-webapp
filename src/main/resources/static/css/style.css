@@ -380,6 +380,28 @@ a:hover {
     background-color: #6c757d;
 }
 
+/* Appointment status <select> options — same colors as the status badges used everywhere
+   else (admin/fragments.html's appointmentsTable, statistics/requests.html). */
+.status-option-pending {
+    background-color: var(--bs-warning);
+    color: #000;
+}
+
+.status-option-confirmed {
+    background-color: var(--bs-success);
+    color: #fff;
+}
+
+.status-option-cancelled {
+    background-color: var(--bs-danger);
+    color: #fff;
+}
+
+.status-option-completed {
+    background-color: var(--bs-secondary);
+    color: #fff;
+}
+
 /* Admin statistics — Requests monthly bar chart. The inner div is given an explicit pixel
    width (proportional to how many months there are) so the chart doesn't get squeezed to fit
    the card; this wrapper's overflow-x: auto is what makes it scroll horizontally instead. */

@@ -125,6 +125,23 @@ class AppointmentAdminControllerTest {
     }
 
     @Test
+    void detailColorCodesStatusDropdownOptionsLikeTheStatusBadgesElsewhere() throws Exception {
+        when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
+        when(systemSettings.isMailEnabled()).thenReturn(true);
+
+        mockMvc.perform(get("/admin/appointments/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("class=\"status-option-pending\"")))
+                .andExpect(content().string(containsString("class=\"status-option-confirmed\"")))
+                .andExpect(content().string(containsString("class=\"status-option-cancelled\"")))
+                .andExpect(content().string(containsString("class=\"status-option-completed\"")));
+    }
+
+    @Test
     void updateStatusRedirectsToDetailWithFlashSuccess() throws Exception {
         mockMvc.perform(post("/admin/appointments/1/status").with(csrf())
                         .param("status", "CONFIRMED")

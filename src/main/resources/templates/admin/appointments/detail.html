@@ -105,7 +105,8 @@
                     <label class="form-label">Stare</label>
                     <select name="status" class="form-select">
                         <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
-                                th:selected="${s == appointment.status()}"></option>
+                                th:selected="${s == appointment.status()}"
+                                th:class="${'status-option-' + #strings.toLowerCase(s.name())}"></option>
                     </select>
                 </div>
                 <div class="col-12 text-end">
