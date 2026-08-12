@@ -175,6 +175,19 @@ class AppointmentAdminControllerTest {
     }
 
     @Test
+    void newFormMarksBusyTimeSlotsAsOccupied() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of("09:00"), Set.of("09:30")));
+
+        mockMvc.perform(get("/admin/appointments/new"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("09:00 — ocupat")))
+                .andExpect(content().string(containsString("09:30 — ocupat")));
+    }
+
+    @Test
     void createAppointmentRedirectsToDetailWithoutSendingReceivedEmail() throws Exception {
         when(appointmentBookingService.bookAsAdmin(any(), any())).thenReturn(7L);
 
