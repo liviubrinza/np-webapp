@@ -25,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -91,6 +93,7 @@ class AppointmentAdminControllerTest {
         when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
         when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
                 .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
         when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
         when(systemSettings.isMailEnabled()).thenReturn(true);
 
@@ -98,6 +101,44 @@ class AppointmentAdminControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/appointments/detail"))
                 .andExpect(model().attribute("mailEnabled", true));
+    }
+
+    @Test
+    void detailRendersDayScheduleTimelineWithOtherAppointmentsOnTheSameDate() throws Exception {
+        when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        List<AppointmentListItemView> dayAppointments = List.of(new AppointmentListItemView(
+                2L, "Maria Ionescu", "Legalizare", LocalDateTime.of(2026, 8, 1, 11, 0),
+                LocalDateTime.of(2026, 8, 1, 11, 30), AppointmentStatus.CONFIRMED, false,
+                LocalDateTime.of(2026, 7, 1, 9, 0)));
+        when(appointmentManagementService.findByDate(any())).thenReturn(dayAppointments);
+        when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
+        when(systemSettings.isMailEnabled()).thenReturn(true);
+
+        mockMvc.perform(get("/admin/appointments/1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("dayAppointments", dayAppointments))
+                .andExpect(content().string(containsString("Maria Ionescu")));
+
+        verify(appointmentManagementService).findByDate(detailView().requestedAt().toLocalDate());
+    }
+
+    @Test
+    void detailColorCodesStatusDropdownOptionsLikeTheStatusBadgesElsewhere() throws Exception {
+        when(appointmentManagementService.getDetail(1L)).thenReturn(detailView());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
+        when(systemSettings.isMailEnabled()).thenReturn(true);
+
+        mockMvc.perform(get("/admin/appointments/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("class=\"status-option-pending\"")))
+                .andExpect(content().string(containsString("class=\"status-option-confirmed\"")))
+                .andExpect(content().string(containsString("class=\"status-option-cancelled\"")))
+                .andExpect(content().string(containsString("class=\"status-option-completed\"")));
     }
 
     @Test
@@ -148,6 +189,19 @@ class AppointmentAdminControllerTest {
                 .andExpect(model().attributeExists("bookingRequest", "services", "startTimeSlots", "endTimeSlots",
                         "dayAppointments", "busyTimeSlots"))
                 .andExpect(model().attribute("selectedDate", java.time.LocalDate.now()));
+    }
+
+    @Test
+    void newFormMarksBusyTimeSlotsAsOccupied() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of("09:00"), Set.of("09:30")));
+
+        mockMvc.perform(get("/admin/appointments/new"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("09:00 — ocupat")))
+                .andExpect(content().string(containsString("09:30 — ocupat")));
     }
 
     @Test

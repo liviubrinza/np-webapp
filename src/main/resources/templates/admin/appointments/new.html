@@ -63,7 +63,8 @@
                             <label class="form-label">Ora început</label>
                             <select id="requestedAtTime" class="form-select">
                                 <option value="">Alege ora...</option>
-                                <option th:each="t : ${startTimeSlots}" th:value="${t}" th:text="${t}"
+                                <option th:each="t : ${startTimeSlots}" th:value="${t}"
+                                        th:text="${busyTimeSlots.startTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
                                         th:disabled="${busyTimeSlots.startTimes().contains(t)}"></option>
                             </select>
                         </div>
@@ -71,9 +72,10 @@
                             <label class="form-label">Ora sfârșit</label>
                             <select id="endTimeSelect" name="endTime" class="form-select">
                                 <option value="">Alege ora...</option>
-                                <option th:each="t : ${endTimeSlots}" th:value="${t}" th:text="${t}"
+                                <option th:each="t : ${endTimeSlots}" th:value="${t}"
+                                        th:text="${busyTimeSlots.endTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
                                         th:selected="${selectedEndTime != null and t == selectedEndTime}"
-                                        th:disabled="${busyTimeSlots.endTimes().contains(t)}"></option>
+                                        th:disabled="${busyTimeSlots.endTimes().contains(t) and t != selectedEndTime}"></option>
                             </select>
                         </div>
                     </div>
@@ -124,7 +126,15 @@
 
         var applyDisabled = function (select, busyTimes) {
             Array.from(select.options).forEach(function (option) {
-                option.disabled = busyTimes.indexOf(option.value) !== -1;
+                if (option.value === '') {
+                    return;
+                }
+                var busy = busyTimes.indexOf(option.value) !== -1;
+                // Never disable the currently selected option - a disabled+selected <option> is
+                // silently dropped from form submission by the HTML spec, which would turn a
+                // busy-but-already-chosen time into a missing required request parameter.
+                option.disabled = busy && option.value !== select.value;
+                option.textContent = busy ? option.value + ' — ocupat' : option.value;
             });
         };
 

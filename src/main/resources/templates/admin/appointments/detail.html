@@ -45,7 +45,9 @@
     <div class="card mb-4">
         <div class="card-body">
             <form id="scheduleForm" th:action="@{/admin/appointments/{id}/schedule(id=${appointment.id()})}" method="post"
-                  class="row g-3 align-items-end" th:attr="data-busy-times-url=@{/admin/appointments/{id}/busy-times(id=${appointment.id()})}">
+                  class="row g-3 align-items-end"
+                  th:attr="data-busy-times-url=@{/admin/appointments/{id}/busy-times(id=${appointment.id()})},
+                           data-day-schedule-url=@{/admin/appointments/new/day-schedule}">
                 <input type="hidden" name="back" th:value="${backUrl}"/>
                 <div class="col-md-4">
                     <label class="form-label">Data</label>
@@ -56,18 +58,20 @@
                     <label class="form-label">Ora început</label>
                     <select name="startTime" id="startTimeSelect" class="form-select">
                         <option th:each="t : ${timeSlots}" th:value="${t}"
+                                th:with="currentStart=${#temporals.format(appointment.requestedAt(), 'HH:mm')}"
                                 th:text="${busyTimeSlots.startTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
-                                th:selected="${t == #temporals.format(appointment.requestedAt(), 'HH:mm')}"
-                                th:disabled="${busyTimeSlots.startTimes().contains(t)}"></option>
+                                th:selected="${t == currentStart}"
+                                th:disabled="${busyTimeSlots.startTimes().contains(t) and t != currentStart}"></option>
                     </select>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Ora sfârșit</label>
                     <select name="endTime" id="endTimeSelect" class="form-select">
                         <option th:each="t : ${timeSlots}" th:value="${t}"
+                                th:with="currentEnd=${#temporals.format(appointment.endedAt(), 'HH:mm')}"
                                 th:text="${busyTimeSlots.endTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
-                                th:selected="${t == #temporals.format(appointment.endedAt(), 'HH:mm')}"
-                                th:disabled="${busyTimeSlots.endTimes().contains(t)}"></option>
+                                th:selected="${t == currentEnd}"
+                                th:disabled="${busyTimeSlots.endTimes().contains(t) and t != currentEnd}"></option>
                     </select>
                 </div>
                 <div class="col-12">
@@ -77,6 +81,14 @@
                     <button type="submit" class="btn btn-primary">Actualizează programarea</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Day schedule -->
+    <div class="card mb-4">
+        <div class="card-header">Programări existente în ziua selectată</div>
+        <div class="card-body" id="dayTimelineContainer">
+            <div th:replace="~{admin/fragments :: appointmentsTimeline(${dayAppointments})}"></div>
         </div>
     </div>
 
@@ -93,7 +105,8 @@
                     <label class="form-label">Stare</label>
                     <select name="status" class="form-select">
                         <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
-                                th:selected="${s == appointment.status()}"></option>
+                                th:selected="${s == appointment.status()}"
+                                th:class="${'status-option-' + #strings.toLowerCase(s.name())}"></option>
                     </select>
                 </div>
                 <div class="col-12 text-end">
@@ -236,11 +249,15 @@
         var dateInput = document.getElementById('scheduleDateInput');
         var startSelect = document.getElementById('startTimeSelect');
         var endSelect = document.getElementById('endTimeSelect');
+        var dayTimelineContainer = document.getElementById('dayTimelineContainer');
 
         var applyDisabled = function (select, busyTimes) {
             Array.from(select.options).forEach(function (option) {
                 var busy = busyTimes.indexOf(option.value) !== -1;
-                option.disabled = busy;
+                // Never disable the currently selected option - a disabled+selected <option> is
+                // silently dropped from form submission by the HTML spec, which would turn a
+                // busy-but-already-assigned time into a missing required request parameter.
+                option.disabled = busy && option.value !== select.value;
                 option.textContent = busy ? option.value + ' — ocupat' : option.value;
             });
         };
@@ -260,11 +277,30 @@
                 });
         };
 
+        var refreshDayTimeline = function () {
+            var url = scheduleForm.dataset.dayScheduleUrl + '?date=' + encodeURIComponent(dateInput.value);
+            fetch(url)
+                .then(function (response) {
+                    return response.ok ? response.text() : null;
+                })
+                .then(function (html) {
+                    if (html !== null) {
+                        dayTimelineContainer.innerHTML = html;
+                    }
+                })
+                .catch(function () {
+                    // Leave the previously rendered timeline as-is if the request fails.
+                });
+        };
+
         flatpickr(dateInput, {
             altInput: true,
             altFormat: 'd-M-Y',
             dateFormat: 'Y-m-d',
-            onChange: refreshBusyTimes
+            onChange: function () {
+                refreshBusyTimes();
+                refreshDayTimeline();
+            }
         });
     }
 </script>
