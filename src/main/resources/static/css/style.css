@@ -35,13 +35,17 @@ body > footer {
 
 h1, h2, h3, h4, h5,
 .card-title {
-    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
     font-weight: 700;
     color: var(--brand-text);
 }
 
+h1 {
+    font-weight: 600;
+}
+
 .navbar-brand {
-    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
     font-weight: 700;
     color: #fff;
 }
@@ -143,7 +147,10 @@ a:hover {
 
 .hero-panel {
     display: inline-block;
-    background-color: rgba(255, 255, 255, 0.88);
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 0.75rem;
     padding: 3rem 3.5rem;
     box-shadow: 0 10px 34px rgba(43, 35, 32, 0.18);
@@ -161,7 +168,10 @@ a:hover {
    and left-aligned (not inline-block/centered) so lists, forms, and other structured content lay
    out normally instead of shrink-wrapping like the home page's short centered text. */
 .page-panel {
-    background-color: rgba(255, 255, 255, 0.88);
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 0.75rem;
     /* Extra bottom padding (vs. top) balances out the heading's own margin/line-height space
        above the content, which otherwise makes the panel look top-heavy - content start and
@@ -171,18 +181,19 @@ a:hover {
     text-align: left;
 }
 
-/* Cards */
+/* Cards — sit on the frosted .page-panel/.hero-panel, so they're differentiated from it purely
+   through elevation (shadow + hairline border), not a background-color jump. */
 .card {
     background-color: var(--brand-surface);
     border: 1px solid var(--brand-border);
     border-top: 3px solid var(--brand-primary);
     border-radius: 0.6rem;
-    box-shadow: 0 4px 14px rgba(102, 9, 12, 0.06);
+    box-shadow: 0 6px 18px rgba(43, 35, 32, 0.12);
     transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .card:hover {
-    box-shadow: 0 10px 24px rgba(102, 9, 12, 0.12);
+    box-shadow: 0 10px 26px rgba(43, 35, 32, 0.18);
 }
 
 .card-footer {
