@@ -57,4 +57,20 @@ class ProfileServiceTest {
 
         assertThat(user.getPasswordHash()).isEqualTo("newHash");
     }
+
+    @Test
+    void getFullNameReturnsStoredFullName() {
+        AdminUser user = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
+        when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(user));
+
+        assertThat(service().getFullName("titi")).isEqualTo("Titi Full Name");
+    }
+
+    @Test
+    void getFullNameThrowsWhenUserNotFound() {
+        when(adminUserRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().getFullName("ghost"))
+                .isInstanceOf(NoSuchElementException.class);
+    }
 }

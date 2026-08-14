@@ -22,6 +22,13 @@ public class ProfileService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(readOnly = true)
+    public String getFullName(String username) {
+        return adminUserRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("No admin user with username " + username))
+                .getFullName();
+    }
+
     @Transactional
     public void changePassword(String username, String currentPassword, String newPassword) {
         // Never log raw passwords, only that a change was attempted/succeeded.

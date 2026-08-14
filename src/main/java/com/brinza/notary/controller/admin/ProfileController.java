@@ -33,6 +33,7 @@ public class ProfileController {
     @GetMapping
     public String show(Authentication authentication, Model model) {
         model.addAttribute("username", authentication.getName());
+        model.addAttribute("fullName", profileService.getFullName(authentication.getName()));
         model.addAttribute("changePasswordForm", new ChangePasswordForm());
         return "admin/profile";
     }
@@ -46,6 +47,7 @@ public class ProfileController {
         if (bindingResult.hasErrors()) {
             log.debug("Change-password form has {} validation error(s)", bindingResult.getErrorCount());
             model.addAttribute("username", authentication.getName());
+            model.addAttribute("fullName", profileService.getFullName(authentication.getName()));
             return "admin/profile";
         }
         try {
@@ -54,6 +56,7 @@ public class ProfileController {
         } catch (IllegalArgumentException e) {
             log.debug("Could not change password for username={}: {}", authentication.getName(), e.getMessage());
             model.addAttribute("username", authentication.getName());
+            model.addAttribute("fullName", profileService.getFullName(authentication.getName()));
             model.addAttribute("error", e.getMessage());
             return "admin/profile";
         }

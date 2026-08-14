@@ -6,40 +6,44 @@
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
 
 <main class="container my-4" style="max-width: 480px;">
-    <h1 class="h3 mb-4">Profilul meu</h1>
+    <div class="page-panel">
+        <h1 class="h3 mb-4">Profilul meu</h1>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
 
-    <dl class="row mb-4">
-        <dt class="col-sm-3">Nume de utilizator</dt>
-        <dd class="col-sm-9" th:text="${username}"></dd>
-    </dl>
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Nume de utilizator</dt>
+            <dd class="col-sm-9" th:text="${username}"></dd>
+            <dt class="col-sm-3">Nume complet</dt>
+            <dd class="col-sm-9" th:text="${fullName}"></dd>
+        </dl>
 
-    <h2 class="h5 mb-3">Schimbă parola</h2>
-    <form th:action="@{/admin/profile/password}" th:object="${changePasswordForm}" method="post">
-        <div class="mb-3">
-            <label class="form-label">Parola curentă</label>
-            <input type="password" th:field="*{currentPassword}" class="form-control"
-                   th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Parola nouă</label>
-            <input type="password" th:field="*{newPassword}" class="form-control"
-                   th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Confirmă parola nouă</label>
-            <input type="password" th:field="*{confirmNewPassword}" class="form-control"
-                   th:classappend="${#fields.hasErrors('confirmNewPassword') or #fields.hasErrors('confirmationMatching')} ? 'is-invalid'"/>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmNewPassword')}" th:errors="*{confirmNewPassword}"></div>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmationMatching')}" th:errors="*{confirmationMatching}"></div>
-        </div>
-        <button type="submit" class="btn btn-primary">Actualizează parola</button>
-        <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary">Anulează</a>
-    </form>
+        <h2 class="h5 mb-3">Schimbă parola</h2>
+        <form th:action="@{/admin/profile/password}" th:object="${changePasswordForm}" method="post">
+            <div class="mb-3">
+                <label class="form-label">Parola curentă</label>
+                <input type="password" th:field="*{currentPassword}" class="form-control"
+                       th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'"/>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Parola nouă</label>
+                <input type="password" th:field="*{newPassword}" class="form-control"
+                       th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"/>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirmă parola nouă</label>
+                <input type="password" th:field="*{confirmNewPassword}" class="form-control"
+                       th:classappend="${#fields.hasErrors('confirmNewPassword') or #fields.hasErrors('confirmationMatching')} ? 'is-invalid'"/>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmNewPassword')}" th:errors="*{confirmNewPassword}"></div>
+                <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmationMatching')}" th:errors="*{confirmationMatching}"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizează parola</button>
+            <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary">Anulează</a>
+        </form>
+    </div>
 </main>
 
 </body>
