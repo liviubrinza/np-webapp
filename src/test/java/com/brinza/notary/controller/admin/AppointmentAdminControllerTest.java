@@ -12,6 +12,8 @@ import com.brinza.notary.service.AppointmentBookingService;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.DocumentManagementService;
 import com.brinza.notary.service.ServiceCatalogService;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -44,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(AppointmentAdminController.class)
-@Import(AdminSessionRegistry.class)
+@Import({AdminSessionRegistry.class, TrafficStatsService.class, GeoLocationService.class})
 @WithMockUser(roles = "TECHNICIAN")
 class AppointmentAdminControllerTest {
 

@@ -2,8 +2,12 @@ package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.AdminSessionRegistry;
 import com.brinza.notary.dto.AppointmentMonthlyStatsView;
+import com.brinza.notary.dto.ClientTrafficView;
+import com.brinza.notary.dto.PageTimeView;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.LogViewerService;
+import com.brinza.notary.service.PublicPage;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -33,6 +37,8 @@ class StatisticsAdminControllerTest {
     private AppointmentManagementService appointmentManagementService;
     @MockitoBean
     private LogViewerService logViewerService;
+    @MockitoBean
+    private TrafficStatsService trafficStatsService;
 
     @Test
     void requestsRendersMonthlyStatsAndChartJson() throws Exception {
@@ -46,10 +52,31 @@ class StatisticsAdminControllerTest {
     }
 
     @Test
-    void trafficRendersStaticView() throws Exception {
+    void trafficRendersClientTrafficSnapshotWithTotalsAndAverage() throws Exception {
+        List<ClientTrafficView> snapshot = List.of(
+                new ClientTrafficView("203.0.113.5", java.time.Duration.ofMinutes(7), 2, "Cluj-Napoca, Romania",
+                        List.of(new PageTimeView(PublicPage.SERVICES, java.time.Duration.ofMinutes(7)))),
+                new ClientTrafficView("198.51.100.9", java.time.Duration.ofMinutes(3), 1, null,
+                        List.of(new PageTimeView(PublicPage.HOME, java.time.Duration.ofMinutes(3)))));
+        when(trafficStatsService.snapshot()).thenReturn(snapshot);
+
         mockMvc.perform(get("/admin/statistics/traffic"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("admin/statistics/traffic"));
+                .andExpect(view().name("admin/statistics/traffic"))
+                .andExpect(model().attribute("clientTraffic", snapshot))
+                .andExpect(model().attribute("totalClients", 2))
+                .andExpect(model().attribute("averageTime", java.time.Duration.ofMinutes(5)));
+    }
+
+    @Test
+    void trafficWithNoClientsHasZeroTotalsAndAverage() throws Exception {
+        when(trafficStatsService.snapshot()).thenReturn(List.of());
+
+        mockMvc.perform(get("/admin/statistics/traffic"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/statistics/traffic"))
+                .andExpect(model().attribute("totalClients", 0))
+                .andExpect(model().attribute("averageTime", java.time.Duration.ZERO));
     }
 
     @Test

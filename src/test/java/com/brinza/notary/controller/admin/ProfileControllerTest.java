@@ -3,6 +3,8 @@ package com.brinza.notary.controller.admin;
 import com.brinza.notary.config.AdminSessionRegistry;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.ProfileService;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -12,7 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(ProfileController.class)
-@Import(AdminSessionRegistry.class)
+@Import({AdminSessionRegistry.class, TrafficStatsService.class, GeoLocationService.class})
 @WithMockUser(username = "titi", roles = "TECHNICIAN")
 class ProfileControllerTest {
 

@@ -43,3 +43,12 @@ the app first.
 
 The H2 console is only enabled on the `h2` profile; it is not available when running
 against PostgreSQL (`docker` profile).
+
+## Outbound Network Access
+
+The admin Statistics > Traffic page resolves each visitor IP's approximate (city-level)
+location via a background call to `http://ip-api.com` (`GeoLocationService`). This is the
+app's only outbound HTTP dependency. In a production environment, the firewall/network
+policy must allow outgoing traffic from the app to `ip-api.com` on port 80 (plain HTTP -
+the free tier doesn't offer HTTPS), or these lookups will simply time out and locations
+will stay unresolved (shown as `—` in the table) - nothing else is affected.

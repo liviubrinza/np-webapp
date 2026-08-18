@@ -5,6 +5,8 @@ import com.brinza.notary.dto.ServiceAdminDetailView;
 import com.brinza.notary.dto.ServiceAdminListItemView;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.ServiceAdminManagementService;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -29,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(ServiceAdminController.class)
-@Import(AdminSessionRegistry.class)
+@Import({AdminSessionRegistry.class, TrafficStatsService.class, GeoLocationService.class})
 @WithMockUser(roles = "TECHNICIAN")
 class ServiceAdminControllerTest {
 

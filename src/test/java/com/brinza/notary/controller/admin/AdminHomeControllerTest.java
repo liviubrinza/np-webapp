@@ -1,6 +1,8 @@
 package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.AdminSessionRegistry;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -13,10 +15,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // @WebMvcTest registers Filter-type @Component beans (unlike plain @Components), so the global
-// AdminSessionCorrelationFilter gets pulled into the slice; it needs AdminSessionRegistry, which
-// otherwise isn't part of this slice - every admin-controller @WebMvcTest needs this same import.
+// AdminSessionCorrelationFilter and PublicTrafficTrackingFilter get pulled into the slice; they
+// need AdminSessionRegistry and TrafficStatsService respectively, neither of which is otherwise
+// part of this slice - every admin-controller @WebMvcTest needs this same import.
 @WebMvcTest(AdminHomeController.class)
-@Import(AdminSessionRegistry.class)
+@Import({AdminSessionRegistry.class, TrafficStatsService.class, GeoLocationService.class})
 class AdminHomeControllerTest {
 
     @Autowired

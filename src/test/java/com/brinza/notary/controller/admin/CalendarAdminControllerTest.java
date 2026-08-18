@@ -3,6 +3,8 @@ package com.brinza.notary.controller.admin;
 import com.brinza.notary.config.AdminSessionRegistry;
 import com.brinza.notary.dto.DayAvailability;
 import com.brinza.notary.service.AppointmentManagementService;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -22,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(CalendarAdminController.class)
-@Import(AdminSessionRegistry.class)
+@Import({AdminSessionRegistry.class, TrafficStatsService.class, GeoLocationService.class})
 @WithMockUser(roles = "TECHNICIAN")
 class CalendarAdminControllerTest {
 

@@ -2,9 +2,11 @@ package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.dto.AdminActivityEntryView;
 import com.brinza.notary.dto.AppointmentMonthlyStatsView;
+import com.brinza.notary.dto.ClientTrafficView;
 import com.brinza.notary.dto.LogEntryView;
 import com.brinza.notary.service.AppointmentManagementService;
 import com.brinza.notary.service.LogViewerService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -30,10 +33,14 @@ public class StatisticsAdminController {
 
     private final LogViewerService logViewerService;
     private final AppointmentManagementService appointmentManagementService;
+    private final TrafficStatsService trafficStatsService;
 
-    public StatisticsAdminController(LogViewerService logViewerService, AppointmentManagementService appointmentManagementService) {
+    public StatisticsAdminController(LogViewerService logViewerService,
+                                      AppointmentManagementService appointmentManagementService,
+                                      TrafficStatsService trafficStatsService) {
         this.logViewerService = logViewerService;
         this.appointmentManagementService = appointmentManagementService;
+        this.trafficStatsService = trafficStatsService;
     }
 
     @GetMapping
@@ -78,7 +85,16 @@ public class StatisticsAdminController {
     }
 
     @GetMapping("/traffic")
-    public String showTraffic() {
+    public String showTraffic(Model model) {
+        List<ClientTrafficView> clientTraffic = trafficStatsService.snapshot();
+        log.debug("Rendering traffic statistics for {} client(s)", clientTraffic.size());
+
+        Duration totalTime = clientTraffic.stream().map(ClientTrafficView::totalTime).reduce(Duration.ZERO, Duration::plus);
+        Duration averageTime = clientTraffic.isEmpty() ? Duration.ZERO : totalTime.dividedBy(clientTraffic.size());
+
+        model.addAttribute("clientTraffic", clientTraffic);
+        model.addAttribute("totalClients", clientTraffic.size());
+        model.addAttribute("averageTime", averageTime);
         return "admin/statistics/traffic";
     }
 

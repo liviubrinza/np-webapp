@@ -4,6 +4,8 @@ import com.brinza.notary.config.AdminSessionRegistry;
 import com.brinza.notary.config.ContactConfig;
 import com.brinza.notary.config.SecurityConfig;
 import com.brinza.notary.service.StructuredDataService;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -24,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 // auto-config denies every request; the real config's permitAll for non-/admin paths is
 // exactly the behavior these public-site tests need to exercise.
 @WebMvcTest(HomeController.class)
-@Import({AdminSessionRegistry.class, SecurityConfig.class, ContactConfig.class, StructuredDataService.class})
+@Import({AdminSessionRegistry.class, SecurityConfig.class, ContactConfig.class, StructuredDataService.class, TrafficStatsService.class, GeoLocationService.class})
 class HomeControllerTest {
 
     @Autowired
