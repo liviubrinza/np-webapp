@@ -9,7 +9,72 @@
     <h1 class="h3 mb-4">Statistici</h1>
     <div th:replace="~{admin/fragments :: statisticsNav('traffic')}"></div>
 
-    <div class="alert alert-secondary">Statisticile de trafic nu sunt încă implementate. Reveniți în curând.</div>
+    <p class="text-muted">
+        Date live, doar pentru durata rulării aplicației (nu sunt persistate). O vizită este
+        considerată încheiată după 10 minute de inactivitate din partea aceluiași IP.
+    </p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total clienți</div>
+                    <div class="fs-3 fw-semibold" th:text="${totalClients}"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Timp mediu pe client</div>
+                    <div class="fs-3 fw-semibold"
+                         th:text="${averageTime.toMinutes()} + ':' + ${#numbers.formatInteger(averageTime.toSecondsPart(), 2)}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0" style="table-layout: fixed; width: 100%;">
+                    <colgroup>
+                        <col style="width: 16.67%;">
+                        <col style="width: 10.67%;">
+                        <col style="width: 10.67%;">
+                        <col style="width: 16.67%;">
+                        <col style="width: 45.32%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>IP client</th>
+                        <th>Locație</th>
+                        <th class="text-center">Sesiuni</th>
+                        <th class="text-center">Timp total</th>
+                        <th>Timp per pagină</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="client : ${clientTraffic}">
+                        <td th:text="${client.ip()}"></td>
+                        <td th:text="${client.location()} ?: '—'"></td>
+                        <td class="text-center" th:text="${client.sessionCount()}"></td>
+                        <td class="text-center fw-semibold"
+                            th:text="${client.totalTime().toMinutes()} + ':' + ${#numbers.formatInteger(client.totalTime().toSecondsPart(), 2)}"></td>
+                        <td>
+                            <span th:each="p, iter : ${client.pages()}">
+                                <span th:text="${p.page().label()} + ': ' + ${p.time().toMinutes()} + ':' + ${#numbers.formatInteger(p.time().toSecondsPart(), 2)}"></span><span th:unless="${iter.last}">, </span>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${clientTraffic.isEmpty()}">
+                        <td colspan="5" class="text-muted text-center py-4">Niciun client nu a fost înregistrat încă.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </main>
 
 </body>

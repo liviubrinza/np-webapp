@@ -2,6 +2,8 @@ package com.brinza.notary.controller.web;
 
 import com.brinza.notary.config.AdminSessionRegistry;
 import com.brinza.notary.config.SecurityConfig;
+import com.brinza.notary.service.GeoLocationService;
+import com.brinza.notary.service.TrafficStatsService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -14,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SeoController.class)
-@Import({AdminSessionRegistry.class, SecurityConfig.class})
+@Import({AdminSessionRegistry.class, SecurityConfig.class, TrafficStatsService.class, GeoLocationService.class})
 class SeoControllerTest {
 
     @Autowired
