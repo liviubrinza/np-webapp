@@ -58,6 +58,35 @@ class BookingRequestTest {
         assertThat(requestWith(LocalDateTime.of(2026, 8, 1, 18, 0, 0)).isRequestedAtOnHalfHour()).isFalse();
     }
 
+    @Test
+    void nullRequestedAtPassesWeekdayCheckThrough() {
+        assertThat(requestWith(null).isRequestedAtOnWeekday()).isTrue();
+    }
+
+    @Test
+    void mondayIsValidWeekday() {
+        // 2026-08-03 is a Monday.
+        assertThat(requestWith(LocalDateTime.of(2026, 8, 3, 10, 0, 0)).isRequestedAtOnWeekday()).isTrue();
+    }
+
+    @Test
+    void fridayIsValidWeekday() {
+        // 2026-08-07 is a Friday.
+        assertThat(requestWith(LocalDateTime.of(2026, 8, 7, 10, 0, 0)).isRequestedAtOnWeekday()).isTrue();
+    }
+
+    @Test
+    void saturdayIsInvalid() {
+        // 2026-08-01 is a Saturday.
+        assertThat(requestWith(LocalDateTime.of(2026, 8, 1, 10, 0, 0)).isRequestedAtOnWeekday()).isFalse();
+    }
+
+    @Test
+    void sundayIsInvalid() {
+        // 2026-08-02 is a Sunday.
+        assertThat(requestWith(LocalDateTime.of(2026, 8, 2, 10, 0, 0)).isRequestedAtOnWeekday()).isFalse();
+    }
+
     private static BookingRequest requestWith(LocalDateTime requestedAt) {
         BookingRequest request = new BookingRequest();
         request.setRequestedAt(requestedAt);

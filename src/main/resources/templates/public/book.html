@@ -53,11 +53,11 @@
             <div class="row g-2">
                 <div class="col-6">
                     <input type="text" id="requestedAtDate" class="form-control" autocomplete="off" placeholder="dd-Mon-yyyy"
-                           th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'"/>
+                           th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour') or #fields.hasErrors('requestedAtOnWeekday')} ? 'is-invalid'"/>
                 </div>
                 <div class="col-6">
                     <select id="requestedAtTime" class="form-select"
-                            th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour')} ? 'is-invalid'">
+                            th:classappend="${#fields.hasErrors('requestedAt') or #fields.hasErrors('requestedAtOnHalfHour') or #fields.hasErrors('requestedAtOnWeekday')} ? 'is-invalid'">
                         <option th:each="t : ${timeSlots}" th:value="${t}" th:text="${t}"></option>
                     </select>
                 </div>
@@ -65,6 +65,7 @@
             <input type="hidden" th:field="*{requestedAt}"/>
             <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAt')}" th:errors="*{requestedAt}"></div>
             <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnHalfHour')}" th:errors="*{requestedAtOnHalfHour}"></div>
+            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('requestedAtOnWeekday')}" th:errors="*{requestedAtOnWeekday}"></div>
         </div>
 
         <div class="mb-3">
@@ -102,13 +103,23 @@
             hidden.value = dateInput.value ? (dateInput.value + 'T' + timeSelect.value) : '';
         }
 
+        var disableRules = [
+            function (date) {
+                var day = date.getDay();
+                return day === 0 || day === 6;
+            }
+        ];
+        if (vacationStart && vacationEnd) {
+            disableRules.push({from: vacationStart, to: vacationEnd});
+        }
+
         var picker = flatpickr(dateInput, {
             altInput: true,
             altFormat: 'd-M-Y',
             dateFormat: 'Y-m-d',
             minDate: 'today',
             locale: locale === 'en' ? 'default' : locale,
-            disable: (vacationStart && vacationEnd) ? [{from: vacationStart, to: vacationEnd}] : [],
+            disable: disableRules,
             onChange: sync
         });
 
