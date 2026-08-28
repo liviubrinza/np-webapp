@@ -95,6 +95,8 @@
         var dateInput = document.getElementById('requestedAtDate');
         var timeSelect = document.getElementById('requestedAtTime');
         var locale = /*[[${currentLocale}]]*/ 'en';
+        var vacationStart = /*[[${notificationVacationActive ? notificationVacationStartIso : null}]]*/ null;
+        var vacationEnd = /*[[${notificationVacationActive ? notificationVacationEndIso : null}]]*/ null;
 
         function sync() {
             hidden.value = dateInput.value ? (dateInput.value + 'T' + timeSelect.value) : '';
@@ -106,6 +108,7 @@
             dateFormat: 'Y-m-d',
             minDate: 'today',
             locale: locale === 'en' ? 'default' : locale,
+            disable: (vacationStart && vacationEnd) ? [{from: vacationStart, to: vacationEnd}] : [],
             onChange: sync
         });
 

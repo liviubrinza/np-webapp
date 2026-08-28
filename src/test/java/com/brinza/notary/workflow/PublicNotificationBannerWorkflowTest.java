@@ -174,6 +174,56 @@ class PublicNotificationBannerWorkflowTest {
                 .andExpect(content().string(Matchers.not(Matchers.containsString("<strong>"))));
     }
 
+    // The booking page's date picker must grey out the announced vacation range so visitors
+    // can't request an appointment during a closure the banner is actively telling them about.
+    @Test
+    @WithMockUser(username = "titi", roles = "TECHNICIAN")
+    void bookingPageDisablesVacationRangeInDatePickerWhenVacationBannerActive() throws Exception {
+        mockMvc.perform(post("/admin/settings/notification").with(csrf())
+                        .param("enabled", "true")
+                        .param("vacationStart", "2026-08-01")
+                        .param("vacationEnd", "2026-08-15"))
+                .andExpect(status().is3xxRedirection());
+        try {
+            mockMvc.perform(get("/en/book"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(Matchers.containsString("var vacationStart = \"2026-08-01\";")))
+                    .andExpect(content().string(Matchers.containsString("var vacationEnd = \"2026-08-15\";")));
+        } finally {
+            mockMvc.perform(post("/admin/settings/notification").with(csrf()));
+        }
+    }
+
+    @Test
+    @WithMockUser(username = "titi", roles = "TECHNICIAN")
+    void bookingPageDoesNotDisableAnyDatesByDefault() throws Exception {
+        mockMvc.perform(get("/en/book"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.containsString("var vacationStart = null;")))
+                .andExpect(content().string(Matchers.containsString("var vacationEnd = null;")));
+    }
+
+    // A custom message showing instead of the vacation template means the *displayed* banner no
+    // longer mentions the vacation dates at all, so the booking page shouldn't grey them out.
+    @Test
+    @WithMockUser(username = "titi", roles = "TECHNICIAN")
+    void bookingPageDoesNotDisableDatesWhenCustomMessageOverridesVacationBanner() throws Exception {
+        mockMvc.perform(post("/admin/settings/notification").with(csrf())
+                        .param("enabled", "true")
+                        .param("message", MESSAGE)
+                        .param("vacationStart", "2026-08-01")
+                        .param("vacationEnd", "2026-08-15"))
+                .andExpect(status().is3xxRedirection());
+        try {
+            mockMvc.perform(get("/en/book"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(Matchers.containsString("var vacationStart = null;")))
+                    .andExpect(content().string(Matchers.containsString("var vacationEnd = null;")));
+        } finally {
+            mockMvc.perform(post("/admin/settings/notification").with(csrf()));
+        }
+    }
+
     // A custom typed message takes priority over an auto-generated vacation template even when
     // both are set.
     @Test

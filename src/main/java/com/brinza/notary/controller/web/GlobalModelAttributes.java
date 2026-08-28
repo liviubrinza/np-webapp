@@ -27,6 +27,9 @@ import java.util.Locale;
  * on every public page, and the admin-configurable maintenance/notice banner state - either a
  * custom typed message, or (if none was typed but a vacation period was selected) a translated
  * "office is on holiday" message built via {@link MessageSource} for the visitor's current locale.
+ * A vacation range also gets exposed in plain ISO form ({@code notificationVacationStartIso}/
+ * {@code notificationVacationEndIso}), which {@code book.html}'s date picker uses to grey out
+ * those days so a visitor can't request an appointment during the announced closure.
  *
  * <p>{@code @WebMvcTest} slices pick up every {@code @ControllerAdvice} bean in the application
  * regardless of its {@code basePackages} (see {@code AdminGlobalModelAttributes} for the same
@@ -118,6 +121,10 @@ public class GlobalModelAttributes {
             model.addAttribute("notificationVacationPrefix", messageSource.getMessage(prefixKey, null, locale));
             model.addAttribute("notificationVacationSuffix", messageSource.getMessage(suffixKey, null, locale));
             model.addAttribute("notificationVacationStartDisplay", vacationStart.format(formatter));
+            // ISO (yyyy-MM-dd) form of the same range, for the booking page's date picker to grey
+            // out - the locale-formatted *Display strings above are for human reading only.
+            model.addAttribute("notificationVacationStartIso", vacationStart.toString());
+            model.addAttribute("notificationVacationEndIso", vacationEnd.toString());
             if (!singleDay) {
                 model.addAttribute("notificationVacationBetween",
                         messageSource.getMessage("notification.vacation.message.between", null, locale));
