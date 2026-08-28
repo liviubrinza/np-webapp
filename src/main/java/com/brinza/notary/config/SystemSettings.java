@@ -11,6 +11,8 @@ import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 /**
  * Runtime-editable behavior flags, backed by the {@code system_settings} table and mutable at
  * runtime from the technician-only Configurare page. On startup each known setting is read from
@@ -30,6 +32,10 @@ public class SystemSettings {
     private static final String KEY_LOGIN_LOCKOUT_MAX_ATTEMPTS = "login-lockout.max-attempts";
     private static final String KEY_LOGIN_LOCKOUT_LOCK_DURATION_MINUTES = "login-lockout.lock-duration-minutes";
     private static final String KEY_LOG_LEVEL = "log.level";
+    private static final String KEY_NOTIFICATION_ENABLED = "notification.enabled";
+    private static final String KEY_NOTIFICATION_MESSAGE = "notification.message";
+    private static final String KEY_NOTIFICATION_VACATION_START = "notification.vacation-start";
+    private static final String KEY_NOTIFICATION_VACATION_END = "notification.vacation-end";
 
     /** Base package of the app's own code - the logger scope the runtime-editable log level applies to. */
     private static final String APP_LOGGER_NAME = "com.brinza.notary";
@@ -45,6 +51,10 @@ public class SystemSettings {
     private volatile int loginLockoutMaxAttempts;
     private volatile int loginLockoutLockDurationMinutes;
     private volatile LogLevel logLevel;
+    private volatile boolean notificationEnabled;
+    private volatile String notificationMessage;
+    private volatile LocalDate notificationVacationStart;
+    private volatile LocalDate notificationVacationEnd;
 
     public SystemSettings(SystemSettingRepository systemSettingRepository,
                            @Value("${app.mail.enabled:false}") boolean mailEnabledDefault,
@@ -74,8 +84,24 @@ public class SystemSettings {
                 .map(setting -> LogLevel.valueOf(setting.getSettingValue()))
                 .orElse(logLevelDefault);
         loggingSystem.setLogLevel(APP_LOGGER_NAME, logLevel);
-        log.info("System settings loaded: mailEnabled={}, loginLockoutMaxAttempts={}, loginLockoutLockDurationMinutes={}, logLevel={}",
-                mailEnabled, loginLockoutMaxAttempts, loginLockoutLockDurationMinutes, logLevel);
+        notificationEnabled = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_ENABLED)
+                .map(setting -> Boolean.parseBoolean(setting.getSettingValue()))
+                .orElse(false);
+        notificationMessage = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_MESSAGE)
+                .map(SystemSetting::getSettingValue)
+                .orElse("");
+        notificationVacationStart = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_VACATION_START)
+                .map(SystemSetting::getSettingValue)
+                .filter(value -> !value.isBlank())
+                .map(LocalDate::parse)
+                .orElse(null);
+        notificationVacationEnd = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_VACATION_END)
+                .map(SystemSetting::getSettingValue)
+                .filter(value -> !value.isBlank())
+                .map(LocalDate::parse)
+                .orElse(null);
+        log.info("System settings loaded: mailEnabled={}, loginLockoutMaxAttempts={}, loginLockoutLockDurationMinutes={}, logLevel={}, notificationEnabled={}",
+                mailEnabled, loginLockoutMaxAttempts, loginLockoutLockDurationMinutes, logLevel, notificationEnabled);
     }
 
     public boolean isMailEnabled() {
@@ -139,5 +165,71 @@ public class SystemSettings {
         systemSettingRepository.save(setting);
         loginLockoutLockDurationMinutes = value;
         log.info("System setting updated: loginLockoutLockDurationMinutes={}", value);
+    }
+
+    public boolean isNotificationEnabled() {
+        return notificationEnabled;
+    }
+
+    public String getNotificationMessage() {
+        return notificationMessage;
+    }
+
+    public LocalDate getNotificationVacationStart() {
+        return notificationVacationStart;
+    }
+
+    public LocalDate getNotificationVacationEnd() {
+        return notificationVacationEnd;
+    }
+
+    @Transactional
+    public void setNotification(boolean enabled, String message, LocalDate vacationStart, LocalDate vacationEnd) {
+        String normalizedMessage = message == null ? "" : message.trim();
+        LocalDate normalizedVacationStart = vacationStart;
+        LocalDate normalizedVacationEnd = vacationEnd;
+        if (enabled) {
+            if ((normalizedVacationStart == null) != (normalizedVacationEnd == null)) {
+                throw new IllegalArgumentException(
+                        "Trebuie completate ambele date ale perioadei de vacanță, sau niciuna.");
+            }
+            if (normalizedVacationStart != null && normalizedVacationStart.isAfter(normalizedVacationEnd)) {
+                throw new IllegalArgumentException(
+                        "Data de început a vacanței trebuie să fie înainte de data de sfârșit.");
+            }
+            boolean hasVacationRange = normalizedVacationStart != null;
+            if (normalizedMessage.isEmpty() && !hasVacationRange) {
+                throw new IllegalArgumentException(
+                        "Mesajul de notificare nu poate fi gol când banner-ul este activat, decât dacă este selectată o perioadă de vacanță.");
+            }
+        } else {
+            // Disabling always clears the stored message and vacation period too, so stale content
+            // from a previous notification can never resurface just by flipping the toggle back on.
+            normalizedMessage = "";
+            normalizedVacationStart = null;
+            normalizedVacationEnd = null;
+        }
+        SystemSetting enabledSetting = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_ENABLED)
+                .orElseGet(() -> new SystemSetting(KEY_NOTIFICATION_ENABLED));
+        enabledSetting.setSettingValue(Boolean.toString(enabled));
+        systemSettingRepository.save(enabledSetting);
+        SystemSetting messageSetting = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_MESSAGE)
+                .orElseGet(() -> new SystemSetting(KEY_NOTIFICATION_MESSAGE));
+        messageSetting.setSettingValue(normalizedMessage);
+        systemSettingRepository.save(messageSetting);
+        SystemSetting vacationStartSetting = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_VACATION_START)
+                .orElseGet(() -> new SystemSetting(KEY_NOTIFICATION_VACATION_START));
+        vacationStartSetting.setSettingValue(normalizedVacationStart == null ? "" : normalizedVacationStart.toString());
+        systemSettingRepository.save(vacationStartSetting);
+        SystemSetting vacationEndSetting = systemSettingRepository.findBySettingKey(KEY_NOTIFICATION_VACATION_END)
+                .orElseGet(() -> new SystemSetting(KEY_NOTIFICATION_VACATION_END));
+        vacationEndSetting.setSettingValue(normalizedVacationEnd == null ? "" : normalizedVacationEnd.toString());
+        systemSettingRepository.save(vacationEndSetting);
+        notificationEnabled = enabled;
+        notificationMessage = normalizedMessage;
+        notificationVacationStart = normalizedVacationStart;
+        notificationVacationEnd = normalizedVacationEnd;
+        log.info("System setting updated: notificationEnabled={}, notificationVacationStart={}, notificationVacationEnd={}",
+                enabled, normalizedVacationStart, normalizedVacationEnd);
     }
 }

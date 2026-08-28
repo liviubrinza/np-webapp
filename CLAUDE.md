@@ -417,6 +417,54 @@ cache/persist pattern as `mailEnabled`) — dropdown posts to
 every startup since `logback-spring.xml`'s static `root level="INFO"` is only
 the initial default.
 
+Beyond spec: public-facing maintenance/notice banner, configured from a new
+**Notificare** tab on the Configurare page (`/admin/settings/notification`,
+own `admin/settings/notification.html`) — unlike **Sistem**/**Servicii**,
+this one tab is open to ADMIN as well as TECHNICIAN (`SecurityConfig`,
+`settingsNav` fragment gates each tab's `<li>` individually via
+`sec:authorize`). Same `SystemSettings` cache/persist pattern as
+`mailEnabled`, extended with `notification.enabled`/`notification.message`/
+`notification.vacation-start`/`notification.vacation-end` keys (still the
+generic `system_settings` table, no new migration).
+- Turning the toggle on requires either a typed message or a selected
+  vacation date range (native `<input type="date">` pair, no JS calendar
+  library) — `SystemSettings.setNotification` rejects a partial range, a
+  start after end, and (if there's no vacation range either) an empty
+  message. Turning the toggle off always clears both the message and the
+  vacation range, so a stale one can never resurface just by flipping the
+  toggle back on undoing nothing else. The toggle is the sole persistence
+  trigger (`onchange="this.form.submit()"`) — deliberately not also wired to
+  the message input, since both auto-submitting independently raced each
+  other (whichever field's browser event fired first submitted a stale
+  snapshot of the other field's DOM value).
+- Public rendering (`GlobalModelAttributes`, `layout/fragments.html`'s
+  `notificationBanner` fragment, included site-wide right under the navbar):
+  a typed message always wins over the vacation range; with no typed
+  message, an active vacation range renders a translated "office is closed"
+  template (`notification.vacation.message.*` keys, `messages_en/ro/hu.
+  properties`) with the date(s) in `<strong>` — built from `prefix`/
+  `between`/`suffix` message pieces rather than one `{0}`/`{1}` template, so
+  the dates can be individually bolded via plain `th:text` spans without
+  needing `th:utext`/unescaped output (blocked by the CI Thymeleaf guard). A
+  single-day range (start equals end) uses a dedicated `singleDay.prefix`/
+  `singleDay.suffix` pair ("closed **on** `<date>`") instead of the
+  between/and phrasing.
+- The booking page's flatpickr date picker (`public/book.html`) greys out
+  the announced vacation range (`notificationVacationStartIso`/`...EndIso`
+  model attributes) so a visitor can't request an appointment during a
+  closure the banner is actively telling them about — gated on the same
+  "is the vacation template actually the one showing" flag, not merely on
+  whether a range is stored, so a typed message overriding the vacation
+  banner doesn't grey out dates the visitor is no longer being told about.
+
+Beyond spec: booking is blocked on Saturdays/Sundays —
+`BookingRequest.isRequestedAtOnWeekday()` (same `@AssertTrue` pattern as the
+existing half-hour-slot check), so this applies to both the public booking
+form and the admin's own "+ Adaugă programare" form (`bookAsAdmin`), since
+both share the same `BookingRequest` DTO. `public/book.html`'s flatpickr
+also greys out Saturday/Sunday client-side, same array alongside the
+vacation-range disable rule.
+
 Not started:
 
 - [ ] 12. Dockerize — no `Dockerfile`, `docker-compose.yml`, or

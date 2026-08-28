@@ -70,6 +70,10 @@ public class SecurityConfig {
                         // Requests (Cereri) tab is open to both roles, every other statistics tab
                         // (traffic/activity/logs) stays TECHNICIAN-only.
                         .requestMatchers("/admin/statistics").hasAnyRole("ADMIN", "TECHNICIAN")
+                        // Same exact-match-before-wildcard pattern as the statistics rule above: the
+                        // Configurare page's Notificare tab is open to both roles, but every other
+                        // /admin/settings/** endpoint (Sistem, Servicii) stays TECHNICIAN-only.
+                        .requestMatchers("/admin/settings/notification").hasAnyRole("ADMIN", "TECHNICIAN")
                         .requestMatchers("/admin/statistics/**", "/admin/users/**", "/admin/settings/**").hasRole("TECHNICIAN")
                         .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll()

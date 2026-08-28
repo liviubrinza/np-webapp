@@ -36,8 +36,8 @@
             <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
                 <a class="nav-link text-white" th:href="@{/admin/users}">Utilizatori Admin</a>
             </li>
-            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
-                <a class="nav-link text-white" th:href="@{/admin/settings}">Configurare</a>
+            <li class="nav-item me-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
+                <a class="nav-link text-white" th:href="@{/admin/settings/notification}">Configurare</a>
             </li>
         </ul>
         <form th:action="@{/admin/logout}" method="post" class="d-flex align-items-center mb-0">
@@ -49,11 +49,15 @@
 </nav>
 
 <ul th:fragment="settingsNav(active)" class="nav nav-tabs mb-4">
-    <li class="nav-item">
+    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
+        <a class="nav-link" th:classappend="${active == 'notification'} ? 'active'"
+           th:href="@{/admin/settings/notification}">Notificare</a>
+    </li>
+    <li class="nav-item" sec:authorize="hasRole('TECHNICIAN')">
         <a class="nav-link" th:classappend="${active == 'system'} ? 'active'"
            th:href="@{/admin/settings}">Sistem</a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" sec:authorize="hasRole('TECHNICIAN')">
         <a class="nav-link" th:classappend="${active == 'services'} ? 'active'"
            th:href="@{/admin/settings/services}">Servicii</a>
     </li>

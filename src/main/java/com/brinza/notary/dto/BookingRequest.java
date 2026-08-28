@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
 public class BookingRequest {
@@ -87,6 +88,15 @@ public class BookingRequest {
             return false;
         }
         return hour >= 9 && hour <= 17 && !(hour == 17 && minute == 30);
+    }
+
+    @AssertTrue(message = "{book.requestedAt.weekend}")
+    public boolean isRequestedAtOnWeekday() {
+        if (requestedAt == null) {
+            return true;
+        }
+        DayOfWeek day = requestedAt.getDayOfWeek();
+        return day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY;
     }
 
     public String getNotes() {
