@@ -83,6 +83,18 @@
     </div>
 </nav>
 
+<div th:fragment="notificationBanner" th:if="${notificationEnabled}"
+     class="text-center py-2 px-3" style="background-color: #ffc107; color: #000;">
+    <span th:if="${notificationVacationActive}">
+        <span th:text="${notificationVacationPrefix}"></span>
+        <strong th:text="${notificationVacationStartDisplay}"></strong>
+        <th:block th:unless="${notificationVacationSingleDay}">
+            <span th:text="${notificationVacationBetween}"></span>
+            <strong th:text="${notificationVacationEndDisplay}"></strong></th:block><span th:text="${notificationVacationSuffix}"></span>
+    </span>
+    <span th:unless="${notificationVacationActive}" th:text="${notificationMessage}"></span>
+</div>
+
 <footer th:fragment="footer" class="site-footer text-center py-4 mt-5">
     <div class="container">
         <p th:if="${contactSettings != null}" class="mb-2">
