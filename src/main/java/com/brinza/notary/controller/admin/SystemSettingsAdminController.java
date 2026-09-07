@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
+
 @Controller
 @RequestMapping("/admin/settings")
 public class SystemSettingsAdminController {
@@ -35,6 +37,32 @@ public class SystemSettingsAdminController {
         model.addAttribute("logLevel", systemSettings.getLogLevel());
         model.addAttribute("logLevels", LogLevel.values());
         return "admin/settings/list";
+    }
+
+    @GetMapping("/notification")
+    public String showNotification(Model model) {
+        model.addAttribute("notificationEnabled", systemSettings.isNotificationEnabled());
+        model.addAttribute("notificationMessage", systemSettings.getNotificationMessage());
+        model.addAttribute("vacationStart", systemSettings.getNotificationVacationStart());
+        model.addAttribute("vacationEnd", systemSettings.getNotificationVacationEnd());
+        return "admin/settings/notification";
+    }
+
+    @PostMapping("/notification")
+    public String updateNotification(@RequestParam(required = false, defaultValue = "false") boolean enabled,
+                                      @RequestParam(required = false, defaultValue = "") String message,
+                                      @RequestParam(required = false) LocalDate vacationStart,
+                                      @RequestParam(required = false) LocalDate vacationEnd,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            systemSettings.setNotification(enabled, message, vacationStart, vacationEnd);
+            adminActivityLogger.log("Setat banner notificare pe " + (enabled ? "activat" : "dezactivat"));
+            redirectAttributes.addFlashAttribute("success", "Setare actualizată.");
+        } catch (IllegalArgumentException e) {
+            log.debug("Notification setting rejected: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/settings/notification";
     }
 
     @PostMapping("/log-level")

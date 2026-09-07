@@ -22,6 +22,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -243,6 +244,27 @@ class AppointmentAdminControllerTest {
     }
 
     @Test
+    void createAppointmentOnWeekendRerendersFormWithoutCreating() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+
+        mockMvc.perform(post("/admin/appointments/new").with(csrf())
+                        .param("clientName", "Ion Popescu")
+                        .param("email", "ion@example.com")
+                        .param("phone", "0700000000")
+                        .param("serviceId", "1")
+                        .param("requestedAt", nextSaturdayHalfHourDateTime())
+                        .param("endTime", "11:00")
+                        .param("notes", "notes"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/appointments/new"));
+
+        verify(appointmentBookingService, org.mockito.Mockito.never()).bookAsAdmin(any(), any());
+    }
+
+    @Test
     void createAppointmentRerendersFormOnServiceErrorSuchAsMissingEndTime() throws Exception {
         when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
         when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
@@ -282,9 +304,21 @@ class AppointmentAdminControllerTest {
                 .andExpect(status().isOk());
     }
 
+    /** Next day at 10:00, nudged off any weekend - a valid half-hour weekday slot regardless of run date. */
     private static String futureHalfHourDateTime() {
-        return LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+        LocalDateTime dateTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        while (dateTime.getDayOfWeek() == DayOfWeek.SATURDAY || dateTime.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            dateTime = dateTime.plusDays(1);
+        }
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+    }
+
+    private static String nextSaturdayHalfHourDateTime() {
+        LocalDateTime dateTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        while (dateTime.getDayOfWeek() != DayOfWeek.SATURDAY) {
+            dateTime = dateTime.plusDays(1);
+        }
+        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
     }
 
     private static AppointmentDetailView detailView() {

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('Configurare', null)}"></head>
+<body>
+
+<nav th:replace="~{admin/fragments :: navbar}"></nav>
+
+<main class="container my-4" style="max-width: 720px;">
+    <h1 class="h3 mb-4">Configurare</h1>
+
+    <div th:replace="~{admin/fragments :: settingsNav('notification')}"></div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card">
+        <div class="card-header">Banner de notificare public</div>
+        <div class="card-body">
+            <form th:action="@{/admin/settings/notification}" method="post">
+                <div class="form-check form-switch mb-4">
+                    <input class="form-check-input" type="checkbox" role="switch" id="notificationEnabled"
+                           name="enabled" value="true" th:checked="${notificationEnabled}" onchange="this.form.submit()"/>
+                    <label class="form-check-label fw-semibold" for="notificationEnabled">
+                        Afișează banner de notificare pe site-ul public
+                    </label>
+                </div>
+
+                <hr class="mb-4"/>
+
+                <h2 class="h6 text-uppercase text-muted mb-3">Perioadă de vacanță</h2>
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                    <input type="date" class="form-control" style="width: auto;" id="vacationStart" name="vacationStart"
+                           th:value="${vacationStart != null ? vacationStart : ''}"/>
+                    <span class="text-muted">&rarr;</span>
+                    <input type="date" class="form-control" style="width: auto;" id="vacationEnd" name="vacationEnd"
+                           th:value="${vacationEnd != null ? vacationEnd : ''}"/>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearVacationSelection()">
+                        Șterge selecția
+                    </button>
+                </div>
+                <div class="form-text mb-1" id="vacationRangeDisplay">&nbsp;</div>
+                <p class="form-text mb-4">
+                    Dacă este selectată o perioadă de vacanță, banner-ul va fi activat automat. Vizitatorii vor vedea un mesaj tradus, specific perioadei de
+                    vacanță selectate.
+                </p>
+
+                <h2 class="h6 text-uppercase text-muted mb-3">Mesaj notificare</h2>
+                <input type="text" class="form-control" id="notificationMessage" name="message"
+                       maxlength="500" th:value="${notificationMessage}"
+                       placeholder="Ex: Biroul este închis pentru inventar pe 30 august."/>
+                <p class="form-text mb-0">
+                    Dacă este completat, acest mesaj este întotdeauna afișat în locul celui generat automat pentru
+                    perioada de vacanță.
+                </p>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    function updateVacationRangeDisplay() {
+        var start = document.getElementById('vacationStart').value;
+        var end = document.getElementById('vacationEnd').value;
+        var display = document.getElementById('vacationRangeDisplay');
+        display.textContent = (start && end) ? (start + ' → ' + end) : ' ';
+    }
+
+    function clearVacationSelection() {
+        document.getElementById('vacationStart').value = '';
+        document.getElementById('vacationEnd').value = '';
+        updateVacationRangeDisplay();
+    }
+
+    document.getElementById('vacationStart').addEventListener('change', updateVacationRangeDisplay);
+    document.getElementById('vacationEnd').addEventListener('change', updateVacationRangeDisplay);
+    updateVacationRangeDisplay();
+</script>
+
+</body>
+</html>

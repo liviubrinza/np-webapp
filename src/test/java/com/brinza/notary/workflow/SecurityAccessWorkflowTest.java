@@ -69,14 +69,24 @@ class SecurityAccessWorkflowTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminRoleGetsForbiddenOnTechnicianOnlyRoute() throws Exception {
-        mockMvc.perform(get("/admin/settings"))
+        mockMvc.perform(get("/admin/settings/services"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(roles = "TECHNICIAN")
     void technicianRoleCanAccessTechnicianOnlyRoute() throws Exception {
-        mockMvc.perform(get("/admin/settings"))
+        mockMvc.perform(get("/admin/settings/services"))
+                .andExpect(status().isOk());
+    }
+
+    // The Configurare page's Notificare tab is the one part of /admin/settings/** open to
+    // ADMIN too - everything else under that prefix (Sistem, Servicii) stays TECHNICIAN-only,
+    // covered by the two tests above.
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void adminRoleCanAccessNotificationSettingsPage() throws Exception {
+        mockMvc.perform(get("/admin/settings/notification"))
                 .andExpect(status().isOk());
     }
 

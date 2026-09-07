@@ -12,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -76,8 +77,41 @@ class BookingWorkflowTest {
         assertThat(appointmentRepository.count()).isEqualTo(before);
     }
 
-    /** Two weeks out at 10:00 - safely in the future and on a valid half-hour booking slot. */
+    @Test
+    void weekendSubmissionRedisplaysFormAndPersistsNothing() throws Exception {
+        Service service = serviceRepository.findByCode("document-authentication").orElseThrow();
+        long before = appointmentRepository.count();
+
+        mockMvc.perform(post("/ro/book").with(csrf())
+                        .param("clientName", "Weekend Test Client")
+                        .param("email", "weekend-test-client@example.com")
+                        .param("phone", "0700000000")
+                        .param("serviceId", service.getId().toString())
+                        .param("requestedAt", nextSaturday())
+                        .param("notes", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("public/book"));
+
+        assertThat(appointmentRepository.count()).isEqualTo(before);
+    }
+
+    private static String nextSaturday() {
+        LocalDate date = LocalDate.now().plusDays(14);
+        while (date.getDayOfWeek() != DayOfWeek.SATURDAY) {
+            date = date.plusDays(1);
+        }
+        return date + "T10:00";
+    }
+
+    /**
+     * Two weeks out at 10:00, nudged forward off any weekend - safely in the future, on a valid
+     * half-hour booking slot, and on a weekday regardless of which day the test happens to run.
+     */
     private static String nextValidSlot() {
-        return LocalDate.now().plusDays(14) + "T10:00";
+        LocalDate date = LocalDate.now().plusDays(14);
+        while (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            date = date.plusDays(1);
+        }
+        return date + "T10:00";
     }
 }

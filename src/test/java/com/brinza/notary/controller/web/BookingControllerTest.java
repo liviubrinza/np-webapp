@@ -80,10 +80,28 @@ class BookingControllerTest {
                         .param("email", "ion@example.com")
                         .param("phone", "0700000000")
                         .param("serviceId", "1")
-                        .param("requestedAt", "2099-08-01T10:00")
+                        .param("requestedAt", "2099-08-03T10:00")
                         .param("notes", ""))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/ro/book/confirmation"));
+    }
+
+    @Test
+    void submitOnSaturdayRedisplaysFormWithoutBooking() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
+
+        // 2099-08-01 is a Saturday.
+        mockMvc.perform(post("/ro/book").with(csrf())
+                        .param("clientName", "Ion Popescu")
+                        .param("email", "ion@example.com")
+                        .param("phone", "0700000000")
+                        .param("serviceId", "1")
+                        .param("requestedAt", "2099-08-01T10:00")
+                        .param("notes", ""))
+                .andExpect(status().isOk())
+                .andExpect(view().name("public/book"));
+
+        verify(appointmentBookingService, never()).book(any(), any());
     }
 
     @Test
