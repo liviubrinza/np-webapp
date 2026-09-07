@@ -109,72 +109,85 @@ class AppointmentManagementServiceTest {
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.FREE);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.FREE);
     }
 
     @Test
     void cancelledAppointmentsAreExcludedLeavingDayFree() {
-        Appointment cancelled = appointmentWith(AppointmentStatus.CANCELLED, LocalDateTime.of(2026, 8, 1, 9, 0),
-                LocalDateTime.of(2026, 8, 1, 17, 0));
+        Appointment cancelled = appointmentWith(AppointmentStatus.CANCELLED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 17, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(cancelled));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.FREE);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.FREE);
     }
 
     @Test
     void appointmentCoveringEntireWorkdayIsFull() {
-        Appointment fullDay = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0),
-                LocalDateTime.of(2026, 8, 1, 17, 0));
+        Appointment fullDay = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 18, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(fullDay));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.FULL);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.FULL);
+    }
+
+    @Test
+    void appointmentEndingAtBookingCutoffIsNotYetFull() {
+        // Last bookable slot starts at 17:00 (see BookingRequest), so an appointment ending
+        // exactly then still leaves 17:00-18:00 open - the day should not read as fully booked.
+        Appointment untilCutoff = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 17, 0));
+        when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(untilCutoff));
+
+        Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
+
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.PARTIAL);
     }
 
     @Test
     void partialCoverageLeavesDayPartial() {
-        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0),
-                LocalDateTime.of(2026, 8, 1, 10, 0));
+        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 10, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(morning));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.PARTIAL);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.PARTIAL);
     }
 
     @Test
     void adjacentAppointmentsMergeToFillEntireWorkday() {
-        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0),
-                LocalDateTime.of(2026, 8, 1, 12, 0));
-        Appointment afternoon = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 12, 0),
-                LocalDateTime.of(2026, 8, 1, 17, 0));
+        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 12, 0));
+        Appointment afternoon = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 12, 0),
+                LocalDateTime.of(2026, 8, 3, 18, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(morning, afternoon));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.FULL);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.FULL);
     }
 
     @Test
     void gapBetweenAppointmentsLeavesDayPartial() {
-        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0),
-                LocalDateTime.of(2026, 8, 1, 10, 0));
-        Appointment afternoon = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 15, 0),
-                LocalDateTime.of(2026, 8, 1, 17, 0));
+        Appointment morning = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0),
+                LocalDateTime.of(2026, 8, 3, 10, 0));
+        Appointment afternoon = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 15, 0),
+                LocalDateTime.of(2026, 8, 3, 17, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(morning, afternoon));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
 
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.PARTIAL);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.PARTIAL);
     }
 
     @Test
     void appointmentEntirelyOutsideWorkdayIsClippedAwayButStillReportsPartial() {
-        Appointment beforeOpening = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 6, 0),
-                LocalDateTime.of(2026, 8, 1, 8, 0));
+        Appointment beforeOpening = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 6, 0),
+                LocalDateTime.of(2026, 8, 3, 8, 0));
         when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of(beforeOpening));
 
         Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
@@ -182,7 +195,20 @@ class AppointmentManagementServiceTest {
         // The appointment clips to a zero-length interval since it's entirely before the workday
         // starts, so no interval is recorded - but the day isn't reported FREE, since a
         // non-cancelled appointment does exist. This documents current behavior.
-        assertThat(availability.get(LocalDate.of(2026, 8, 1))).isEqualTo(DayAvailability.PARTIAL);
+        assertThat(availability.get(LocalDate.of(2026, 8, 3))).isEqualTo(DayAvailability.PARTIAL);
+    }
+
+    @Test
+    void weekendDaysAreExcludedFromAvailabilityMap() {
+        when(appointmentRepository.search(isNull(), any(), any(), isNull())).thenReturn(List.of());
+
+        Map<LocalDate, DayAvailability> availability = service().monthAvailability(YearMonth.of(2026, 8));
+
+        // 2026-08-01 is a Saturday, 2026-08-02 a Sunday - no bookings are ever made on weekends,
+        // so the calendar should not color them at all (not even FREE).
+        assertThat(availability).doesNotContainKey(LocalDate.of(2026, 8, 1));
+        assertThat(availability).doesNotContainKey(LocalDate.of(2026, 8, 2));
+        assertThat(availability).containsKey(LocalDate.of(2026, 8, 3));
     }
 
     // ---- monthlyStatusSummary ----

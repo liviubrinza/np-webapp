@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -38,7 +39,9 @@ public class AppointmentManagementService {
 
     private static final DateTimeFormatter CHANGE_LOG_FORMAT = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
     private static final LocalTime WORKDAY_START = LocalTime.of(9, 0);
-    private static final LocalTime WORKDAY_END = LocalTime.of(17, 0);
+    // Bookable slots stop at 17:00 (see BookingRequest/BookingController), but an appointment
+    // started then can run past it, so a day only counts as fully booked once coverage reaches 18:00.
+    private static final LocalTime WORKDAY_END = LocalTime.of(18, 0);
 
     private final AppointmentRepository appointmentRepository;
     private final ServiceCatalogService serviceCatalogService;
@@ -105,6 +108,9 @@ public class AppointmentManagementService {
         Map<LocalDate, DayAvailability> result = new LinkedHashMap<>();
         for (int day = 1; day <= month.lengthOfMonth(); day++) {
             LocalDate date = month.atDay(day);
+            if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                continue;
+            }
             result.put(date, dayAvailability(byDay.getOrDefault(date, List.of())));
         }
         return result;

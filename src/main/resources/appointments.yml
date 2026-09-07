@@ -8,8 +8,10 @@
 # `booked-date` is the appointment's created-at timestamp (when the booking was made), separate
 # from `requested-at` (the actual appointment slot). `status` accepts any AppointmentStatus value.
 #
-# 3/5/18 August 2026 are deliberately fully booked back-to-back from 09:00 to 17:00 with no gaps
-# (each block's durations sum to exactly 480 minutes) - keep that invariant if you edit them.
+# Several days are deliberately fully booked back-to-back from 09:00 to 18:00 with no gaps (each
+# block's durations sum to exactly 540 minutes) so the admin calendar shows them red - keep that
+# invariant if you edit them. Currently: 3/5/18 August (below), 8/15/22 September (below), plus
+# 8/15/22 May, 2/10/18 June, and 6/14/22 July in the historical section further down.
 app:
   demo-appointments:
     - client-name: "Attila Nagy"
@@ -72,6 +74,14 @@ app:
       booked-date: "2026-07-30T15:30:00"
       duration: 30
       status: CONFIRMED
+    - client-name: "Ferenc Kovács"
+      email: "ferenc.kovacs87@outlook.com"
+      phone: "0723625315"
+      booked-service: document-authentication
+      requested-at: "2026-08-03T17:00:00"
+      booked-date: "2026-07-19T17:00:00"
+      duration: 60
+      status: CONFIRMED
     - client-name: "Cristina Tóth"
       email: "cristina.toth74@yahoo.com"
       phone: "0733212852"
@@ -132,6 +142,14 @@ app:
       duration: 30
       status: CONFIRMED
       notes: "First time client."
+    - client-name: "Georgiana Nagy"
+      email: "georgiana.nagy62@gmail.com"
+      phone: "0773706075"
+      booked-service: document-authentication
+      requested-at: "2026-08-05T17:00:00"
+      booked-date: "2026-07-21T17:00:00"
+      duration: 60
+      status: CONFIRMED
     - client-name: "Enikő Popescu"
       email: "eniko.popescu12@yahoo.com"
       phone: "0762184869"
@@ -219,6 +237,14 @@ app:
       duration: 30
       status: CONFIRMED
       notes: "Returning client."
+    - client-name: "Ferenc Barbu"
+      email: "ferenc.barbu4@outlook.com"
+      phone: "0770013235"
+      booked-service: document-authentication
+      requested-at: "2026-08-18T17:00:00"
+      booked-date: "2026-08-03T17:00:00"
+      duration: 60
+      status: CONFIRMED
     - client-name: "Elena Radu"
       email: "elena.radu53@gmail.com"
       phone: "0762788504"
@@ -307,6 +333,98 @@ app:
       status: CONFIRMED
       notes: "Prefers a morning slot next time."
 
+    # Fully booked (2026-09-08, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Ildikó Szabó"
+      email: "ildiko.szabo46@gmail.com"
+      phone: "0772801514"
+      booked-service: probate-proceedings
+      requested-at: "2026-09-08T09:00:00"
+      booked-date: "2026-08-21T07:00:00"
+      duration: 180
+      status: CONFIRMED
+    - client-name: "Enikő Dobre"
+      email: "eniko.dobre12@outlook.com"
+      phone: "0760641367"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-08T12:00:00"
+      booked-date: "2026-08-18T09:45:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Réka Barbu"
+      email: "reka.barbu19@gmail.com"
+      phone: "0747238117"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-08T14:00:00"
+      booked-date: "2026-08-15T11:30:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Raluca Barbu"
+      email: "raluca.barbu93@yahoo.com"
+      phone: "0769957913"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-08T16:00:00"
+      booked-date: "2026-08-12T13:15:00"
+      duration: 120
+      status: CONFIRMED
+    # Fully booked (2026-09-15, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Melinda Dumitru"
+      email: "melinda.dumitru6@yahoo.com"
+      phone: "0727703152"
+      booked-service: probate-proceedings
+      requested-at: "2026-09-15T09:00:00"
+      booked-date: "2026-08-28T07:00:00"
+      duration: 180
+      status: CONFIRMED
+    - client-name: "Georgiana Molnár"
+      email: "georgiana.molnar28@gmail.com"
+      phone: "0731142333"
+      booked-service: probate-proceedings
+      requested-at: "2026-09-15T12:00:00"
+      booked-date: "2026-08-25T09:45:00"
+      duration: 180
+      status: CONFIRMED
+    - client-name: "Ferenc Kiss"
+      email: "ferenc.kiss54@gmail.com"
+      phone: "0736181654"
+      booked-service: probate-proceedings
+      requested-at: "2026-09-15T15:00:00"
+      booked-date: "2026-08-22T12:30:00"
+      duration: 180
+      status: CONFIRMED
+    # Fully booked (2026-09-22, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Norbert Stan"
+      email: "norbert.stan97@outlook.com"
+      phone: "0796929091"
+      booked-service: probate-proceedings
+      requested-at: "2026-09-22T09:00:00"
+      booked-date: "2026-09-04T07:00:00"
+      duration: 180
+      status: CONFIRMED
+    - client-name: "Raluca Dumitru"
+      email: "raluca.dumitru50@yahoo.com"
+      phone: "0715641889"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-22T12:00:00"
+      booked-date: "2026-09-01T09:45:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Adriana Kiss"
+      email: "adriana.kiss87@gmail.com"
+      phone: "0718262123"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-22T14:00:00"
+      booked-date: "2026-08-29T11:30:00"
+      duration: 120
+      status: CONFIRMED
+    - client-name: "Tibor Molnár"
+      email: "tibor.molnar24@outlook.com"
+      phone: "0744611534"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-09-22T16:00:00"
+      booked-date: "2026-08-26T13:15:00"
+      duration: 120
+      status: CONFIRMED
+
     # --- Historical data for the statistics "Cereri" tab (grouped by booked-date/created-at) ---
 
     # May 2026 - closed out, COMPLETED or CANCELLED only.
@@ -369,6 +487,90 @@ app:
       duration: 45
       status: CANCELLED
 
+    # Fully booked (2026-05-08, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Dan Constantin"
+      email: "dan.constantin91@yahoo.com"
+      phone: "0756940887"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-08T09:00:00"
+      booked-date: "2026-04-20T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Tibor Molnár"
+      email: "tibor.molnar60@gmail.com"
+      phone: "0799049522"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-08T12:00:00"
+      booked-date: "2026-04-17T09:45:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Raluca Constantin"
+      email: "raluca.constantin71@outlook.com"
+      phone: "0798706634"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-08T15:00:00"
+      booked-date: "2026-04-14T12:30:00"
+      duration: 180
+      status: COMPLETED
+    # Fully booked (2026-05-15, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Radu Popescu"
+      email: "radu.popescu19@outlook.com"
+      phone: "0745797513"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-15T09:00:00"
+      booked-date: "2026-04-27T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Bogdan Kiss"
+      email: "bogdan.kiss1@yahoo.com"
+      phone: "0753779751"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-05-15T12:00:00"
+      booked-date: "2026-04-24T09:45:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Krisztina Kiss"
+      email: "krisztina.kiss26@gmail.com"
+      phone: "0763419030"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-05-15T14:00:00"
+      booked-date: "2026-04-21T11:30:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Adriana Dobre"
+      email: "adriana.dobre4@outlook.com"
+      phone: "0745096681"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-05-15T16:00:00"
+      booked-date: "2026-04-18T13:15:00"
+      duration: 120
+      status: COMPLETED
+    # Fully booked (2026-05-22, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Timea Popescu"
+      email: "timea.popescu63@yahoo.com"
+      phone: "0781002435"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-22T09:00:00"
+      booked-date: "2026-05-04T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Adriana Varga"
+      email: "adriana.varga84@gmail.com"
+      phone: "0799705085"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-22T12:00:00"
+      booked-date: "2026-05-01T09:45:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Réka Tóth"
+      email: "reka.toth25@gmail.com"
+      phone: "0760744809"
+      booked-service: probate-proceedings
+      requested-at: "2026-05-22T15:00:00"
+      booked-date: "2026-04-28T12:30:00"
+      duration: 180
+      status: COMPLETED
+
     # June 2026 - closed out, COMPLETED or CANCELLED only.
     - client-name: "Diana Barbu"
       email: "diana.barbu63@yahoo.com"
@@ -413,6 +615,98 @@ app:
       status: CANCELLED
       notes: "Estate moved to a different notary office."
 
+    # Fully booked (2026-06-02, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Marius Popa"
+      email: "marius.popa73@yahoo.com"
+      phone: "0771522768"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-02T09:00:00"
+      booked-date: "2026-05-15T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Georgiana Kovács"
+      email: "georgiana.kovacs74@yahoo.com"
+      phone: "0774694475"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-02T12:00:00"
+      booked-date: "2026-05-12T09:45:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Ildikó Kiss"
+      email: "ildiko.kiss52@yahoo.com"
+      phone: "0783757031"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-02T14:00:00"
+      booked-date: "2026-05-09T11:30:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Bogdan Ionescu"
+      email: "bogdan.ionescu21@yahoo.com"
+      phone: "0774079532"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-02T16:00:00"
+      booked-date: "2026-05-06T13:15:00"
+      duration: 120
+      status: COMPLETED
+    # Fully booked (2026-06-10, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Zsolt Kovács"
+      email: "zsolt.kovacs82@outlook.com"
+      phone: "0760461600"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-10T09:00:00"
+      booked-date: "2026-05-23T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Timea Barbu"
+      email: "timea.barbu82@yahoo.com"
+      phone: "0755158046"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-10T12:00:00"
+      booked-date: "2026-05-20T09:45:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Katalin Molnár"
+      email: "katalin.molnar94@outlook.com"
+      phone: "0732781863"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-10T15:00:00"
+      booked-date: "2026-05-17T12:30:00"
+      duration: 180
+      status: COMPLETED
+    # Fully booked (2026-06-18, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Timea Varga"
+      email: "timea.varga20@outlook.com"
+      phone: "0723794545"
+      booked-service: probate-proceedings
+      requested-at: "2026-06-18T09:00:00"
+      booked-date: "2026-05-31T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Mihai Stan"
+      email: "mihai.stan60@outlook.com"
+      phone: "0760746392"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-18T12:00:00"
+      booked-date: "2026-05-28T09:45:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Bogdan Nagy"
+      email: "bogdan.nagy60@outlook.com"
+      phone: "0790816181"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-18T14:00:00"
+      booked-date: "2026-05-25T11:30:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Bogdan Varga"
+      email: "bogdan.varga2@outlook.com"
+      phone: "0798315777"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-06-18T16:00:00"
+      booked-date: "2026-05-22T13:15:00"
+      duration: 120
+      status: COMPLETED
+
     # July 2026 - a couple of cancellations.
     - client-name: "Béla Szász"
       email: "bela.szasz39@gmail.com"
@@ -431,6 +725,90 @@ app:
       booked-date: "2026-07-10T15:15:00"
       duration: 30
       status: CANCELLED
+
+    # Fully booked (2026-07-06, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Radu Varga"
+      email: "radu.varga90@gmail.com"
+      phone: "0781252378"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-06T09:00:00"
+      booked-date: "2026-06-18T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Krisztina Stan"
+      email: "krisztina.stan15@outlook.com"
+      phone: "0788413213"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-06T12:00:00"
+      booked-date: "2026-06-15T09:45:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Ildikó Dumitru"
+      email: "ildiko.dumitru4@yahoo.com"
+      phone: "0736285472"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-06T15:00:00"
+      booked-date: "2026-06-12T12:30:00"
+      duration: 180
+      status: COMPLETED
+    # Fully booked (2026-07-14, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Enikő Tóth"
+      email: "eniko.toth58@outlook.com"
+      phone: "0752119404"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-14T09:00:00"
+      booked-date: "2026-06-26T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Raluca Stan"
+      email: "raluca.stan99@yahoo.com"
+      phone: "0722631322"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-07-14T12:00:00"
+      booked-date: "2026-06-23T09:45:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Timea Farkas"
+      email: "timea.farkas40@gmail.com"
+      phone: "0798916318"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-07-14T14:00:00"
+      booked-date: "2026-06-20T11:30:00"
+      duration: 120
+      status: COMPLETED
+    - client-name: "Adriana Kiss"
+      email: "adriana.kiss15@gmail.com"
+      phone: "0730611546"
+      booked-service: deeds-and-contracts
+      requested-at: "2026-07-14T16:00:00"
+      booked-date: "2026-06-17T13:15:00"
+      duration: 120
+      status: COMPLETED
+    # Fully booked (2026-07-22, 09:00-18:00, no gaps, 540 min).
+    - client-name: "Melinda Molnár"
+      email: "melinda.molnar97@gmail.com"
+      phone: "0798676186"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-22T09:00:00"
+      booked-date: "2026-07-04T07:00:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Simona Stan"
+      email: "simona.stan75@gmail.com"
+      phone: "0761779940"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-22T12:00:00"
+      booked-date: "2026-07-01T09:45:00"
+      duration: 180
+      status: COMPLETED
+    - client-name: "Attila Tóth"
+      email: "attila.toth9@outlook.com"
+      phone: "0729379346"
+      booked-service: probate-proceedings
+      requested-at: "2026-07-22T15:00:00"
+      booked-date: "2026-06-28T12:30:00"
+      duration: 180
+      status: COMPLETED
 
     # August 2026 - a mix of confirmed and cancelled (avoids 3/5/18 Aug, already fully booked above).
     - client-name: "Robert Ionescu"
