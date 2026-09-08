@@ -58,7 +58,7 @@ public class AppointmentManagementService {
     @Transactional(readOnly = true)
     public List<AppointmentListItemView> search(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to, String clientName) {
         log.info("search called with statuses={} from={} to={} clientName={}", statuses, from, to, clientName);
-        String normalizedName = normalize(clientName);
+        String normalizedName = SearchTextNormalizer.normalize(clientName);
         Set<AppointmentStatus> normalizedStatuses = (statuses == null || statuses.isEmpty()) ? null : statuses;
         List<AppointmentListItemView> results = appointmentRepository.search(normalizedStatuses, from, to, normalizedName).stream()
                 .map(this::toListItem)
@@ -73,8 +73,10 @@ public class AppointmentManagementService {
         log.info("searchGrouped called with statuses={} from={} to={} name={} phone={} email={}",
                 statuses, from, to, name, phone, email);
         Set<AppointmentStatus> normalizedStatuses = (statuses == null || statuses.isEmpty()) ? null : statuses;
+        // The name is matched against the accent-folded column, so the term is folded the same
+        // way; phone and email are matched as typed, only trimmed.
         List<AppointmentListItemView> all = appointmentRepository.searchByCriteria(normalizedStatuses, from, to,
-                        normalize(name), normalize(phone), normalize(email)).stream()
+                        SearchTextNormalizer.normalize(name), normalize(phone), normalize(email)).stream()
                 .map(this::toListItem)
                 .toList();
 

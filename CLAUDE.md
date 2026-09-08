@@ -343,6 +343,17 @@ below was added on top of the original numbered plan.
         directly — its parameter must be passed by name in that case
         (`"admin/fragments :: appointmentsTimeline(appointments=...)"`) or
         Thymeleaf rejects it as a "synthetic"/positional parameter.
+      - Client-name search is accent-insensitive both ways ("Molnar" finds
+        "Molnár" and vice versa): `appointments.client_name_normalized` (Java
+        migration `V16`) holds an accent-folded, lower-cased copy written by
+        `Appointment.setClientName`, and `SearchTextNormalizer` folds the
+        search term the same way before the JPQL `LIKE`. Done in Java, not
+        via PostgreSQL's `unaccent()`, so H2 and Postgres behave identically;
+        `SearchTextNormalizer` also expands the letters NFD can't decompose
+        (ø→o, æ→ae, ß→ss…). Phone/email are still matched as typed. Gotcha:
+        the `@DataJpaTest` repository slices must `@Import` every Java
+        migration class (Flyway doesn't see the `@Component` otherwise), so
+        `V16` had to be added next to `V11` in all five of them.
       - List page's status filter is a multi-select checkbox dropdown (not a
         single `<select>`); "Toate" is mutually exclusive with individual
         statuses via plain JS and isn't itself submitted — no `status`

@@ -103,8 +103,21 @@ class AppointmentManagementServiceTest {
 
         service().searchGrouped(null, null, null, " Ion Popescu ", " 0700 ", " ion@example.com ");
 
+        // The name is folded to match the accent-folded column it is compared against; phone and
+        // email are matched as typed and only trimmed.
         verify(appointmentRepository).searchByCriteria(isNull(), isNull(), isNull(),
-                eq("Ion Popescu"), eq("0700"), eq("ion@example.com"));
+                eq("ion popescu"), eq("0700"), eq("ion@example.com"));
+    }
+
+    @Test
+    void searchGroupedFoldsAccentsInTheNameCriterion() {
+        when(appointmentRepository.searchByCriteria(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of());
+
+        service().searchGrouped(null, null, null, "Molnár", null, null);
+
+        verify(appointmentRepository).searchByCriteria(isNull(), isNull(), isNull(),
+                eq("molnar"), isNull(), isNull());
     }
 
     // ---- findByDate ----

@@ -1,5 +1,6 @@
 package com.brinza.notary.domain;
 
+import com.brinza.notary.service.SearchTextNormalizer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,6 +31,14 @@ public class Appointment {
 
     @Column(name = "client_name", nullable = false)
     private String clientName;
+
+    /**
+     * Accent-folded copy of {@link #clientName}, written by {@link #setClientName(String)} and
+     * searched instead of the raw name so "Molnar" and "Molnár" find each other. Never set it
+     * directly — it must stay derived from the name.
+     */
+    @Column(name = "client_name_normalized", nullable = false)
+    private String clientNameNormalized;
 
     @Column(nullable = false)
     private String email;
@@ -66,7 +75,7 @@ public class Appointment {
 
     public Appointment(String clientName, String email, String phone, Service service,
                         LocalDateTime requestedAt, LocalDateTime endedAt, String notes) {
-        this.clientName = clientName;
+        setClientName(clientName);
         this.email = email;
         this.phone = phone;
         this.service = service;
@@ -93,6 +102,11 @@ public class Appointment {
 
     public void setClientName(String clientName) {
         this.clientName = clientName;
+        this.clientNameNormalized = SearchTextNormalizer.normalize(clientName);
+    }
+
+    public String getClientNameNormalized() {
+        return clientNameNormalized;
     }
 
     public String getEmail() {

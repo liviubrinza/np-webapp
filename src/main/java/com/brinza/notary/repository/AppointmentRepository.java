@@ -36,9 +36,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             WHERE (:statuses IS NULL OR a.status IN :statuses)
               AND (:from IS NULL OR a.requestedAt >= :from)
               AND (:to IS NULL OR a.requestedAt <= :to)
-              AND (:name IS NULL OR LOWER(a.clientName) LIKE LOWER(CONCAT('%', :name, '%')))
+              AND (:name IS NULL OR a.clientNameNormalized LIKE CONCAT('%', :name, '%'))
             ORDER BY a.requestedAt DESC
             """)
+    /** {@code name} must already be folded with {@code SearchTextNormalizer} — the column is. */
     List<Appointment> search(@Param("statuses") Set<AppointmentStatus> statuses,
                               @Param("from") LocalDateTime from,
                               @Param("to") LocalDateTime to,
@@ -49,11 +50,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             WHERE (:statuses IS NULL OR a.status IN :statuses)
               AND (:from IS NULL OR a.requestedAt >= :from)
               AND (:to IS NULL OR a.requestedAt <= :to)
-              AND (:name IS NULL OR LOWER(a.clientName) LIKE LOWER(CONCAT('%', :name, '%')))
+              AND (:name IS NULL OR a.clientNameNormalized LIKE CONCAT('%', :name, '%'))
               AND (:phone IS NULL OR LOWER(a.phone) LIKE LOWER(CONCAT('%', :phone, '%')))
               AND (:email IS NULL OR LOWER(a.email) LIKE LOWER(CONCAT('%', :email, '%')))
             ORDER BY a.requestedAt DESC
             """)
+    /** {@code name} must already be folded with {@code SearchTextNormalizer} — the column is. */
     List<Appointment> searchByCriteria(@Param("statuses") Set<AppointmentStatus> statuses,
                                         @Param("from") LocalDateTime from,
                                         @Param("to") LocalDateTime to,
