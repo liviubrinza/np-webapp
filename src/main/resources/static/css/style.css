@@ -366,14 +366,14 @@ a:hover {
 }
 
 .timeline-block-time {
-    font-size: 0.68rem;
+    font-size: 0.9rem;
     font-weight: 600;
     opacity: 0.85;
     flex-shrink: 0;
 }
 
 .timeline-block-client {
-    font-size: 0.8rem;
+    font-size: 1.1rem;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -381,7 +381,7 @@ a:hover {
 }
 
 .timeline-block-service {
-    font-size: 0.7rem;
+    font-size: 1rem;
     opacity: 0.9;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -389,7 +389,7 @@ a:hover {
 }
 
 .timeline-block-pending {
-    background-color: #fd7e14;
+    background-color: #f09f35;
 }
 
 .timeline-block-confirmed {
