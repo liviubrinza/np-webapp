@@ -30,7 +30,9 @@ class AdminNavbarUserMenuWorkflowTest {
     void userMenuIsRenderedAsAnIconAndUsernameDropdownButton() throws Exception {
         mockMvc.perform(get("/admin/appointments"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.containsString("/images/user_icon.png")))
+                // The URL carries a content hash - see StaticAssetVersioningTest.
+                .andExpect(content().string(Matchers.matchesPattern(
+                        "(?s).*/images/user_icon(-[0-9a-f]{32})?\\.png.*")))
                 .andExpect(content().string(Matchers.containsString("data-bs-toggle=\"dropdown\"")))
                 .andExpect(content().string(Matchers.containsString("titi")));
     }

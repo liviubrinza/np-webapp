@@ -500,3 +500,72 @@ a:hover {
     font-size: 1rem;
     color: var(--brand-text);
 }
+
+/* ==========================================================
+   Admin navbar — scoped to .admin-navbar so the public site's
+   navbar (which shares .navbar-dark .navbar-nav .nav-link above)
+   keeps its own gold hover.
+   ========================================================== */
+
+.admin-navbar .navbar-nav .nav-link {
+    color: #fff;
+    border-radius: .25rem;
+}
+
+/* Beats the gold .navbar-dark .navbar-nav .nav-link:hover rule above by one class. */
+.admin-navbar.navbar-dark .navbar-nav .nav-link:hover,
+.admin-navbar.navbar-dark .navbar-nav .nav-link:focus,
+.admin-navbar.navbar-dark .navbar-nav .nav-link:focus-visible {
+    background-color: #fff;
+    color: var(--brand-primary);
+}
+
+.pending-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background-color: #ffc107;
+    color: #000;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+/* Yellow on the white hover fill all but disappears, so the badge takes the banner's
+   red (with white text) for as long as the link is hovered. */
+.admin-navbar .nav-link:hover .pending-badge,
+.admin-navbar .nav-link:focus-visible .pending-badge {
+    background-color: var(--brand-primary);
+    color: #fff;
+}
+
+/* The user menu fills the bar's full height: stretch it across the flex row, then cancel
+   the navbar's own vertical padding with negative margins so it reaches both edges. */
+.admin-navbar .user-menu {
+    display: flex;
+    align-self: stretch;
+    margin-top: calc(-1 * var(--bs-navbar-padding-y));
+    margin-bottom: calc(-1 * var(--bs-navbar-padding-y));
+}
+
+.user-menu-toggle {
+    padding-top: 0;
+    padding-bottom: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+/* The icon PNG is black, inverted to white so it reads on the dark navbar. Hover/focus/open
+   turn the button light and its label dark, so the inversion comes off with them. */
+.user-menu-icon {
+    filter: invert(1);
+}
+
+.user-menu-toggle:hover .user-menu-icon,
+.user-menu-toggle:focus-visible .user-menu-icon,
+.user-menu-toggle:active .user-menu-icon,
+.user-menu-toggle.show .user-menu-icon {
+    filter: none;
+}

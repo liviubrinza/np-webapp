@@ -161,6 +161,14 @@ DB only stores metadata and the relative path.
   `pr-security-tests.yml` CI workflow (that plugin binds to `verify`, a phase
   `test` never reaches). Run `mvn clean compile spotbugs:check` separately
   before committing anything security-sensitive — see rule 20 above
+- `WebConfig` caches `/css/**` and `/images/**` for 7 days, so those URLs carry
+  a content hash (`/css/style-<md5>.css`, `VersionResourceResolver` +
+  `ResourceUrlEncodingFilter` rewriting the templates' `@{...}` links). Any new
+  static asset must be linked with `@{...}`, never a literal path, or it will
+  bypass the rewrite. Reason this exists: templates reload instantly
+  (`thymeleaf.cache: false`) while an edited `style.css` stayed cached in the
+  browser for a week, which made finished CSS changes look broken
+  (`StaticAssetVersioningTest`)
 - Flyway migrations run automatically on startup — these define table structure
   only (`db/migration/*.sql`); no seed data lives in SQL anymore
 - Reference/seed data lives in YAML files under `src/main/resources/`
@@ -345,7 +353,11 @@ below was added on top of the original numbered plan.
         which the shared `admin/fragments :: head` fragment now loads
         (deferred) for every admin page — the navbar's user menu is a
         dropdown too (icon + username button → Profil / Deconectare,
-        `AdminNavbarUserMenuWorkflowTest`).
+        `AdminNavbarUserMenuWorkflowTest`). The admin navbar's own styling
+        (full-height user-menu button, white-fill hover on the links, the
+        pending badge) lives in `style.css` scoped under `.admin-navbar`,
+        because the public navbar shares `.navbar-dark .navbar-nav
+        .nav-link` there and keeps its gold hover.
 - [x] **9. Document upload/download/delete** — filesystem storage
       (`DocumentStorageService`, `DocumentManagementService`). Deviation: no
       standalone document-manager page — done from the appointment detail
