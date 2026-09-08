@@ -65,10 +65,10 @@ class AppointmentManagementServiceTest {
         Appointment confirmedLater = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 5, 9, 0));
         Appointment confirmedEarlier = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0));
 
-        when(appointmentRepository.search(null, null, null, null))
+        when(appointmentRepository.searchByCriteria(null, null, null, null, null, null))
                 .thenReturn(List.of(pendingNew, pendingOld, confirmedLater, confirmedEarlier));
 
-        AppointmentListView view = service().searchGrouped(null, null, null, null);
+        AppointmentListView view = service().searchGrouped(null, null, null, null, null, null);
 
         assertThat(view.pending()).extracting(AppointmentListItemView::requestedAt)
                 .containsExactly(LocalDateTime.of(2026, 8, 1, 9, 0), LocalDateTime.of(2026, 8, 2, 9, 0));
@@ -84,6 +84,27 @@ class AppointmentManagementServiceTest {
         service().search(null, null, null, "   ");
 
         verify(appointmentRepository).search(isNull(), isNull(), isNull(), isNull());
+    }
+
+    @Test
+    void searchGroupedBlankCriteriaAreNormalizedToNull() {
+        when(appointmentRepository.searchByCriteria(isNull(), isNull(), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(List.of());
+
+        service().searchGrouped(null, null, null, "  ", "  ", null);
+
+        verify(appointmentRepository).searchByCriteria(isNull(), isNull(), isNull(), isNull(), isNull(), isNull());
+    }
+
+    @Test
+    void searchGroupedTrimsAndForwardsNonBlankCriteria() {
+        when(appointmentRepository.searchByCriteria(any(), any(), any(), any(), any(), any()))
+                .thenReturn(List.of());
+
+        service().searchGrouped(null, null, null, " Ion Popescu ", " 0700 ", " ion@example.com ");
+
+        verify(appointmentRepository).searchByCriteria(isNull(), isNull(), isNull(),
+                eq("Ion Popescu"), eq("0700"), eq("ion@example.com"));
     }
 
     // ---- findByDate ----

@@ -23,7 +23,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +71,7 @@ class AppointmentAdminControllerTest {
 
     @Test
     void listRendersGroupedAppointments() throws Exception {
-        when(appointmentManagementService.searchGrouped(any(), any(), any(), any()))
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new AppointmentListView(List.of(), List.of()));
 
         mockMvc.perform(get("/admin/appointments"))
@@ -79,7 +82,7 @@ class AppointmentAdminControllerTest {
 
     @Test
     void listBindsMultipleStatusCheckboxesIntoASetAndForwardsToService() throws Exception {
-        when(appointmentManagementService.searchGrouped(any(), any(), any(), any()))
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
                 .thenReturn(new AppointmentListView(List.of(), List.of()));
 
         mockMvc.perform(get("/admin/appointments").param("status", "CONFIRMED", "CANCELLED"))
@@ -88,7 +91,86 @@ class AppointmentAdminControllerTest {
                 .andExpect(model().attribute("selectedStatuses", Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)));
 
         verify(appointmentManagementService).searchGrouped(
-                eq(Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)), any(), any(), any());
+                eq(Set.of(AppointmentStatus.CONFIRMED, AppointmentStatus.CANCELLED)), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void listWithNoFilterDefaultsToCurrentMonth() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        YearMonth currentMonth = YearMonth.now();
+        LocalDate firstOfMonth = currentMonth.atDay(1);
+        LocalDate lastOfMonth = currentMonth.atEndOfMonth();
+
+        mockMvc.perform(get("/admin/appointments"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("from", firstOfMonth))
+                .andExpect(model().attribute("to", lastOfMonth));
+
+        verify(appointmentManagementService).searchGrouped(any(),
+                eq(firstOfMonth.atStartOfDay()), eq(lastOfMonth.atTime(LocalTime.MAX)), any(), any(), any());
+    }
+
+    @Test
+    void listWithExplicitDateFilterIsNotOverriddenByCurrentMonthDefault() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments").param("from", "2026-01-01"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("from", LocalDate.of(2026, 1, 1)))
+                .andExpect(model().attribute("to", (Object) null));
+
+        verify(appointmentManagementService).searchGrouped(any(),
+                eq(LocalDateTime.of(2026, 1, 1, 0, 0)), isNull(), any(), any(), any());
+    }
+
+    @Test
+    void listWithBlankDateFiltersAfterSubmitIsTreatedAsNoDateFilter() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments").param("submitted", "true").param("from", "").param("to", ""))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("from", (Object) null))
+                .andExpect(model().attribute("to", (Object) null));
+
+        verify(appointmentManagementService).searchGrouped(any(), isNull(), isNull(), any(), any(), any());
+    }
+
+    @Test
+    void listWithSearchCriteriaIsNotRestrictedToCurrentMonth() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments").param("name", "Ion"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("from", (Object) null))
+                .andExpect(model().attribute("to", (Object) null))
+                .andExpect(model().attribute("name", "Ion"));
+
+        verify(appointmentManagementService).searchGrouped(any(), isNull(), isNull(),
+                eq("Ion"), isNull(), isNull());
+    }
+
+    @Test
+    void listForwardsAllSearchAndFilterCriteriaToService() throws Exception {
+        when(appointmentManagementService.searchGrouped(any(), any(), any(), any(), any(), any()))
+                .thenReturn(new AppointmentListView(List.of(), List.of()));
+
+        mockMvc.perform(get("/admin/appointments")
+                        .param("name", "Ion Popescu")
+                        .param("phone", "0700")
+                        .param("email", "ion@example.com")
+                        .param("from", "2026-01-01")
+                        .param("to", "2026-01-31")
+                        .param("status", "CONFIRMED"))
+                .andExpect(status().isOk());
+
+        verify(appointmentManagementService).searchGrouped(eq(Set.of(AppointmentStatus.CONFIRMED)),
+                eq(LocalDateTime.of(2026, 1, 1, 0, 0)), eq(LocalDateTime.of(2026, 1, 31, 23, 59, 59, 999999999)),
+                eq("Ion Popescu"), eq("0700"), eq("ion@example.com"));
     }
 
     @Test
