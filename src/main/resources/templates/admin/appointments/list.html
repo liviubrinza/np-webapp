@@ -12,57 +12,88 @@
 
     <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
 
-    <div class="card bg-light mb-4">
-        <div class="card-body">
-            <form method="get" th:action="@{/admin/appointments}" class="row g-2 align-items-end">
-                <div class="col-auto">
-                    <label class="form-label mb-0"><b>Nume</b></label>
-                    <input type="text" name="name" class="form-control form-control-sm" placeholder="Numele clientului"
-                           th:value="${name}"/>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-0" id="statusFilterLabel"><b>Stare</b></label>
-                    <div class="dropdown">
-                        <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" id="statusFilterToggle"
-                                data-bs-toggle="dropdown" aria-expanded="false" aria-labelledby="statusFilterLabel"
-                                th:text="${statusFilterLabel}">Toate</button>
-                        <ul class="dropdown-menu p-2" style="min-width: 220px;">
-                            <li>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="statusAll"
-                                           th:checked="${selectedStatuses.isEmpty()}"/>
-                                    <label class="form-check-label" for="statusAll">Toate</label>
-                                </div>
-                            </li>
-                            <li><hr class="dropdown-divider"/></li>
-                            <li th:each="s : ${statuses}">
-                                <div class="form-check">
-                                    <input class="form-check-input status-option" type="checkbox" name="status"
-                                           th:value="${s}" th:id="${'status-' + s}"
-                                           th:checked="${selectedStatuses.contains(s)}"/>
-                                    <label class="form-check-label" th:for="${'status-' + s}" th:text="${s.displayName}"></label>
-                                </div>
-                            </li>
-                        </ul>
+    <form method="get" th:action="@{/admin/appointments}">
+        <input type="hidden" name="submitted" value="true"/>
+        <div class="card bg-light mb-3">
+            <div class="card-header"><b>Căutare</b></div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label class="form-label mb-0">Nume</label>
+                        <input type="text" name="name" class="form-control form-control-sm" placeholder="Numele clientului"
+                               th:value="${name}"/>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0">Telefon</label>
+                        <input type="text" name="phone" class="form-control form-control-sm" placeholder="Telefon"
+                               th:value="${phone}"/>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0">Email</label>
+                        <input type="text" name="email" class="form-control form-control-sm" placeholder="Email"
+                               th:value="${email}"/>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">Caută</button>
                     </div>
                 </div>
-                <div class="col-auto">
-                    <label class="form-label mb-0"><b>De la</b></label>
-                    <input type="text" name="from" id="fromDateInput" class="form-control form-control-sm"
-                           autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${from}"/>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-0"><b>Până la</b></label>
-                    <input type="text" name="to" id="toDateInput" class="form-control form-control-sm"
-                           autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${to}"/>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
-                    <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary btn-sm">Resetează</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="card bg-light mb-4">
+            <div class="card-header"><b>Filtrare</b></div>
+            <div class="card-body">
+                <div class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label class="form-label mb-0" id="statusFilterLabel"><b>Stare</b></label>
+                        <div class="dropdown">
+                            <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" id="statusFilterToggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false" aria-labelledby="statusFilterLabel"
+                                    th:text="${statusFilterLabel}">Toate</button>
+                            <ul class="dropdown-menu p-2" style="min-width: 220px;">
+                                <li>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="statusAll"
+                                               th:checked="${selectedStatuses.isEmpty()}"/>
+                                        <label class="form-check-label" for="statusAll">Toate</label>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li th:each="s : ${statuses}">
+                                    <div class="form-check">
+                                        <input class="form-check-input status-option" type="checkbox" name="status"
+                                               th:value="${s}" th:id="${'status-' + s}"
+                                               th:checked="${selectedStatuses.contains(s)}"/>
+                                        <label class="form-check-label" th:for="${'status-' + s}" th:text="${s.displayName}"></label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0"><b>De la</b></label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="from" id="fromDateInput" class="form-control form-control-sm"
+                                   autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${from}"/>
+                            <button type="button" id="fromDateClear" class="btn btn-outline-secondary" title="Șterge data">&times;</button>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <label class="form-label mb-0"><b>Până la</b></label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="to" id="toDateInput" class="form-control form-control-sm"
+                                   autocomplete="off" placeholder="dd-Mon-yyyy" th:value="${to}"/>
+                            <button type="button" id="toDateClear" class="btn btn-outline-secondary" title="Șterge data">&times;</button>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary btn-sm">Filtrează</button>
+                        <a th:href="@{/admin/appointments}" class="btn btn-outline-secondary btn-sm">Resetează</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 
     <div class="card mb-4">
         <div class="card-header"><b>În așteptare</b></div>
@@ -86,8 +117,14 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     flatpickr.l10ns.default.firstDayOfWeek = 1;
-    flatpickr('#fromDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
-    flatpickr('#toDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+    var fromPicker = flatpickr('#fromDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+    var toPicker = flatpickr('#toDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+    document.getElementById('fromDateClear').addEventListener('click', function () {
+        fromPicker.clear();
+    });
+    document.getElementById('toDateClear').addEventListener('click', function () {
+        toPicker.clear();
+    });
 
     (function () {
         var allCheckbox = document.getElementById('statusAll');

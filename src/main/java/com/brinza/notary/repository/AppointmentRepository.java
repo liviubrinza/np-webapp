@@ -46,6 +46,23 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("""
             SELECT a FROM Appointment a
+            WHERE (:statuses IS NULL OR a.status IN :statuses)
+              AND (:from IS NULL OR a.requestedAt >= :from)
+              AND (:to IS NULL OR a.requestedAt <= :to)
+              AND (:name IS NULL OR LOWER(a.clientName) LIKE LOWER(CONCAT('%', :name, '%')))
+              AND (:phone IS NULL OR LOWER(a.phone) LIKE LOWER(CONCAT('%', :phone, '%')))
+              AND (:email IS NULL OR LOWER(a.email) LIKE LOWER(CONCAT('%', :email, '%')))
+            ORDER BY a.requestedAt DESC
+            """)
+    List<Appointment> searchByCriteria(@Param("statuses") Set<AppointmentStatus> statuses,
+                                        @Param("from") LocalDateTime from,
+                                        @Param("to") LocalDateTime to,
+                                        @Param("name") String name,
+                                        @Param("phone") String phone,
+                                        @Param("email") String email);
+
+    @Query("""
+            SELECT a FROM Appointment a
             WHERE (:from IS NULL OR a.createdAt >= :from)
               AND (:to IS NULL OR a.createdAt <= :to)
             """)

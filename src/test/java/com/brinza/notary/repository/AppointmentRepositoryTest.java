@@ -38,7 +38,11 @@ class AppointmentRepositoryTest {
     }
 
     private Appointment appointmentWith(String clientName, AppointmentStatus status, LocalDateTime requestedAt) {
-        Appointment appointment = new Appointment(clientName, clientName + "@example.com", "0700000000", service,
+        return appointmentWith(clientName, clientName + "@example.com", "0700000000", status, requestedAt);
+    }
+
+    private Appointment appointmentWith(String clientName, String email, String phone, AppointmentStatus status, LocalDateTime requestedAt) {
+        Appointment appointment = new Appointment(clientName, email, phone, service,
                 requestedAt, requestedAt.plusMinutes(30), null);
         appointment.setStatus(status);
         return appointmentRepository.save(appointment);
@@ -100,6 +104,41 @@ class AppointmentRepositoryTest {
         appointmentWith("Second", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
 
         List<Appointment> result = appointmentRepository.search(null, null, null, null);
+
+        assertThat(result).extracting(Appointment::getClientName).containsExactly("Second", "First");
+    }
+
+    @Test
+    void searchByCriteriaMatchesNameRegardlessOfFirstOrLastNamePosition() {
+        appointmentWith("Ion Popescu", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        appointmentWith("Maria Ionescu", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
+
+        List<Appointment> byPartialName = appointmentRepository.searchByCriteria(null, null, null, "ion", null, null);
+        assertThat(byPartialName).extracting(Appointment::getClientName)
+                .containsExactlyInAnyOrder("Ion Popescu", "Maria Ionescu");
+
+        List<Appointment> byFullName = appointmentRepository.searchByCriteria(null, null, null, "ion popescu", null, null);
+        assertThat(byFullName).extracting(Appointment::getClientName).containsExactly("Ion Popescu");
+    }
+
+    @Test
+    void searchByCriteriaMatchesByPhoneAndEmail() {
+        appointmentWith("Ion Popescu", "ion@example.com", "0711111111", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        appointmentWith("Maria Ionescu", "maria@example.com", "0722222222", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
+
+        List<Appointment> byPhone = appointmentRepository.searchByCriteria(null, null, null, null, "0711", null);
+        assertThat(byPhone).extracting(Appointment::getClientName).containsExactly("Ion Popescu");
+
+        List<Appointment> byEmail = appointmentRepository.searchByCriteria(null, null, null, null, null, "maria@");
+        assertThat(byEmail).extracting(Appointment::getClientName).containsExactly("Maria Ionescu");
+    }
+
+    @Test
+    void searchByCriteriaWithAllNullFiltersReturnsEverything() {
+        appointmentWith("First", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        appointmentWith("Second", AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
+
+        List<Appointment> result = appointmentRepository.searchByCriteria(null, null, null, null, null, null);
 
         assertThat(result).extracting(Appointment::getClientName).containsExactly("Second", "First");
     }

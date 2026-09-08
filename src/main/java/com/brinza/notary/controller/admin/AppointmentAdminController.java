@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -79,11 +80,25 @@ public class AppointmentAdminController {
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                         @RequestParam(required = false) String name,
+                        @RequestParam(required = false) String phone,
+                        @RequestParam(required = false) String email,
+                        @RequestParam(required = false) String submitted,
                         Model model) {
+        // Only default to the current month on a genuinely bare landing: no submitted form (the
+        // "submitted" marker), no explicit dates, and no search criteria. Once the admin has
+        // actually submitted the form, a blank date field means "don't filter by date" rather
+        // than silently falling back to the current month.
+        boolean bareLanding = submitted == null && from == null && to == null
+                && isBlank(name) && isBlank(phone) && isBlank(email);
+        if (bareLanding) {
+            YearMonth currentMonth = YearMonth.now();
+            from = currentMonth.atDay(1);
+            to = currentMonth.atEndOfMonth();
+        }
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDateTime = to != null ? to.atTime(LocalTime.MAX) : null;
 
-        var grouped = appointmentManagementService.searchGrouped(status, fromDateTime, toDateTime, name);
+        var grouped = appointmentManagementService.searchGrouped(status, fromDateTime, toDateTime, name, phone, email);
         model.addAttribute("pendingAppointments", grouped.pending());
         model.addAttribute("otherAppointments", grouped.others());
         model.addAttribute("statuses", AppointmentStatus.values());
@@ -92,7 +107,13 @@ public class AppointmentAdminController {
         model.addAttribute("from", from);
         model.addAttribute("to", to);
         model.addAttribute("name", name);
+        model.addAttribute("phone", phone);
+        model.addAttribute("email", email);
         return "admin/appointments/list";
+    }
+
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private static String statusFilterLabel(Set<AppointmentStatus> statuses) {

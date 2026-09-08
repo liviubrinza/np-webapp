@@ -58,7 +58,7 @@ public class AppointmentManagementService {
     @Transactional(readOnly = true)
     public List<AppointmentListItemView> search(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to, String clientName) {
         log.info("search called with statuses={} from={} to={} clientName={}", statuses, from, to, clientName);
-        String normalizedName = (clientName == null || clientName.isBlank()) ? null : clientName.trim();
+        String normalizedName = normalize(clientName);
         Set<AppointmentStatus> normalizedStatuses = (statuses == null || statuses.isEmpty()) ? null : statuses;
         List<AppointmentListItemView> results = appointmentRepository.search(normalizedStatuses, from, to, normalizedName).stream()
                 .map(this::toListItem)
@@ -68,9 +68,15 @@ public class AppointmentManagementService {
     }
 
     @Transactional(readOnly = true)
-    public AppointmentListView searchGrouped(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to, String clientName) {
-        log.info("searchGrouped called with statuses={} from={} to={} clientName={}", statuses, from, to, clientName);
-        List<AppointmentListItemView> all = search(statuses, from, to, clientName);
+    public AppointmentListView searchGrouped(Set<AppointmentStatus> statuses, LocalDateTime from, LocalDateTime to,
+                                              String name, String phone, String email) {
+        log.info("searchGrouped called with statuses={} from={} to={} name={} phone={} email={}",
+                statuses, from, to, name, phone, email);
+        Set<AppointmentStatus> normalizedStatuses = (statuses == null || statuses.isEmpty()) ? null : statuses;
+        List<AppointmentListItemView> all = appointmentRepository.searchByCriteria(normalizedStatuses, from, to,
+                        normalize(name), normalize(phone), normalize(email)).stream()
+                .map(this::toListItem)
+                .toList();
 
         List<AppointmentListItemView> pending = all.stream()
                 .filter(a -> a.status() == AppointmentStatus.PENDING)
@@ -264,6 +270,10 @@ public class AppointmentManagementService {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No appointment with id " + id));
         appointment.addInternalNote(new InternalNote(authorUsername, note));
+    }
+
+    private static String normalize(String value) {
+        return (value == null || value.isBlank()) ? null : value.trim();
     }
 
     private AppointmentListItemView toListItem(Appointment appointment) {
