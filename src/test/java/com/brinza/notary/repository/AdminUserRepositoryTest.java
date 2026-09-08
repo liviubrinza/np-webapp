@@ -3,6 +3,7 @@ package com.brinza.notary.repository;
 import com.brinza.notary.domain.AdminRole;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.migration.V11__AddAppointmentEndedAt;
+import com.brinza.notary.migration.V16__AddAppointmentClientNameNormalized;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // migration (a plain @Component); without this @Import, Flyway silently skips it and the
 // appointments.ended_at column never gets created.
 @DataJpaTest
-@Import(V11__AddAppointmentEndedAt.class)
+@Import({V11__AddAppointmentEndedAt.class, V16__AddAppointmentClientNameNormalized.class})
 class AdminUserRepositoryTest {
 
     @Autowired

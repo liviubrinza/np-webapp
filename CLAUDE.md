@@ -161,6 +161,14 @@ DB only stores metadata and the relative path.
   `pr-security-tests.yml` CI workflow (that plugin binds to `verify`, a phase
   `test` never reaches). Run `mvn clean compile spotbugs:check` separately
   before committing anything security-sensitive — see rule 20 above
+- `WebConfig` caches `/css/**` and `/images/**` for 7 days, so those URLs carry
+  a content hash (`/css/style-<md5>.css`, `VersionResourceResolver` +
+  `ResourceUrlEncodingFilter` rewriting the templates' `@{...}` links). Any new
+  static asset must be linked with `@{...}`, never a literal path, or it will
+  bypass the rewrite. Reason this exists: templates reload instantly
+  (`thymeleaf.cache: false`) while an edited `style.css` stayed cached in the
+  browser for a week, which made finished CSS changes look broken
+  (`StaticAssetVersioningTest`)
 - Flyway migrations run automatically on startup — these define table structure
   only (`db/migration/*.sql`); no seed data lives in SQL anymore
 - Reference/seed data lives in YAML files under `src/main/resources/`
@@ -335,15 +343,32 @@ below was added on top of the original numbered plan.
         directly — its parameter must be passed by name in that case
         (`"admin/fragments :: appointmentsTimeline(appointments=...)"`) or
         Thymeleaf rejects it as a "synthetic"/positional parameter.
+      - Client-name search is accent-insensitive both ways ("Molnar" finds
+        "Molnár" and vice versa): `appointments.client_name_normalized` (Java
+        migration `V16`) holds an accent-folded, lower-cased copy written by
+        `Appointment.setClientName`, and `SearchTextNormalizer` folds the
+        search term the same way before the JPQL `LIKE`. Done in Java, not
+        via PostgreSQL's `unaccent()`, so H2 and Postgres behave identically;
+        `SearchTextNormalizer` also expands the letters NFD can't decompose
+        (ø→o, æ→ae, ß→ss…). Phone/email are still matched as typed. Gotcha:
+        the `@DataJpaTest` repository slices must `@Import` every Java
+        migration class (Flyway doesn't see the `@Component` otherwise), so
+        `V16` had to be added next to `V11` in all five of them.
       - List page's status filter is a multi-select checkbox dropdown (not a
         single `<select>`); "Toate" is mutually exclusive with individual
         statuses via plain JS and isn't itself submitted — no `status`
         params means no filter. `showList`'s `status` param is
         `Set<AppointmentStatus>`; repository JPQL uses `IN :statuses`, with
         an empty incoming set normalized to `null` before the query (empty
-        JPQL `IN ()` isn't safe to assume). Needed the Bootstrap JS bundle
-        added to this page only — other admin pages still pull Bootstrap CSS
-        only.
+        JPQL `IN ()` isn't safe to assume). Needs the Bootstrap JS bundle,
+        which the shared `admin/fragments :: head` fragment now loads
+        (deferred) for every admin page — the navbar's user menu is a
+        dropdown too (icon + username button → Profil / Deconectare,
+        `AdminNavbarUserMenuWorkflowTest`). The admin navbar's own styling
+        (full-height user-menu button, white-fill hover on the links, the
+        pending badge) lives in `style.css` scoped under `.admin-navbar`,
+        because the public navbar shares `.navbar-dark .navbar-nav
+        .nav-link` there and keeps its gold hover.
 - [x] **9. Document upload/download/delete** — filesystem storage
       (`DocumentStorageService`, `DocumentManagementService`). Deviation: no
       standalone document-manager page — done from the appointment detail
