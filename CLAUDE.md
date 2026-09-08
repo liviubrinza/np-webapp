@@ -341,9 +341,11 @@ below was added on top of the original numbered plan.
         params means no filter. `showList`'s `status` param is
         `Set<AppointmentStatus>`; repository JPQL uses `IN :statuses`, with
         an empty incoming set normalized to `null` before the query (empty
-        JPQL `IN ()` isn't safe to assume). Needed the Bootstrap JS bundle
-        added to this page only — other admin pages still pull Bootstrap CSS
-        only.
+        JPQL `IN ()` isn't safe to assume). Needs the Bootstrap JS bundle,
+        which the shared `admin/fragments :: head` fragment now loads
+        (deferred) for every admin page — the navbar's user menu is a
+        dropdown too (icon + username button → Profil / Deconectare,
+        `AdminNavbarUserMenuWorkflowTest`).
 - [x] **9. Document upload/download/delete** — filesystem storage
       (`DocumentStorageService`, `DocumentManagementService`). Deviation: no
       standalone document-manager page — done from the appointment detail
