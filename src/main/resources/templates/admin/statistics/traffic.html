@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Statistici · Trafic', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Statistici · Trafic', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -37,13 +37,13 @@
     <div class="card">
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0" style="table-layout: fixed; width: 100%;">
+                <table class="table table-striped table-hover align-middle mb-0 traffic-table">
                     <colgroup>
-                        <col style="width: 16.67%;">
-                        <col style="width: 10.67%;">
-                        <col style="width: 10.67%;">
-                        <col style="width: 16.67%;">
-                        <col style="width: 45.32%;">
+                        <col class="col-ip"/>
+                        <col class="col-location"/>
+                        <col class="col-sessions"/>
+                        <col class="col-total-time"/>
+                        <col class="col-pages"/>
                     </colgroup>
                     <thead>
                     <tr>

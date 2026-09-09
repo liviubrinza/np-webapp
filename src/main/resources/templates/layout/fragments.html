@@ -24,12 +24,10 @@
             navigation: auto;
         }
     </style>
-    <th:block th:if="${extraHead != null}">
-        <th:block th:replace="${extraHead}"></th:block>
-    </th:block>
+    <th:block th:replace="${extraHead}"></th:block>
 </head>
 
-<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark border-bottom" style="background-color: #66090c;">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark border-bottom" style="background-color: var(--brand-primary);">
     <div class="container">
         <a class="navbar-brand" th:href="@{'/' + ${currentLocale}}" th:text="#{site.title}">Notary Public Office</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -82,6 +80,8 @@
         </div>
     </div>
 </nav>
+
+<script th:fragment="bootstrapJs" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <div th:fragment="notificationBanner" th:if="${notificationEnabled}"
      class="text-center py-2 px-3" style="background-color: #ffc107; color: #000;">

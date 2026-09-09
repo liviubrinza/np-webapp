@@ -11,8 +11,7 @@
     <a th:href="${backUrl}" class="d-inline-block mb-3"
        th:text="${backUrl.startsWith('/admin/calendar')} ? '← Înapoi la calendar' : '← Înapoi la programări'">&larr; Înapoi la programări</a>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
     <div class="alert alert-warning" th:if="${appointment.overlapsConfirmed()}">
         ⚠ Această programare se suprapune cu o programare deja confirmată. Nu poate fi confirmată până când suprapunerea nu este rezolvată.
     </div>

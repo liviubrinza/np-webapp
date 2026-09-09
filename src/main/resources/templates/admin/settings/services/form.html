@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head(${serviceId} != null ? 'Editează Serviciu' : 'Serviciu Nou', null)}"></head>
+<head th:replace="~{admin/fragments :: head(${serviceId} != null ? 'Editează Serviciu' : 'Serviciu Nou', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -10,7 +10,7 @@
 
     <h1 class="h3 mb-4" th:text="${serviceId} != null ? 'Editează Serviciu' : 'Serviciu Nou'"></h1>
 
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
     <form th:action="${serviceId} != null ? @{/admin/settings/services/{id}(id=${serviceId})} : @{/admin/settings/services}"
           th:object="${serviceForm}" method="post">

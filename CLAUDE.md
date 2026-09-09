@@ -152,6 +152,16 @@ DB only stores metadata and the relative path.
 - Write integration tests for the appointment booking flow and the admin CRUD
   endpoints using `@SpringBootTest` + Testcontainers (PostgreSQL) once the
   schema stabilizes; unit tests for services as you go
+- Shared Thymeleaf fragments — reuse these instead of copying markup into a new
+  page: `layout/fragments` (`head`, `navbar`, `notificationBanner`,
+  `bootstrapJs`, `footer`) for public pages, `admin/fragments` (`head`,
+  `navbar`, `flashAlerts` for the `success`/`error` flash pair, `settingsNav`,
+  `statisticsNav`, `appointmentsTable`, `appointmentsTimeline`) for admin ones.
+  Both `head(...)` fragments take an `extraHead` fragment argument — pass `~{}`
+  when a page has nothing extra, never `null`
+- Keep colours and repeated layout values in `style.css` (brand tokens live in
+  `:root`); inline `style="..."` is for values Thymeleaf computes per element,
+  such as the timeline block offsets
 
 ## Build & Run
 
