@@ -44,16 +44,6 @@ h1 {
     font-weight: 600;
 }
 
-.navbar-brand {
-    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-    font-weight: 700;
-    color: #fff;
-}
-
-.navbar-brand:hover {
-    color: #fff;
-}
-
 main h1 {
     color: var(--brand-primary);
     margin-bottom: 0.5rem;
@@ -73,8 +63,16 @@ a:hover {
 
 /* Navbar */
 .navbar-brand {
+    font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    font-weight: 700;
     font-size: 1.4rem;
     letter-spacing: 0.02em;
+    color: #fff;
+}
+
+/* Keeps the brand white rather than picking up the global a:hover burgundy. */
+.navbar-brand:hover {
+    color: #fff;
 }
 
 .navbar {
@@ -396,7 +394,6 @@ a:hover {
     background-color: #28a745;
 }
 
-
 .timeline-block-completed {
     background-color: #6c757d;
 }
@@ -501,24 +498,33 @@ a:hover {
     color: var(--brand-text);
 }
 
+/* Admin statistics — Traffic table. Fixed layout with explicit column widths so the
+   per-page breakdown column absorbs the leftover width instead of the columns resizing
+   themselves around whatever text each client happens to have. */
+.traffic-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.traffic-table .col-ip,
+.traffic-table .col-total-time {
+    width: 16.67%;
+}
+
+.traffic-table .col-location,
+.traffic-table .col-sessions {
+    width: 10.67%;
+}
+
+.traffic-table .col-pages {
+    width: 45.32%;
+}
+
 /* ==========================================================
-   Admin navbar — scoped to .admin-navbar so the public site's
-   navbar (which shares .navbar-dark .navbar-nav .nav-link above)
-   keeps its own gold hover.
+   Admin navbar — the nav links are deliberately left to the
+   shared .navbar-dark .navbar-nav .nav-link rules above, so
+   both navbars use the same translucent white and gold hover.
    ========================================================== */
-
-.admin-navbar .navbar-nav .nav-link {
-    color: #fff;
-    border-radius: .25rem;
-}
-
-/* Beats the gold .navbar-dark .navbar-nav .nav-link:hover rule above by one class. */
-.admin-navbar.navbar-dark .navbar-nav .nav-link:hover,
-.admin-navbar.navbar-dark .navbar-nav .nav-link:focus,
-.admin-navbar.navbar-dark .navbar-nav .nav-link:focus-visible {
-    background-color: #fff;
-    color: var(--brand-primary);
-}
 
 .pending-badge {
     display: inline-flex;
@@ -533,12 +539,20 @@ a:hover {
     line-height: 1;
 }
 
-/* Yellow on the white hover fill all but disappears, so the badge takes the banner's
-   red (with white text) for as long as the link is hovered. */
-.admin-navbar .nav-link:hover .pending-badge,
-.admin-navbar .nav-link:focus-visible .pending-badge {
-    background-color: var(--brand-primary);
+/* Marker next to a client's name in the appointments table when their PENDING appointment
+   overlaps an already-CONFIRMED one. Same round shape as .pending-badge, in the danger red. */
+.overlap-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background-color: #dc3545;
     color: #fff;
+    font-size: 0.85rem;
+    font-weight: bold;
+    line-height: 1;
 }
 
 /* Bootstrap disables Popper for dropdowns inside a .navbar and positions the menu with

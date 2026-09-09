@@ -10,7 +10,7 @@
 <main class="container my-4">
     <h1 class="h3 mb-4">Programări</h1>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
     <form method="get" th:action="@{/admin/appointments}">
         <input type="hidden" name="submitted" value="true"/>

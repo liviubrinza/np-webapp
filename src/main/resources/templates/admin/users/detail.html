@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Detalii Utilizator', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Detalii Utilizator', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -10,8 +10,7 @@
 
     <h1 class="h3 mb-4">Detalii Utilizator</h1>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
     <table class="table table-borderless">
         <tbody>

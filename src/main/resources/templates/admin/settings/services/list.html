@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Servicii', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Servicii', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -15,8 +15,7 @@
         <a th:href="@{/admin/settings/services/new}" class="btn btn-primary btn-sm">Serviciu nou</a>
     </div>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
     <table class="table table-hover align-middle">
         <thead>

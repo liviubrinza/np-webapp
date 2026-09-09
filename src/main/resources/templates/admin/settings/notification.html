@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Configurare', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Configurare', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -10,8 +10,7 @@
 
     <div th:replace="~{admin/fragments :: settingsNav('notification')}"></div>
 
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
     <div class="card">
         <div class="card-header">Banner de notificare public</div>

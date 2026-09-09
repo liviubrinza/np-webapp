@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Profilul Meu', null)}"></head>
+<head th:replace="~{admin/fragments :: head('Profilul Meu', ~{})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -9,8 +9,7 @@
     <div class="page-panel">
         <h1 class="h3 mb-4">Profilul meu</h1>
 
-        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
-        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+        <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
         <dl class="row mb-4">
             <dt class="col-sm-3">Nume de utilizator</dt>
