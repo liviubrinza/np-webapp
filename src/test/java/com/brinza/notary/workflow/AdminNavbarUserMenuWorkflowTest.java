@@ -43,7 +43,7 @@ class AdminNavbarUserMenuWorkflowTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        String menu = html.substring(html.indexOf("<ul class=\"dropdown-menu dropdown-menu-end\">"));
+        String menu = html.substring(html.indexOf("<ul class=\"dropdown-menu dropdown-menu-lg-end\">"));
         menu = menu.substring(0, menu.indexOf("</ul>"));
 
         org.assertj.core.api.Assertions.assertThat(menu)

@@ -18,45 +18,50 @@
     </th:block>
 </head>
 
-<nav th:fragment="navbar" class="navbar navbar-dark admin-navbar" style="background-color: #66090c;">
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark admin-navbar" style="background-color: #66090c;">
     <div class="container-fluid">
         <a class="navbar-brand" th:href="@{/admin}">Panou Admin</a>
-        <ul class="navbar-nav flex-row me-auto">
-            <li class="nav-item me-3">
-                <a class="nav-link" th:href="@{/admin/appointments}">Programări<span
-                        th:if="${hasPendingAppointments}" class="ms-1 fw-bold pending-badge"
-                        title="Există programări în așteptare">!</span></a>
-            </li>
-            <li class="nav-item me-3">
-                <a class="nav-link" th:href="@{/admin/calendar}">Calendar</a>
-            </li>
-            <li class="nav-item me-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
-                <a class="nav-link" th:href="@{/admin/statistics}">Statistici</a>
-            </li>
-            <li class="nav-item me-3" sec:authorize="hasRole('TECHNICIAN')">
-                <a class="nav-link" th:href="@{/admin/users}">Utilizatori Admin</a>
-            </li>
-            <li class="nav-item me-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
-                <a class="nav-link" th:href="@{/admin/settings/notification}">Configurare</a>
-            </li>
-        </ul>
-        <div class="dropdown user-menu">
-            <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center user-menu-toggle"
-                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <img th:src="@{/images/user_icon.png}" alt="" width="24" height="24" class="me-2 user-menu-icon"/>
-                <span sec:authentication="name">admin</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" th:href="@{/admin/profile}">Profil</a></li>
-                <li>
-                    <hr class="dropdown-divider"/>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNavbarNav">
+            <ul class="navbar-nav flex-lg-row me-auto">
+                <li class="nav-item me-lg-3">
+                    <a class="nav-link" th:href="@{/admin/appointments}">Programări<span
+                            th:if="${hasPendingAppointments}" class="ms-1 fw-bold pending-badge"
+                            title="Există programări în așteptare">!</span></a>
                 </li>
-                <li>
-                    <form th:action="@{/admin/logout}" method="post" class="mb-0">
-                        <button type="submit" class="dropdown-item">Deconectare</button>
-                    </form>
+                <li class="nav-item me-lg-3">
+                    <a class="nav-link" th:href="@{/admin/calendar}">Calendar</a>
+                </li>
+                <li class="nav-item me-lg-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
+                    <a class="nav-link" th:href="@{/admin/statistics}">Statistici</a>
+                </li>
+                <li class="nav-item me-lg-3" sec:authorize="hasRole('TECHNICIAN')">
+                    <a class="nav-link" th:href="@{/admin/users}">Utilizatori Admin</a>
+                </li>
+                <li class="nav-item me-lg-3" sec:authorize="hasAnyRole('ADMIN', 'TECHNICIAN')">
+                    <a class="nav-link" th:href="@{/admin/settings/notification}">Configurare</a>
                 </li>
             </ul>
+            <div class="dropdown user-menu">
+                <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center user-menu-toggle"
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img th:src="@{/images/user_icon.png}" alt="" width="24" height="24" class="me-2 user-menu-icon"/>
+                    <span sec:authentication="name">admin</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-lg-end">
+                    <li><a class="dropdown-item" th:href="@{/admin/profile}">Profil</a></li>
+                    <li>
+                        <hr class="dropdown-divider"/>
+                    </li>
+                    <li>
+                        <form th:action="@{/admin/logout}" method="post" class="mb-0">
+                            <button type="submit" class="dropdown-item">Deconectare</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </nav>
