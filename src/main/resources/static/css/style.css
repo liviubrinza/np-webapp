@@ -541,20 +541,44 @@ a:hover {
     color: #fff;
 }
 
-/* The user menu fills the bar's full height: stretch it across the flex row, then cancel
-   the navbar's own vertical padding with negative margins so it reaches both edges. */
+/* Bootstrap disables Popper for dropdowns inside a .navbar and positions the menu with
+   plain CSS (dropdown-menu-end's right:0) relative to this element instead — so it must
+   stay shrink-to-fit (inline-flex), or below lg, where .user-menu is a plain block in the
+   collapsed panel, it would stretch full-width and strand the menu against the panel's
+   right edge instead of under the button. At lg+ it's a flex item of the row-flex navbar,
+   so its width is already content-sized regardless of inline-flex vs flex.
+   The user menu fills the bar's full height: stretch it across the flex row, then cancel
+   the navbar's own vertical padding with negative margins so it reaches both edges. Only
+   applies at the navbar-expand-lg breakpoint, where the bar is a single row — below that,
+   the menu sits inside the collapsed hamburger panel instead. */
 .admin-navbar .user-menu {
-    display: flex;
-    align-self: stretch;
-    margin-top: calc(-1 * var(--bs-navbar-padding-y));
-    margin-bottom: calc(-1 * var(--bs-navbar-padding-y));
+    display: inline-flex;
 }
 
+@media (min-width: 992px) {
+    .admin-navbar .user-menu {
+        align-self: stretch;
+        margin-top: calc(-1 * var(--bs-navbar-padding-y));
+        margin-bottom: calc(-1 * var(--bs-navbar-padding-y));
+    }
+}
+
+/* Below lg, the toggle sits stacked in the collapsed panel among the nav-links, so it
+   needs their padding-y (navbar-nav's --bs-nav-link-padding-y default, .5rem) to keep an
+   even gap between every stacked item. At lg+ it goes back to 0 for the full-height fill
+   above. */
 .user-menu-toggle {
-    padding-top: 0;
-    padding-bottom: 0;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
     border: 0;
     border-radius: 0;
+}
+
+@media (min-width: 992px) {
+    .user-menu-toggle {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
 }
 
 /* The icon PNG is black, inverted to white so it reads on the dark navbar. Hover/focus/open
