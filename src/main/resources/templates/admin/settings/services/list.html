@@ -17,38 +17,42 @@
 
     <div th:replace="~{admin/fragments :: flashAlerts}"></div>
 
-    <table class="table table-hover align-middle">
-        <thead>
-        <tr>
-            <th>Cod</th>
-            <th>Nume (RO)</th>
-            <th>Durată (min)</th>
-            <th>Activ</th>
-            <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="s : ${services}">
-            <td th:text="${s.code()}"></td>
-            <td th:text="${s.nameRo()}"></td>
-            <td th:text="${s.durationMinutes()}"></td>
-            <td>
-                <span th:if="${s.active()}" class="badge bg-success">Activ</span>
-                <span th:unless="${s.active()}" class="badge bg-secondary">Inactiv</span>
-            </td>
-            <td class="text-end">
-                <a th:href="@{/admin/settings/services/{id}/edit(id=${s.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
-                <form th:action="@{/admin/settings/services/{id}/delete(id=${s.id()})}" method="post" class="d-inline"
-                      onsubmit="return confirm('Ștergeți acest serviciu?');">
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Șterge</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:if="${services.isEmpty()}">
-            <td colspan="5" class="text-muted text-center py-4">Nu există servicii încă.</td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead>
+                <tr>
+                    <th>Cod</th>
+                    <th>Nume (RO)</th>
+                    <th>Durată (min)</th>
+                    <th>Activ</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${services}">
+                    <td th:text="${s.code()}"></td>
+                    <td th:text="${s.nameRo()}"></td>
+                    <td th:text="${s.durationMinutes()}"></td>
+                    <td>
+                        <span th:if="${s.active()}" class="badge bg-success">Activ</span>
+                        <span th:unless="${s.active()}" class="badge bg-secondary">Inactiv</span>
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/admin/settings/services/{id}/edit(id=${s.id()})}" class="btn btn-outline-secondary btn-sm">Editează</a>
+                        <form th:action="@{/admin/settings/services/{id}/delete(id=${s.id()})}" method="post" class="d-inline"
+                              onsubmit="return confirm('Ștergeți acest serviciu?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Șterge</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${services.isEmpty()}">
+                    <td colspan="5" class="text-muted text-center py-4">Nu există servicii încă.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </main>
 
 </body>
