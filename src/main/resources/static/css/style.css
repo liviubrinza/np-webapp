@@ -137,10 +137,20 @@ a:hover {
     flex: 1 0 auto;
     min-height: 320px;
     padding: 1rem;
-    background: var(--brand-bg) url('/images/background_2.png') center center / contain no-repeat;
+    background: var(--brand-bg) url('/images/background.png') center center / contain no-repeat;
     text-align: center;
     display: flex;
     align-items: center;
+}
+
+/* Portrait viewports (phones, or any browser window taller than it is wide) get a dedicated
+   portrait-cropped image instead of shrinking the landscape one - background.png's elements are
+   spread across its full width, so `contain`-ing it into a narrow viewport leaves large empty
+   bands above/below, and `cover`-ing it would crop most of those elements out. */
+@media (orientation: portrait) {
+    .hero-section {
+        background: var(--brand-bg) url('/images/background_mobile.png') center center / cover no-repeat;
+    }
 }
 
 .hero-panel {
