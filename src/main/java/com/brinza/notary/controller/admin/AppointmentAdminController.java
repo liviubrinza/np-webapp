@@ -40,6 +40,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Controller
@@ -186,7 +187,7 @@ public class AppointmentAdminController {
     @GetMapping("/{id}")
     public String showDetail(@PathVariable Long id, @RequestParam(required = false) String back, Model model) {
         var appointment = appointmentManagementService.getDetail(id);
-        List<String> timeSlots = buildTimeSlots();
+        List<String> timeSlots = buildTimeSlots(appointment.requestedAt().toLocalTime(), appointment.endedAt().toLocalTime());
         model.addAttribute("appointment", appointment);
         model.addAttribute("statuses", AppointmentStatus.values());
         model.addAttribute("timeSlots", timeSlots);
@@ -305,12 +306,25 @@ public class AppointmentAdminController {
         return "/admin/appointments";
     }
 
-    private static List<String> buildTimeSlots() {
-        List<String> slots = new ArrayList<>();
+    /**
+     * The reschedule form's start/end dropdowns are normally a fixed 30-minute grid, but a
+     * service duration that isn't a multiple of 30 minutes (e.g. the 45-minute "Procură") can
+     * give an appointment a start or end time off that grid. Without adding it as an option here,
+     * no {@code <option>} would match the current value, so the browser would silently preselect
+     * the first slot (09:00) instead - showing (and, on any unrelated form submit, actually
+     * saving) a time that doesn't match what the appointment's day timeline displays.
+     */
+    private static List<String> buildTimeSlots(LocalTime... extraTimes) {
+        TreeSet<LocalTime> slots = new TreeSet<>();
         for (LocalTime t = SCHEDULE_START; !t.isAfter(SCHEDULE_END); t = t.plusMinutes(30)) {
-            slots.add(t.toString());
+            slots.add(t);
         }
-        return slots;
+        for (LocalTime extra : extraTimes) {
+            if (extra != null) {
+                slots.add(extra);
+            }
+        }
+        return slots.stream().map(LocalTime::toString).toList();
     }
 
     /**
