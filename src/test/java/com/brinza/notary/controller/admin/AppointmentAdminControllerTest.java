@@ -227,6 +227,31 @@ class AppointmentAdminControllerTest {
     }
 
     @Test
+    void detailIncludesAppointmentsOwnOffGridEndTimeAsASelectedOption() throws Exception {
+        // "Procură" is a 45-minute service, so a public booking for it lands the end time off the
+        // 30-minute reschedule grid (buildTimeSlots) - without adding it as an option, no <option>
+        // would match it, so the browser would silently default the "Ora sfârșit" select to 09:00
+        // instead of showing (and, on any unrelated form submit, actually saving) the real 09:45.
+        AppointmentDetailView offGridDetail = new AppointmentDetailView(1L, "Ion Popescu", "ion@example.com",
+                "0700000000", "Procură", LocalDateTime.of(2026, 8, 1, 9, 0), LocalDateTime.of(2026, 8, 1, 9, 45),
+                AppointmentStatus.PENDING, false, "notes", List.of(), LocalDateTime.of(2026, 7, 1, 9, 0));
+        when(appointmentManagementService.getDetail(1L)).thenReturn(offGridDetail);
+        when(appointmentManagementService.findBusyTimeSlots(any(), any(), any()))
+                .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
+        when(appointmentManagementService.findByDate(any())).thenReturn(List.of());
+        when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
+        when(systemSettings.isMailEnabled()).thenReturn(true);
+
+        mockMvc.perform(get("/admin/appointments/1"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("timeSlots", org.hamcrest.Matchers.hasItems("09:00", "09:45")))
+                .andExpect(content().string(containsString("value=\"09:45\"")));
+
+        verify(appointmentManagementService).findBusyTimeSlots(any(), any(),
+                org.mockito.ArgumentMatchers.argThat(slots -> slots.contains("09:45")));
+    }
+
+    @Test
     void updateStatusRedirectsToDetailWithFlashSuccess() throws Exception {
         mockMvc.perform(post("/admin/appointments/1/status").with(csrf())
                         .param("status", "CONFIRMED")

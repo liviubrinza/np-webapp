@@ -339,6 +339,24 @@ below was added on top of the original numbered plan.
         `updateSchedule`'s server-side check is the real guarantee.
         Regression tests: `AppointmentOverlapWorkflowTest`,
         `AppointmentManagementServiceTest`.
+      - Gotcha (real bug, reported by the notary, reproduced via manual
+        browser testing): the reschedule form's start/end dropdowns
+        (`AppointmentAdminController#buildTimeSlots`) were a fixed 30-minute
+        grid (09:00-18:00), but a service whose duration isn't a multiple of
+        30 minutes ("Procură" = 45 min, "Legalizare Traduceri" = 20 min)
+        gives some appointments a start or end time off that grid. With no
+        matching `<option>`, Thymeleaf's `th:selected` never matched, so the
+        browser silently defaulted the select to its first option (09:00) —
+        showing a start/end time that didn't match the same appointment's
+        entry in the day timeline directly below on that same page, and
+        silently corrupting the schedule to 09:00 if the admin submitted that
+        form for any other reason (e.g. only changing the date).
+        `buildTimeSlots` now takes the appointment's own current start/end
+        `LocalTime`s and folds them into the grid (`TreeSet<LocalTime>`) so
+        an off-grid value is always present and correctly preselected; the
+        busy-time computation naturally picks it up too since it shares the
+        same list. Regression test:
+        `AppointmentAdminControllerTest#detailIncludesAppointmentsOwnOffGridEndTimeAsASelectedOption`.
       - Admins can create appointments directly ("+ Adaugă programare" on the
         list page → `admin/appointments/new.html`), reusing
         `AppointmentBookingService`/`BookingRequest`. Deliberate difference:
