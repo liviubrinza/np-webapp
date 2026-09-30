@@ -40,7 +40,7 @@ public class AppointmentBookingService {
         appointmentEmailService.sendBookingReceivedEmail(saved);
 
         String serviceName = serviceCatalogService.resolveName(saved.getService(), locale);
-        return new AppointmentConfirmationView(saved.getClientName(), serviceName, saved.getRequestedAt());
+        return new AppointmentConfirmationView(saved.getClientName(), serviceName, saved.getRequestedFor());
     }
 
     /**

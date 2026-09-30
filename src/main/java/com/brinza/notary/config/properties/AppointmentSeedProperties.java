@@ -10,7 +10,7 @@ import java.util.List;
 public record AppointmentSeedProperties(List<AppointmentDefinition> demoAppointments) {
 
     public record AppointmentDefinition(String clientName, String email, String phone, String bookedService,
-                                         LocalDateTime requestedAt, LocalDateTime bookedDate, int duration,
+                                         LocalDateTime requestedFor, LocalDateTime bookedDate, int duration,
                                          AppointmentStatus status, String notes) {
     }
 }

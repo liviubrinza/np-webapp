@@ -23,21 +23,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             FROM Appointment a
             WHERE a.status = :status
               AND a.id <> :excludeId
-              AND a.requestedAt < :endedAt
-              AND a.endedAt > :requestedAt
+              AND a.requestedFor < :endedAt
+              AND a.endedAt > :requestedFor
             """)
     boolean existsOverlapping(@Param("status") AppointmentStatus status,
                               @Param("excludeId") Long excludeId,
-                              @Param("requestedAt") LocalDateTime requestedAt,
+                              @Param("requestedFor") LocalDateTime requestedFor,
                               @Param("endedAt") LocalDateTime endedAt);
 
     @Query("""
             SELECT a FROM Appointment a
             WHERE (:statuses IS NULL OR a.status IN :statuses)
-              AND (:from IS NULL OR a.requestedAt >= :from)
-              AND (:to IS NULL OR a.requestedAt <= :to)
+              AND (:from IS NULL OR a.requestedFor >= :from)
+              AND (:to IS NULL OR a.requestedFor <= :to)
               AND (:name IS NULL OR a.clientNameNormalized LIKE CONCAT('%', :name, '%'))
-            ORDER BY a.requestedAt DESC
+            ORDER BY a.requestedFor DESC
             """)
     /** {@code name} must already be folded with {@code SearchTextNormalizer} — the column is. */
     List<Appointment> search(@Param("statuses") Set<AppointmentStatus> statuses,
@@ -48,12 +48,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("""
             SELECT a FROM Appointment a
             WHERE (:statuses IS NULL OR a.status IN :statuses)
-              AND (:from IS NULL OR a.requestedAt >= :from)
-              AND (:to IS NULL OR a.requestedAt <= :to)
+              AND (:from IS NULL OR a.requestedFor >= :from)
+              AND (:to IS NULL OR a.requestedFor <= :to)
               AND (:name IS NULL OR a.clientNameNormalized LIKE CONCAT('%', :name, '%'))
               AND (:phone IS NULL OR LOWER(a.phone) LIKE LOWER(CONCAT('%', :phone, '%')))
               AND (:email IS NULL OR LOWER(a.email) LIKE LOWER(CONCAT('%', :email, '%')))
-            ORDER BY a.requestedAt DESC
+            ORDER BY a.requestedFor DESC
             """)
     /** {@code name} must already be folded with {@code SearchTextNormalizer} — the column is. */
     List<Appointment> searchByCriteria(@Param("statuses") Set<AppointmentStatus> statuses,

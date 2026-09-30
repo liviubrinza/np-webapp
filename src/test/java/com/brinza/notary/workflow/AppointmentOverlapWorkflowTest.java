@@ -167,7 +167,7 @@ class AppointmentOverlapWorkflowTest {
                 .andExpect(flash().attributeExists("error"));
 
         Appointment reloaded = appointmentRepository.findById(other.getId()).orElseThrow();
-        assertThat(reloaded.getRequestedAt()).isEqualTo(start.plusHours(2));
+        assertThat(reloaded.getRequestedFor()).isEqualTo(start.plusHours(2));
     }
 
     @Test
@@ -184,7 +184,7 @@ class AppointmentOverlapWorkflowTest {
                 .andExpect(flash().attributeExists("error"));
 
         Appointment reloaded = appointmentRepository.findById(pending.getId()).orElseThrow();
-        assertThat(reloaded.getRequestedAt()).isEqualTo(start.plusHours(2));
+        assertThat(reloaded.getRequestedFor()).isEqualTo(start.plusHours(2));
     }
 
     @Test

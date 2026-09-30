@@ -50,8 +50,8 @@ public class Appointment {
     @JoinColumn(name = "service_id", nullable = false)
     private Service service;
 
-    @Column(name = "requested_at", nullable = false)
-    private LocalDateTime requestedAt;
+    @Column(name = "requested_for", nullable = false)
+    private LocalDateTime requestedFor;
 
     @Column(name = "ended_at", nullable = false)
     private LocalDateTime endedAt;
@@ -74,12 +74,12 @@ public class Appointment {
     }
 
     public Appointment(String clientName, String email, String phone, Service service,
-                        LocalDateTime requestedAt, LocalDateTime endedAt, String notes) {
+                        LocalDateTime requestedFor, LocalDateTime endedAt, String notes) {
         setClientName(clientName);
         this.email = email;
         this.phone = phone;
         this.service = service;
-        this.requestedAt = requestedAt;
+        this.requestedFor = requestedFor;
         this.endedAt = endedAt;
         this.notes = notes;
         this.status = AppointmentStatus.PENDING;
@@ -133,12 +133,12 @@ public class Appointment {
         this.service = service;
     }
 
-    public LocalDateTime getRequestedAt() {
-        return requestedAt;
+    public LocalDateTime getRequestedFor() {
+        return requestedFor;
     }
 
-    public void setRequestedAt(LocalDateTime requestedAt) {
-        this.requestedAt = requestedAt;
+    public void setRequestedFor(LocalDateTime requestedFor) {
+        this.requestedFor = requestedFor;
     }
 
     public LocalDateTime getEndedAt() {

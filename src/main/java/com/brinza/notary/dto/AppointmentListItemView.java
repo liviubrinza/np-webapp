@@ -8,7 +8,7 @@ public record AppointmentListItemView(
         Long id,
         String clientName,
         String serviceName,
-        LocalDateTime requestedAt,
+        LocalDateTime requestedFor,
         LocalDateTime endedAt,
         AppointmentStatus status,
         boolean overlapsConfirmed,

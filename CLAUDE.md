@@ -252,6 +252,15 @@ below was added on top of the original numbered plan.
       business-logic classes must fully-qualify
       `@org.springframework.stereotype.Service` to avoid a same-name import
       clash — see `ServiceCatalogService`.
+      - Naming, deliberately not uniform: `Appointment.requestedFor` (column
+        `requested_for`, renamed from `requested_at` by `V17`) is the slot the
+        appointment is *for*, as opposed to `createdAt` (when the booking was
+        made, shown as "Trimisă la"). The DTOs and admin templates follow the
+        entity. `BookingRequest.requestedAt` keeps the old name on purpose — it
+        is the public form's field, bound by `th:field`/request params with its
+        own i18n validation keys (`book.requestedAt`,
+        `isRequestedAtOnHalfHour`) and no `createdAt` beside it to confuse it
+        with, so renaming it would churn user-visible wiring for nothing.
 - [x] **3. i18n** — `PathLocaleResolver` resolves locale from the URL prefix
       (`/en`, `/ro`, `/hu`), not a cookie/session. Gotcha: a root
       `messages.properties` (unsuffixed) must exist alongside the

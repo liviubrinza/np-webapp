@@ -60,7 +60,7 @@ class BookingWorkflowTest {
         assertThat(matches).hasSize(1);
         Appointment saved = matches.get(0);
         assertThat(saved.getStatus()).isEqualTo(AppointmentStatus.PENDING);
-        assertThat(saved.getEndedAt()).isEqualTo(saved.getRequestedAt().plusMinutes(service.getDurationMinutes()));
+        assertThat(saved.getEndedAt()).isEqualTo(saved.getRequestedFor().plusMinutes(service.getDurationMinutes()));
     }
 
     @Test

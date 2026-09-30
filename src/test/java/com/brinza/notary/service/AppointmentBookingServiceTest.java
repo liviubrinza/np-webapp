@@ -61,7 +61,7 @@ class AppointmentBookingServiceTest {
         verify(appointmentRepository).save(captor.capture());
         Appointment saved = captor.getValue();
         assertThat(saved.getClientName()).isEqualTo("Ion Popescu");
-        assertThat(saved.getEndedAt()).isEqualTo(saved.getRequestedAt().plusMinutes(30));
+        assertThat(saved.getEndedAt()).isEqualTo(saved.getRequestedFor().plusMinutes(30));
 
         verify(appointmentEmailService).sendBookingReceivedEmail(saved);
         assertThat(confirmation.clientName()).isEqualTo("Ion Popescu");

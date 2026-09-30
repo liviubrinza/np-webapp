@@ -49,13 +49,13 @@
                 <div class="col-md-4">
                     <label class="form-label">Data</label>
                     <input type="text" name="date" id="scheduleDateInput" class="form-control" autocomplete="off" placeholder="dd-Mon-yyyy"
-                           th:value="${#temporals.format(appointment.requestedAt(), 'yyyy-MM-dd')}"/>
+                           th:value="${#temporals.format(appointment.requestedFor(), 'yyyy-MM-dd')}"/>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Ora început</label>
                     <select name="startTime" id="startTimeSelect" class="form-select">
                         <option th:each="t : ${timeSlots}" th:value="${t}"
-                                th:with="currentStart=${#temporals.format(appointment.requestedAt(), 'HH:mm')}"
+                                th:with="currentStart=${#temporals.format(appointment.requestedFor(), 'HH:mm')}"
                                 th:text="${busyTimeSlots.startTimes().contains(t)} ? ${t} + ' — ocupat' : ${t}"
                                 th:selected="${t == currentStart}"
                                 th:disabled="${busyTimeSlots.startTimes().contains(t) and t != currentStart}"></option>

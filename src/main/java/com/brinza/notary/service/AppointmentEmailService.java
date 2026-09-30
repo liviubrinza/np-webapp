@@ -112,9 +112,9 @@ public class AppointmentEmailService {
         for (Map.Entry<Locale, String> entry : EMAIL_LANGUAGES.entrySet()) {
             Locale locale = entry.getKey();
             String serviceName = serviceCatalogService.resolveName(appointment.getService(), locale);
-            String requestedAt = appointment.getRequestedAt()
+            String requestedFor = appointment.getRequestedFor()
                     .format(DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm", locale));
-            Object[] args = {appointment.getClientName(), serviceName, requestedAt};
+            Object[] args = {appointment.getClientName(), serviceName, requestedFor};
             Object[] contactArgs = {this.contactAddress, this.contactPhone};
 
             body.append("\n");

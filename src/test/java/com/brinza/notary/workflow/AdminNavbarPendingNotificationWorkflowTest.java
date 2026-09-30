@@ -41,9 +41,9 @@ class AdminNavbarPendingNotificationWorkflowTest {
 
     private Appointment appointmentWith(AppointmentStatus status) {
         Service service = serviceRepository.findByCode("document-authentication").orElseThrow();
-        LocalDateTime requestedAt = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime requestedFor = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
         Appointment appointment = new Appointment("Client", "client@example.com", "0700000000", service,
-                requestedAt, requestedAt.plusMinutes(30), null);
+                requestedFor, requestedFor.plusMinutes(30), null);
         appointment.setStatus(status);
         return appointmentRepository.save(appointment);
     }

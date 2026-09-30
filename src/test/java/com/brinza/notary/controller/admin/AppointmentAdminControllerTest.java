@@ -206,7 +206,7 @@ class AppointmentAdminControllerTest {
                 .andExpect(model().attribute("dayAppointments", dayAppointments))
                 .andExpect(content().string(containsString("Maria Ionescu")));
 
-        verify(appointmentManagementService).findByDate(detailView().requestedAt().toLocalDate());
+        verify(appointmentManagementService).findByDate(detailView().requestedFor().toLocalDate());
     }
 
     @Test

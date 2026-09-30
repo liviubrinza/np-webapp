@@ -56,23 +56,25 @@ class AppointmentManagementServiceTest {
     // ---- search / searchGrouped ----
 
     @Test
-    void searchGroupedSeparatesPendingFromOthersAndSortsEach() {
+    void searchGroupedSeparatesPendingFromOthersAndSortsEachByRequestedSlot() {
         lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
-        Appointment pendingOld = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
-        pendingOld.setCreatedAt(LocalDateTime.of(2026, 7, 1, 9, 0));
-        Appointment pendingNew = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
-        pendingNew.setCreatedAt(LocalDateTime.of(2026, 7, 2, 9, 0));
+        // The booking dates deliberately run opposite to the requested slots: both tables are
+        // ordered by the requested slot, the only date the list page displays.
+        Appointment pendingEarlierSlot = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
+        pendingEarlierSlot.setCreatedAt(LocalDateTime.of(2026, 7, 20, 9, 0));
+        Appointment pendingLaterSlot = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 2, 9, 0));
+        pendingLaterSlot.setCreatedAt(LocalDateTime.of(2026, 7, 5, 9, 0));
         Appointment confirmedLater = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 5, 9, 0));
         Appointment confirmedEarlier = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 3, 9, 0));
 
         when(appointmentRepository.searchByCriteria(null, null, null, null, null, null))
-                .thenReturn(List.of(pendingNew, pendingOld, confirmedLater, confirmedEarlier));
+                .thenReturn(List.of(pendingLaterSlot, pendingEarlierSlot, confirmedLater, confirmedEarlier));
 
         AppointmentListView view = service().searchGrouped(null, null, null, null, null, null);
 
-        assertThat(view.pending()).extracting(AppointmentListItemView::requestedAt)
+        assertThat(view.pending()).extracting(AppointmentListItemView::requestedFor)
                 .containsExactly(LocalDateTime.of(2026, 8, 1, 9, 0), LocalDateTime.of(2026, 8, 2, 9, 0));
-        assertThat(view.others()).extracting(AppointmentListItemView::requestedAt)
+        assertThat(view.others()).extracting(AppointmentListItemView::requestedFor)
                 .containsExactly(LocalDateTime.of(2026, 8, 3, 9, 0), LocalDateTime.of(2026, 8, 5, 9, 0));
     }
 
@@ -123,7 +125,7 @@ class AppointmentManagementServiceTest {
     // ---- findByDate ----
 
     @Test
-    void findByDateSortsByRequestedAt() {
+    void findByDateSortsByRequestedFor() {
         lenient().when(serviceCatalogService.resolveName(any(), eq(Locale.of("ro")))).thenReturn("Svc");
         Appointment late = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 15, 0));
         Appointment early = appointmentWith(AppointmentStatus.CONFIRMED, LocalDateTime.of(2026, 8, 1, 9, 0));
@@ -131,7 +133,7 @@ class AppointmentManagementServiceTest {
 
         List<AppointmentListItemView> result = service().findByDate(LocalDate.of(2026, 8, 1));
 
-        assertThat(result).extracting(AppointmentListItemView::requestedAt)
+        assertThat(result).extracting(AppointmentListItemView::requestedFor)
                 .containsExactly(LocalDateTime.of(2026, 8, 1, 9, 0), LocalDateTime.of(2026, 8, 1, 15, 0));
     }
 
@@ -316,7 +318,7 @@ class AppointmentManagementServiceTest {
         Appointment pending = appointmentWith(AppointmentStatus.PENDING, LocalDateTime.of(2026, 8, 1, 9, 0));
         when(appointmentRepository.search(null, null, null, null)).thenReturn(List.of(pending));
         when(appointmentRepository.existsOverlapping(eq(AppointmentStatus.CONFIRMED), isNull(),
-                eq(pending.getRequestedAt()), eq(pending.getEndedAt()))).thenReturn(true);
+                eq(pending.getRequestedFor()), eq(pending.getEndedAt()))).thenReturn(true);
 
         List<AppointmentListItemView> result = service().search(null, null, null, null);
 
@@ -475,12 +477,12 @@ class AppointmentManagementServiceTest {
 
     @Test
     void updateScheduleIsNoOpWhenUnchanged() {
-        LocalDateTime requestedAt = LocalDateTime.of(2026, 8, 1, 9, 0);
+        LocalDateTime requestedFor = LocalDateTime.of(2026, 8, 1, 9, 0);
         LocalDateTime endedAt = LocalDateTime.of(2026, 8, 1, 9, 30);
-        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, requestedAt, endedAt);
+        Appointment appointment = appointmentWith(AppointmentStatus.PENDING, requestedFor, endedAt);
         when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 
-        service().updateSchedule(1L, requestedAt, endedAt, "titi");
+        service().updateSchedule(1L, requestedFor, endedAt, "titi");
 
         assertThat(appointment.getInternalNotes()).isEmpty();
     }
@@ -495,7 +497,7 @@ class AppointmentManagementServiceTest {
 
         service().updateSchedule(1L, newStart, newEnd, "titi");
 
-        assertThat(appointment.getRequestedAt()).isEqualTo(newStart);
+        assertThat(appointment.getRequestedFor()).isEqualTo(newStart);
         assertThat(appointment.getInternalNotes()).hasSize(1);
     }
 
@@ -511,7 +513,7 @@ class AppointmentManagementServiceTest {
         assertThatThrownBy(() -> service().updateSchedule(1L, newStart, newEnd, "titi"))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(appointment.getRequestedAt()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
+        assertThat(appointment.getRequestedFor()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
         assertThat(appointment.getInternalNotes()).isEmpty();
     }
 
@@ -527,7 +529,7 @@ class AppointmentManagementServiceTest {
         assertThatThrownBy(() -> service().updateSchedule(1L, newStart, newEnd, "titi"))
                 .isInstanceOf(IllegalArgumentException.class);
 
-        assertThat(appointment.getRequestedAt()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
+        assertThat(appointment.getRequestedFor()).isEqualTo(LocalDateTime.of(2026, 8, 1, 9, 0));
         assertThat(appointment.getInternalNotes()).isEmpty();
     }
 
@@ -542,7 +544,7 @@ class AppointmentManagementServiceTest {
 
         service().updateSchedule(1L, newStart, newEnd, "titi");
 
-        assertThat(appointment.getRequestedAt()).isEqualTo(newStart);
+        assertThat(appointment.getRequestedFor()).isEqualTo(newStart);
     }
 
     // ---- findBusyTimeSlots ----
@@ -619,13 +621,13 @@ class AppointmentManagementServiceTest {
                 .isInstanceOf(NoSuchElementException.class);
     }
 
-    private Appointment appointmentWith(AppointmentStatus status, LocalDateTime requestedAt) {
-        return appointmentWith(status, requestedAt, requestedAt.plusMinutes(30));
+    private Appointment appointmentWith(AppointmentStatus status, LocalDateTime requestedFor) {
+        return appointmentWith(status, requestedFor, requestedFor.plusMinutes(30));
     }
 
-    private Appointment appointmentWith(AppointmentStatus status, LocalDateTime requestedAt, LocalDateTime endedAt) {
+    private Appointment appointmentWith(AppointmentStatus status, LocalDateTime requestedFor, LocalDateTime endedAt) {
         Appointment appointment = new Appointment("Client", "client@example.com", "0700000000", notaryService,
-                requestedAt, endedAt, null);
+                requestedFor, endedAt, null);
         appointment.setStatus(status);
         return appointment;
     }
