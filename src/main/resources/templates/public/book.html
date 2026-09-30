@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html th:lang="${currentLocale}" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layout/fragments :: head(#{nav.book}, #{book.meta.description}, false, ~{::link})}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
-</head>
+<head th:replace="~{layout/fragments :: head(#{nav.book}, #{book.meta.description}, false, ~{fragments/datepicker :: styles})}"></head>
 <body>
 
 <nav th:replace="~{layout/fragments :: navbar}"></nav>
@@ -86,16 +84,12 @@
 
 <footer th:replace="~{layout/fragments :: footer}"></footer>
 <script th:replace="~{layout/fragments :: bootstrapJs}"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>flatpickr.l10ns.default.firstDayOfWeek = 1;</script>
-<script th:if="${currentLocale == 'ro'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
-<script th:if="${currentLocale == 'hu'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
+<th:block th:replace="~{fragments/datepicker :: scripts}"></th:block>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var hidden = document.getElementById('requestedAt');
         var dateInput = document.getElementById('requestedAtDate');
         var timeSelect = document.getElementById('requestedAtTime');
-        var locale = /*[[${currentLocale}]]*/ 'en';
         var vacationStart = /*[[${notificationVacationActive ? notificationVacationStartIso : null}]]*/ null;
         var vacationEnd = /*[[${notificationVacationActive ? notificationVacationEndIso : null}]]*/ null;
 
@@ -114,11 +108,7 @@
         }
 
         var picker = flatpickr(dateInput, {
-            altInput: true,
-            altFormat: 'd-M-Y',
-            dateFormat: 'Y-m-d',
             minDate: 'today',
-            locale: locale === 'en' ? 'default' : locale,
             disable: disableRules,
             onChange: sync
         });

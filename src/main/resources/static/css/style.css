@@ -236,6 +236,13 @@ a:hover {
     box-shadow: 0 4px 14px rgba(102, 9, 12, 0.08);
 }
 
+/* A date input that should not stretch to fill its row. The class is on the source input;
+   flatpickr copies it onto the visible alt input it creates, which the inline style it
+   replaced could not be. */
+.date-input-compact {
+    width: auto;
+}
+
 /* Admin calendar — per-day appointment-load indicator */
 .flatpickr-day.day-status-free {
     background: #5cbd3e !important;

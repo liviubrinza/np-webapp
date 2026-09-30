@@ -159,6 +159,15 @@ DB only stores metadata and the relative path.
   `statisticsNav`, `appointmentsTable`, `appointmentsTimeline`) for admin ones.
   Both `head(...)` fragments take an `extraHead` fragment argument — pass `~{}`
   when a page has nothing extra, never `null`
+- Date pickers (public and admin alike) are configured in exactly one place:
+  `static/js/datepicker.js` (`flatpickr.setDefaults` — Monday-first for every
+  locale bundle, `Y-m-d` value + `d-M-Y` display), pulled in by
+  `fragments/datepicker`'s `styles` (pass it as the `head(...)` `extraHead`
+  argument) and `scripts` (include before the page's own script) fragments. A
+  new calendar calls plain `flatpickr(...)` and passes only its own behaviour
+  (`minDate`, `disable`, `onChange`…) — never the shared options, and never a
+  native `<input type="date">`, whose first day of week comes from the browser
+  instead (`SharedDatePickerConfigurationTest` guards both)
 - Keep colours and repeated layout values in `style.css` (brand tokens live in
   `:root`); inline `style="..."` is for values Thymeleaf computes per element,
   such as the timeline block offsets
@@ -171,7 +180,7 @@ DB only stores metadata and the relative path.
   `pr-security-tests.yml` CI workflow (that plugin binds to `verify`, a phase
   `test` never reaches). Run `mvn clean compile spotbugs:check` separately
   before committing anything security-sensitive — see rule 20 above
-- `WebConfig` caches `/css/**` and `/images/**` for 7 days, so those URLs carry
+- `WebConfig` caches `/css/**`, `/js/**` and `/images/**` for 7 days, so those URLs carry
   a content hash (`/css/style-<md5>.css`, `VersionResourceResolver` +
   `ResourceUrlEncodingFilter` rewriting the templates' `@{...}` links). Any new
   static asset must be linked with `@{...}`, never a literal path, or it will
@@ -480,8 +489,8 @@ this one tab is open to ADMIN as well as TECHNICIAN (`SecurityConfig`,
 `notification.vacation-start`/`notification.vacation-end` keys (still the
 generic `system_settings` table, no new migration).
 - Turning the toggle on requires either a typed message or a selected
-  vacation date range (native `<input type="date">` pair, no JS calendar
-  library) — `SystemSettings.setNotification` rejects a partial range, a
+  vacation date range (a flatpickr pair via the shared `fragments/datepicker`
+  configuration) — `SystemSettings.setNotification` rejects a partial range, a
   start after end, and (if there's no vacation range either) an empty
   message. Turning the toggle off always clears both the message and the
   vacation range, so a stale one can never resurface just by flipping the
@@ -517,6 +526,17 @@ form and the admin's own "+ Adaugă programare" form (`bookAsAdmin`), since
 both share the same `BookingRequest` DTO. `public/book.html`'s flatpickr
 also greys out Saturday/Sunday client-side, same array alongside the
 vacation-range disable rule.
+
+Beyond spec: every calendar in the app now shares one configuration —
+`static/js/datepicker.js` + the `fragments/datepicker` `styles`/`scripts`
+fragments (see Conventions). It replaced six per-page copies of
+`firstDayOfWeek`/`dateFormat`/`altFormat` and fixed the Configurare >
+Notificare vacation range, whose two native `<input type="date">` fields were
+the only calendars starting the week on Sunday. The public booking page's
+locale bundle is picked by the fragment and the locale handed to flatpickr via
+a `data-locale` attribute on the script tag, so no page wires that up either.
+`/js/**` is content-hash-versioned like `/css/**` (`WebConfig`), so the shared
+file can't go stale in a browser. Tests: `SharedDatePickerConfigurationTest`.
 
 Not started:
 

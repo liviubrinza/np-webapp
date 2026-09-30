@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,17 @@ class AppointmentOverlapWorkflowTest {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
+    /**
+     * The list page only defaults to the current month on a bare landing, so these tests pass the
+     * date filter explicitly: the appointments below are booked for tomorrow, which falls in the
+     * next month on the last day of this one - an unfiltered request would then leave them out of
+     * the default range and assert against a page that shows neither of them.
+     */
+    private ResultActions listFilteredToDayOf(LocalDateTime start) throws Exception {
+        String day = start.toLocalDate().toString();
+        return mockMvc.perform(get("/admin/appointments").param("from", day).param("to", day));
+    }
+
     private Appointment appointmentAt(LocalDateTime start, AppointmentStatus status) {
         Service service = serviceRepository.findByCode("document-authentication").orElseThrow();
         Appointment appointment = new Appointment("Client " + status, "client@example.com", "0700000000", service,
@@ -59,7 +71,7 @@ class AppointmentOverlapWorkflowTest {
         appointmentAt(start, AppointmentStatus.CONFIRMED);
         appointmentAt(start, AppointmentStatus.PENDING);
 
-        mockMvc.perform(get("/admin/appointments"))
+        listFilteredToDayOf(start)
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString(OVERLAP_LIST_MARKER)));
     }
@@ -70,7 +82,7 @@ class AppointmentOverlapWorkflowTest {
         appointmentAt(start, AppointmentStatus.CONFIRMED);
         appointmentAt(start.plusHours(2), AppointmentStatus.PENDING);
 
-        mockMvc.perform(get("/admin/appointments"))
+        listFilteredToDayOf(start)
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.not(Matchers.containsString(OVERLAP_LIST_MARKER))));
     }
@@ -81,7 +93,7 @@ class AppointmentOverlapWorkflowTest {
         appointmentAt(start, AppointmentStatus.CONFIRMED);
         appointmentAt(start, AppointmentStatus.CANCELLED);
 
-        mockMvc.perform(get("/admin/appointments"))
+        listFilteredToDayOf(start)
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.not(Matchers.containsString(OVERLAP_LIST_MARKER))));
     }
