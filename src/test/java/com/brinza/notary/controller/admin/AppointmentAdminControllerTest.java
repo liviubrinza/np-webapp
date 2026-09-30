@@ -195,8 +195,7 @@ class AppointmentAdminControllerTest {
                 .thenReturn(new BusyTimeSlots(Set.of(), Set.of()));
         List<AppointmentListItemView> dayAppointments = List.of(new AppointmentListItemView(
                 2L, "Maria Ionescu", "Legalizare", LocalDateTime.of(2026, 8, 1, 11, 0),
-                LocalDateTime.of(2026, 8, 1, 11, 30), AppointmentStatus.CONFIRMED, false,
-                LocalDateTime.of(2026, 7, 1, 9, 0)));
+                LocalDateTime.of(2026, 8, 1, 11, 30), AppointmentStatus.CONFIRMED, false));
         when(appointmentManagementService.findByDate(any())).thenReturn(dayAppointments);
         when(documentManagementService.listForAppointment(1L)).thenReturn(List.of());
         when(systemSettings.isMailEnabled()).thenReturn(true);

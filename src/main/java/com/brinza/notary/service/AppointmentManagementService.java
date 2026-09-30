@@ -289,8 +289,7 @@ public class AppointmentManagementService {
                 appointment.getRequestedFor(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
-                overlapsConfirmedForDisplay(appointment),
-                appointment.getCreatedAt()
+                overlapsConfirmedForDisplay(appointment)
         );
     }
 

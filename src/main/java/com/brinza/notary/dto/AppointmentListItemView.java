@@ -11,6 +11,5 @@ public record AppointmentListItemView(
         LocalDateTime requestedFor,
         LocalDateTime endedAt,
         AppointmentStatus status,
-        boolean overlapsConfirmed,
-        LocalDateTime createdAt) {
+        boolean overlapsConfirmed) {
 }

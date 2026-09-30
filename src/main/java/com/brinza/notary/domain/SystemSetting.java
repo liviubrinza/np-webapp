@@ -45,19 +45,11 @@ public class SystemSetting {
         return id;
     }
 
-    public String getSettingKey() {
-        return settingKey;
-    }
-
     public String getSettingValue() {
         return settingValue;
     }
 
     public void setSettingValue(String settingValue) {
         this.settingValue = settingValue;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
     }
 }
