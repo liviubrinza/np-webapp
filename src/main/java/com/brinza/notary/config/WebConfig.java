@@ -29,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Rewrites the {@code @{/css/...}} / {@code @{/images/...}} links in the templates to the
+     * Rewrites the {@code @{/css/...}} / {@code @{/js/...}} / {@code @{/images/...}} links in the templates to the
      * content-hashed URLs the version resolver below serves. Without it the hashed files would
      * exist but nothing would ever link to them.
      */
@@ -51,6 +51,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResolver(contentVersionResolver());
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/")
+                .setCacheControl(cacheControl)
+                .resourceChain(true)
+                .addResolver(contentVersionResolver());
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/")
                 .setCacheControl(cacheControl)
                 .resourceChain(true)
                 .addResolver(contentVersionResolver());

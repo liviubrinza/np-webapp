@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Configurare', ~{})}"></head>
+<head th:replace="~{admin/fragments :: head('Configurare', ~{fragments/datepicker :: styles})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -28,10 +28,12 @@
 
                 <h2 class="h6 text-uppercase text-muted mb-3">Perioadă de vacanță</h2>
                 <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                    <input type="date" class="form-control" style="width: auto;" id="vacationStart" name="vacationStart"
+                    <input type="text" class="form-control date-input-compact" id="vacationStart" name="vacationStart"
+                           autocomplete="off" placeholder="dd-Mon-yyyy"
                            th:value="${vacationStart != null ? vacationStart : ''}"/>
                     <span class="text-muted">&rarr;</span>
-                    <input type="date" class="form-control" style="width: auto;" id="vacationEnd" name="vacationEnd"
+                    <input type="text" class="form-control date-input-compact" id="vacationEnd" name="vacationEnd"
+                           autocomplete="off" placeholder="dd-Mon-yyyy"
                            th:value="${vacationEnd != null ? vacationEnd : ''}"/>
                     <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearVacationSelection()">
                         Șterge selecția
@@ -56,6 +58,7 @@
     </div>
 </main>
 
+<th:block th:replace="~{fragments/datepicker :: scripts}"></th:block>
 <script>
     function updateVacationRangeDisplay() {
         var start = document.getElementById('vacationStart').value;
@@ -64,14 +67,15 @@
         display.textContent = (start && end) ? (start + ' → ' + end) : ' ';
     }
 
+    var startPicker = flatpickr('#vacationStart', {onChange: updateVacationRangeDisplay});
+    var endPicker = flatpickr('#vacationEnd', {onChange: updateVacationRangeDisplay});
+
     function clearVacationSelection() {
-        document.getElementById('vacationStart').value = '';
-        document.getElementById('vacationEnd').value = '';
+        startPicker.clear();
+        endPicker.clear();
         updateVacationRangeDisplay();
     }
 
-    document.getElementById('vacationStart').addEventListener('change', updateVacationRangeDisplay);
-    document.getElementById('vacationEnd').addEventListener('change', updateVacationRangeDisplay);
     updateVacationRangeDisplay();
 </script>
 

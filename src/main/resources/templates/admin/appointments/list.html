@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Programări', ~{::link})}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
-</head>
+<head th:replace="~{admin/fragments :: head('Programări', ~{fragments/datepicker :: styles})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -113,11 +111,10 @@
     </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<th:block th:replace="~{fragments/datepicker :: scripts}"></th:block>
 <script>
-    flatpickr.l10ns.default.firstDayOfWeek = 1;
-    var fromPicker = flatpickr('#fromDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
-    var toPicker = flatpickr('#toDateInput', {altInput: true, altFormat: 'd-M-Y', dateFormat: 'Y-m-d'});
+    var fromPicker = flatpickr('#fromDateInput');
+    var toPicker = flatpickr('#toDateInput');
     document.getElementById('fromDateClear').addEventListener('click', function () {
         fromPicker.clear();
     });

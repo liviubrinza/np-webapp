@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Adaugă Programare', ~{::link})}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
-</head>
+<head th:replace="~{admin/fragments :: head('Adaugă Programare', ~{fragments/datepicker :: styles})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -105,8 +103,7 @@
     </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>flatpickr.l10ns.default.firstDayOfWeek = 1;</script>
+<th:block th:replace="~{fragments/datepicker :: scripts}"></th:block>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var hidden = document.getElementById('requestedAt');
@@ -172,9 +169,6 @@
         };
 
         flatpickr(dateInput, {
-            altInput: true,
-            altFormat: 'd-M-Y',
-            dateFormat: 'Y-m-d',
             onChange: function () {
                 sync();
                 refreshDaySchedule();

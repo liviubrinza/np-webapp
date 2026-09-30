@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  The single place a calendar is wired up. A page with a date picker passes
+  `~{fragments/datepicker :: styles}` as its head fragment's extraHead argument and includes
+  `~{fragments/datepicker :: scripts}` before its own picker code; /js/datepicker.js then holds
+  the shared look and behaviour (see that file).
+-->
+<th:block th:fragment="styles">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+</th:block>
+
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script th:if="${currentLocale == 'ro'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ro.js"></script>
+    <script th:if="${currentLocale == 'hu'}" src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
+    <script th:src="@{/js/datepicker.js}" th:attr="data-locale=${currentLocale}"></script>
+</th:block>
+
+</body>
+</html>

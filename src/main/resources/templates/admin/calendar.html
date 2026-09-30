@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ro" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments :: head('Calendar', ~{::link})}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
-</head>
+<head th:replace="~{admin/fragments :: head('Calendar', ~{fragments/datepicker :: styles})}"></head>
 <body>
 
 <nav th:replace="~{admin/fragments :: navbar}"></nav>
@@ -33,8 +31,7 @@
     </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>flatpickr.l10ns.default.firstDayOfWeek = 1;</script>
+<th:block th:replace="~{fragments/datepicker :: scripts}"></th:block>
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
         var selectedDate = /*[[${#temporals.format(selectedDate, 'yyyy-MM-dd')}]]*/ '2026-01-01';
@@ -56,7 +53,8 @@
 
         flatpickr('#calendar', {
             inline: true,
-            dateFormat: 'Y-m-d',
+            // The picker is rendered into a <div>, so there is no input to mirror into.
+            altInput: false,
             defaultDate: selectedDate,
             onChange: function (selectedDates, dateStr) {
                 window.location.href = '/admin/calendar?date=' + dateStr;
