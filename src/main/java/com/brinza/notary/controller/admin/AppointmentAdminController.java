@@ -187,13 +187,13 @@ public class AppointmentAdminController {
     @GetMapping("/{id}")
     public String showDetail(@PathVariable Long id, @RequestParam(required = false) String back, Model model) {
         var appointment = appointmentManagementService.getDetail(id);
-        List<String> timeSlots = buildTimeSlots(appointment.requestedAt().toLocalTime(), appointment.endedAt().toLocalTime());
+        List<String> timeSlots = buildTimeSlots(appointment.requestedFor().toLocalTime(), appointment.endedAt().toLocalTime());
         model.addAttribute("appointment", appointment);
         model.addAttribute("statuses", AppointmentStatus.values());
         model.addAttribute("timeSlots", timeSlots);
         model.addAttribute("busyTimeSlots",
-                appointmentManagementService.findBusyTimeSlots(appointment.requestedAt().toLocalDate(), id, timeSlots));
-        model.addAttribute("dayAppointments", appointmentManagementService.findByDate(appointment.requestedAt().toLocalDate()));
+                appointmentManagementService.findBusyTimeSlots(appointment.requestedFor().toLocalDate(), id, timeSlots));
+        model.addAttribute("dayAppointments", appointmentManagementService.findByDate(appointment.requestedFor().toLocalDate()));
         model.addAttribute("documents", documentManagementService.listForAppointment(id));
         model.addAttribute("backUrl", sanitizeBack(back));
         model.addAttribute("mailEnabled", systemSettings.isMailEnabled());

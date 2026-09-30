@@ -80,14 +80,17 @@ public class AppointmentManagementService {
                 .map(this::toListItem)
                 .toList();
 
+        // Both tables on the list page show the requested slot as their only date column, so both
+        // are ordered by it - ordering the pending one by createdAt instead left the dates the
+        // page actually displays in no apparent order.
         List<AppointmentListItemView> pending = all.stream()
                 .filter(a -> a.status() == AppointmentStatus.PENDING)
-                .sorted(Comparator.comparing(AppointmentListItemView::createdAt))
+                .sorted(Comparator.comparing(AppointmentListItemView::requestedFor))
                 .toList();
 
         List<AppointmentListItemView> others = all.stream()
                 .filter(a -> a.status() != AppointmentStatus.PENDING)
-                .sorted(Comparator.comparing(AppointmentListItemView::requestedAt))
+                .sorted(Comparator.comparing(AppointmentListItemView::requestedFor))
                 .toList();
 
         return new AppointmentListView(pending, others);
@@ -97,7 +100,7 @@ public class AppointmentManagementService {
     public List<AppointmentListItemView> findByDate(LocalDate date) {
         log.info("findByDate called for date={}", date);
         return search(null, date.atStartOfDay(), date.atTime(LocalTime.MAX), null).stream()
-                .sorted(Comparator.comparing(AppointmentListItemView::requestedAt))
+                .sorted(Comparator.comparing(AppointmentListItemView::requestedFor))
                 .toList();
     }
 
@@ -110,7 +113,7 @@ public class AppointmentManagementService {
 
         Map<LocalDate, List<Appointment>> byDay = appointments.stream()
                 .filter(a -> a.getStatus() != AppointmentStatus.CANCELLED)
-                .collect(Collectors.groupingBy(a -> a.getRequestedAt().toLocalDate()));
+                .collect(Collectors.groupingBy(a -> a.getRequestedFor().toLocalDate()));
         log.debug("monthAvailability grouped {} appointment(s) across {} day(s)", appointments.size(), byDay.size());
 
         Map<LocalDate, DayAvailability> result = new LinkedHashMap<>();
@@ -135,7 +138,7 @@ public class AppointmentManagementService {
 
         List<int[]> intervals = new ArrayList<>();
         for (Appointment appointment : nonCancelledAppointments) {
-            int start = Math.max(appointment.getRequestedAt().toLocalTime().toSecondOfDay() / 60, startOfDay);
+            int start = Math.max(appointment.getRequestedFor().toLocalTime().toSecondOfDay() / 60, startOfDay);
             int end = Math.min(appointment.getEndedAt().toLocalTime().toSecondOfDay() / 60, endOfDay);
             if (end > start) {
                 intervals.add(new int[]{start, end});
@@ -239,31 +242,31 @@ public class AppointmentManagementService {
     }
 
     @Transactional
-    public void updateSchedule(Long id, LocalDateTime requestedAt, LocalDateTime endedAt, String authorUsername) {
-        log.info("updateSchedule called for id={} requestedAt={} endedAt={} author={}", id, requestedAt, endedAt, authorUsername);
-        if (!endedAt.isAfter(requestedAt)) {
-            log.debug("Rejected schedule update for id={}: endedAt not after requestedAt", id);
+    public void updateSchedule(Long id, LocalDateTime requestedFor, LocalDateTime endedAt, String authorUsername) {
+        log.info("updateSchedule called for id={} requestedFor={} endedAt={} author={}", id, requestedFor, endedAt, authorUsername);
+        if (!endedAt.isAfter(requestedFor)) {
+            log.debug("Rejected schedule update for id={}: endedAt not after requestedFor", id);
             throw new IllegalArgumentException("Ora de sfârșit trebuie să fie după ora de început.");
         }
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No appointment with id " + id));
-        LocalDateTime previousRequestedAt = appointment.getRequestedAt();
+        LocalDateTime previousRequestedFor = appointment.getRequestedFor();
         LocalDateTime previousEndedAt = appointment.getEndedAt();
-        if (previousRequestedAt.equals(requestedAt) && previousEndedAt.equals(endedAt)) {
+        if (previousRequestedFor.equals(requestedFor) && previousEndedAt.equals(endedAt)) {
             log.debug("Schedule unchanged for appointment id={}", id);
             return;
         }
-        if (appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, id, requestedAt, endedAt)) {
+        if (appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, id, requestedFor, endedAt)) {
             log.debug("Rejected schedule update for id={}: new schedule overlaps a confirmed appointment", id);
             throw new IllegalArgumentException("Noua dată și oră se suprapun cu o programare deja confirmată.");
         }
-        appointment.setRequestedAt(requestedAt);
+        appointment.setRequestedFor(requestedFor);
         appointment.setEndedAt(endedAt);
         String note = "Stare schimbată: %s-%s -> %s-%s".formatted(
-                previousRequestedAt.format(CHANGE_LOG_FORMAT), previousEndedAt.toLocalTime(),
-                requestedAt.format(CHANGE_LOG_FORMAT), endedAt.toLocalTime());
+                previousRequestedFor.format(CHANGE_LOG_FORMAT), previousEndedAt.toLocalTime(),
+                requestedFor.format(CHANGE_LOG_FORMAT), endedAt.toLocalTime());
         appointment.addInternalNote(new InternalNote(authorUsername, note));
-        log.debug("Appointment id={} schedule changed {}-{} -> {}-{}", id, previousRequestedAt, previousEndedAt, requestedAt, endedAt);
+        log.debug("Appointment id={} schedule changed {}-{} -> {}-{}", id, previousRequestedFor, previousEndedAt, requestedFor, endedAt);
     }
 
     @Transactional
@@ -283,11 +286,10 @@ public class AppointmentManagementService {
                 appointment.getId(),
                 appointment.getClientName(),
                 serviceCatalogService.resolveName(appointment.getService(), Locale.of("ro")),
-                appointment.getRequestedAt(),
+                appointment.getRequestedFor(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
-                overlapsConfirmedForDisplay(appointment),
-                appointment.getCreatedAt()
+                overlapsConfirmedForDisplay(appointment)
         );
     }
 
@@ -298,7 +300,7 @@ public class AppointmentManagementService {
                 appointment.getEmail(),
                 appointment.getPhone(),
                 serviceCatalogService.resolveName(appointment.getService(), Locale.of("ro")),
-                appointment.getRequestedAt(),
+                appointment.getRequestedFor(),
                 appointment.getEndedAt(),
                 appointment.getStatus(),
                 overlapsConfirmedForDisplay(appointment),
@@ -336,7 +338,7 @@ public class AppointmentManagementService {
      */
     private boolean overlapsConfirmed(Appointment appointment) {
         return appointmentRepository.existsOverlapping(AppointmentStatus.CONFIRMED, appointment.getId(),
-                appointment.getRequestedAt(), appointment.getEndedAt());
+                appointment.getRequestedFor(), appointment.getEndedAt());
     }
 
     /**
@@ -371,9 +373,9 @@ public class AppointmentManagementService {
         for (String candidate : candidateTimes) {
             LocalTime t = LocalTime.parse(candidate);
             boolean startBusy = confirmed.stream().anyMatch(a ->
-                    !t.isBefore(a.getRequestedAt().toLocalTime()) && t.isBefore(a.getEndedAt().toLocalTime()));
+                    !t.isBefore(a.getRequestedFor().toLocalTime()) && t.isBefore(a.getEndedAt().toLocalTime()));
             boolean endBusy = confirmed.stream().anyMatch(a ->
-                    t.isAfter(a.getRequestedAt().toLocalTime()) && !t.isAfter(a.getEndedAt().toLocalTime()));
+                    t.isAfter(a.getRequestedFor().toLocalTime()) && !t.isAfter(a.getEndedAt().toLocalTime()));
             if (startBusy) {
                 busyStart.add(candidate);
             }

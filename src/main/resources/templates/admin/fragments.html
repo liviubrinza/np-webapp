@@ -120,7 +120,7 @@
                 th:if="${a.overlapsConfirmed()}" class="ms-1 overlap-badge"
                 title="Se suprapune cu o programare confirmată">!</span></td>
         <td th:text="${a.serviceName()}"></td>
-        <td th:text="${#temporals.format(a.requestedAt(), 'dd MMM yyyy, HH:mm')}"></td>
+        <td th:text="${#temporals.format(a.requestedFor(), 'dd MMM yyyy, HH:mm')}"></td>
         <td th:if="${showStatus}">
             <span th:switch="${a.status().name()}">
                 <span th:case="'PENDING'" class="badge bg-warning text-dark" th:text="${a.status().displayName}"></span>
@@ -147,13 +147,13 @@
                 <div class="timeline-block"
                      th:each="a : ${appointments}"
                      th:if="${a.status.name() != 'CANCELLED'}"
-                     th:with="startMin=${a.requestedAt.hour * 60 + a.requestedAt.minute}, endMin=${a.endedAt.hour * 60 + a.endedAt.minute}, backTarget='/admin/calendar?date=' + ${#temporals.format(a.requestedAt, 'yyyy-MM-dd')}"
+                     th:with="startMin=${a.requestedFor.hour * 60 + a.requestedFor.minute}, endMin=${a.endedAt.hour * 60 + a.endedAt.minute}, backTarget='/admin/calendar?date=' + ${#temporals.format(a.requestedFor, 'yyyy-MM-dd')}"
                      th:style="|top: ${(startMin - 540) * 2}px; height: ${(endMin - startMin) * 2}px;|"
                      th:classappend="${'timeline-block-' + a.status.name().toLowerCase()}">
                     <a class="timeline-block-link" th:href="@{/admin/appointments/{id}(id=${a.id}, back=${backTarget})}">
                         <span class="timeline-block-header">
                             <span class="timeline-block-time"
-                                  th:text="${#temporals.format(a.requestedAt, 'HH:mm')} + '-' + ${#temporals.format(a.endedAt, 'HH:mm')}"></span>
+                                  th:text="${#temporals.format(a.requestedFor, 'HH:mm')} + '-' + ${#temporals.format(a.endedAt, 'HH:mm')}"></span>
                             <span class="timeline-block-client" th:text="${a.clientName}"></span>
                         </span>
                         <span class="timeline-block-service" th:text="${a.serviceName}"></span>

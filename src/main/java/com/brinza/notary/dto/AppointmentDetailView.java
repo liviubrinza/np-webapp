@@ -11,7 +11,7 @@ public record AppointmentDetailView(
         String email,
         String phone,
         String serviceName,
-        LocalDateTime requestedAt,
+        LocalDateTime requestedFor,
         LocalDateTime endedAt,
         AppointmentStatus status,
         boolean overlapsConfirmed,

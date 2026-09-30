@@ -46,11 +46,15 @@ Read and follow these at the start of every session.
     correct functionality.
 20. `mvn test` never runs SpotBugs/find-security-bugs — that plugin binds to
     the `verify` phase, one phase past `test`, so passing tests says nothing
-    about the security check. Before committing anything touching redirects,
-    request-derived values, raw SQL, or similar security-sensitive patterns,
-    also run `mvn clean compile spotbugs:check` (the actual CI step) — see
-    Build & Run. Reason: shipped a commit with an `UNVALIDATED_REDIRECT` that
-    `mvn test` couldn't have caught no matter how thorough.
+    about it. Run `mvn clean compile spotbugs:check` (the actual CI step) before
+    **every** commit that touches Java, not just security-sensitive ones — see
+    Build & Run. Two reasons, both from shipped breakage: an
+    `UNVALIDATED_REDIRECT` that `mvn test` could never have caught, and a
+    dead-code cleanup that removed `Document.getCategory()` and failed CI with
+    `URF_UNREAD_FIELD` because the field was then written-never-read. Deleting
+    code can trip this plugin as easily as adding it, and note it only reports
+    unread *unannotated* fields — a `@Column`-annotated one stays silent, so
+    the check is not a substitute for knowing whether a field is really used.
 
 ## Project Overview
 
@@ -252,6 +256,15 @@ below was added on top of the original numbered plan.
       business-logic classes must fully-qualify
       `@org.springframework.stereotype.Service` to avoid a same-name import
       clash — see `ServiceCatalogService`.
+      - Naming, deliberately not uniform: `Appointment.requestedFor` (column
+        `requested_for`, renamed from `requested_at` by `V17`) is the slot the
+        appointment is *for*, as opposed to `createdAt` (when the booking was
+        made, shown as "Trimisă la"). The DTOs and admin templates follow the
+        entity. `BookingRequest.requestedAt` keeps the old name on purpose — it
+        is the public form's field, bound by `th:field`/request params with its
+        own i18n validation keys (`book.requestedAt`,
+        `isRequestedAtOnHalfHour`) and no `createdAt` beside it to confuse it
+        with, so renaming it would churn user-visible wiring for nothing.
 - [x] **3. i18n** — `PathLocaleResolver` resolves locale from the URL prefix
       (`/en`, `/ro`, `/hu`), not a cookie/session. Gotcha: a root
       `messages.properties` (unsuffixed) must exist alongside the

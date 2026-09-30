@@ -69,8 +69,8 @@ public class AppointmentDemoDataSeeder implements CommandLineRunner {
                     definition.email(),
                     definition.phone(),
                     service,
-                    definition.requestedAt(),
-                    definition.requestedAt().plusMinutes(definition.duration()),
+                    definition.requestedFor(),
+                    definition.requestedFor().plusMinutes(definition.duration()),
                     definition.notes());
             appointment.setStatus(definition.status());
             appointment.setCreatedAt(definition.bookedDate());

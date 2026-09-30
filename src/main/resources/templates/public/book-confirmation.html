@@ -19,8 +19,8 @@
                 <dt class="col-sm-3" th:text="#{book.service}">Service</dt>
                 <dd class="col-sm-9" th:text="${appointment.serviceName()}"></dd>
 
-                <dt class="col-sm-3" th:text="#{book.requestedAt}">Preferred date/time</dt>
-                <dd class="col-sm-9 mb-0" th:text="${#temporals.format(appointment.requestedAt(), 'dd MMM yyyy, HH:mm')}"></dd>
+                <dt class="col-sm-3" th:text="#{book.requestedFor}">Preferred date/time</dt>
+                <dd class="col-sm-9 mb-0" th:text="${#temporals.format(appointment.requestedFor(), 'dd MMM yyyy, HH:mm')}"></dd>
             </dl>
         </div>
     </div>

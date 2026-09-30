@@ -38,13 +38,13 @@ class AppointmentRepositoryTest {
         service = serviceRepository.save(service);
     }
 
-    private Appointment appointmentWith(String clientName, AppointmentStatus status, LocalDateTime requestedAt) {
-        return appointmentWith(clientName, clientName + "@example.com", "0700000000", status, requestedAt);
+    private Appointment appointmentWith(String clientName, AppointmentStatus status, LocalDateTime requestedFor) {
+        return appointmentWith(clientName, clientName + "@example.com", "0700000000", status, requestedFor);
     }
 
-    private Appointment appointmentWith(String clientName, String email, String phone, AppointmentStatus status, LocalDateTime requestedAt) {
+    private Appointment appointmentWith(String clientName, String email, String phone, AppointmentStatus status, LocalDateTime requestedFor) {
         Appointment appointment = new Appointment(clientName, email, phone, service,
-                requestedAt, requestedAt.plusMinutes(30), null);
+                requestedFor, requestedFor.plusMinutes(30), null);
         appointment.setStatus(status);
         return appointmentRepository.save(appointment);
     }

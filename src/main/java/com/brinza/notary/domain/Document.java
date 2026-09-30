@@ -64,20 +64,16 @@ public class Document {
         return id;
     }
 
+    // No caller reads these two yet, but they are the read API for two mapped columns, and
+    // dropping them left `category` written-never-read, which SpotBugs fails the build over
+    // (URF_UNREAD_FIELD - it only skips annotated fields, so `title` slipped through). Nothing
+    // mutates either after upload, so the setters stay gone.
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getCategory() {
         return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     public String getStoredPath() {
