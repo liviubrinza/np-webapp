@@ -209,6 +209,15 @@ a:hover {
     border-top: 1px solid var(--brand-border);
 }
 
+/* Service cards (public Services page) carry the same hairline under the title as the one the
+   footer draws above the duration, so the card reads as three stacked bands. Scoped to its own
+   class rather than styling .card-header: the admin pages use card headers too and keep
+   Bootstrap's tinted cap. */
+.service-card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--brand-border);
+}
+
 /* Forms */
 .form-label {
     font-weight: 600;

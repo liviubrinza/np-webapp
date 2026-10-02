@@ -60,6 +60,28 @@ class ServicesControllerTest {
     }
 
     @Test
+    void showsTheDurationDisclaimerInEveryLocale() throws Exception {
+        when(serviceCatalogService.findActiveServices(any())).thenReturn(
+                List.of(new ServiceView(1L, "Autentificare", "descriere", 30)));
+
+        // One assertion per locale: a key missing from one messages file renders as
+        // ??services.duration.disclaimer_xx?? rather than failing, so only the translated text
+        // proves the translation is actually there.
+        mockMvc.perform(get("/ro/services"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<strong>Precizare:</strong>")))
+                .andExpect(content().string(containsString("Durata afișată pentru fiecare serviciu este estimativă")));
+        mockMvc.perform(get("/en/services"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<strong>Disclaimer:</strong>")))
+                .andExpect(content().string(containsString("The duration shown for each service is an estimate")));
+        mockMvc.perform(get("/hu/services"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<strong>Tájékoztatás:</strong>")))
+                .andExpect(content().string(containsString("feltüntetett időtartam becsült érték")));
+    }
+
+    @Test
     void linksToBookingForm() throws Exception {
         when(serviceCatalogService.findActiveServices(any())).thenReturn(List.of());
 
