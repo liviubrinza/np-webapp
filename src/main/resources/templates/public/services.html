@@ -16,16 +16,25 @@
             <div class="page-panel">
                 <h1 th:text="#{nav.services}">Services</h1>
 
-                <p th:if="${services.isEmpty()}" class="text-muted" th:text="#{services.empty}">
+                <p class="mt-3">
+                    <h5>
+                        <strong th:text="#{services.duration.disclaimer.label}">Disclaimer:</strong>
+                    </h5>
+                    <span th:text="#{services.duration.disclaimer}">The duration shown for each service is an estimate.</span>
+                </p>
+
+                <p th:if="${services.isEmpty()}" class="text-muted mt-3" th:text="#{services.empty}">
                     No services available at the moment.
                 </p>
 
                 <div class="row row-cols-1 g-4 mt-2">
                     <div class="col" th:each="service : ${services}">
                         <div class="card h-100">
+                            <div class="card-header service-card-header">
+                                <h2 class="h5 card-title mb-0" th:text="${service.name()}">Service name</h2>
+                            </div>
                             <div class="card-body">
-                                <h2 class="h5 card-title" th:text="${service.name()}">Service name</h2>
-                                <p class="card-text" th:text="${service.description()}">Description</p>
+                                <p class="card-text mb-0" th:text="${service.description()}">Description</p>
                             </div>
                             <div class="card-footer text-muted"
                                  th:text="${service.durationMinutes()} + ' ' + #{services.minutes}">30 min</div>
