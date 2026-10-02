@@ -254,20 +254,20 @@ a:hover {
 
 /* Admin calendar — per-day appointment-load indicator */
 .flatpickr-day.day-status-free {
-    background: #5cbd3e !important;
-    border-color: #5cbd3e !important;
+    background: #1b7430 !important;
+    border-color: #1b7430 !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-partial {
-    background: #fac278 !important;
-    border-color: #fac278 !important;
+    background: #cd7b0f !important;
+    border-color: #cd7b0f !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-full {
-    background: #fa6464 !important;
-    border-color: #fa6464 !important;
+    background: #ac1f1f !important;
+    border-color: #ac1f1f !important;
     color: #fff !important;
 }
 
@@ -303,15 +303,15 @@ a:hover {
 }
 
 .calendar-legend-free {
-    background-color: #28a745;
+    background-color: #1b7430;
 }
 
 .calendar-legend-partial {
-    background-color: #fd7e14;
+    background-color: #cd7b0f;
 }
 
 .calendar-legend-full {
-    background-color: #dc3545;
+    background-color: #ac1f1f;
 }
 
 /* Admin calendar — day timeline */
@@ -413,11 +413,11 @@ a:hover {
 }
 
 .timeline-block-pending {
-    background-color: #f09f35;
+    background-color: #cd7b0f;
 }
 
 .timeline-block-confirmed {
-    background-color: #28a745;
+    background-color: #1b7430;
 }
 
 .timeline-block-completed {
