@@ -254,20 +254,20 @@ a:hover {
 
 /* Admin calendar — per-day appointment-load indicator */
 .flatpickr-day.day-status-free {
-    background: #5cbd3e !important;
-    border-color: #5cbd3e !important;
+    background: #1b7430 !important;
+    border-color: #1b7430 !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-partial {
-    background: #fac278 !important;
-    border-color: #fac278 !important;
+    background: #cd7b0f !important;
+    border-color: #cd7b0f !important;
     color: #fff !important;
 }
 
 .flatpickr-day.day-status-full {
-    background: #fa6464 !important;
-    border-color: #fa6464 !important;
+    background: #ac1f1f !important;
+    border-color: #ac1f1f !important;
     color: #fff !important;
 }
 
@@ -303,15 +303,15 @@ a:hover {
 }
 
 .calendar-legend-free {
-    background-color: #28a745;
+    background-color: #1b7430;
 }
 
 .calendar-legend-partial {
-    background-color: #fd7e14;
+    background-color: #cd7b0f;
 }
 
 .calendar-legend-full {
-    background-color: #dc3545;
+    background-color: #ac1f1f;
 }
 
 /* Admin calendar — day timeline */
@@ -413,11 +413,11 @@ a:hover {
 }
 
 .timeline-block-pending {
-    background-color: #f09f35;
+    background-color: #cd7b0f;
 }
 
 .timeline-block-confirmed {
-    background-color: #28a745;
+    background-color: #1b7430;
 }
 
 .timeline-block-completed {
@@ -632,4 +632,85 @@ a:hover {
 .user-menu-toggle:active .user-menu-icon,
 .user-menu-toggle.show .user-menu-icon {
     filter: none;
+}
+
+/* ==========================================================
+   Admin dark theme — chosen per user on the Profile page and
+   applied via data-bs-theme="dark" on <html>, which also turns
+   on Bootstrap's own dark colour mode. Shades of gray with white
+   text; the navbar and buttons use a darker, muted burgundy.
+   ========================================================== */
+
+[data-bs-theme="dark"] {
+    --brand-primary: #4a010e;
+    --brand-primary-dark: #36000a;
+    --brand-bg: #2b2b2b;
+    --brand-surface: #383838;
+    --brand-text: #ffffff;
+    --brand-text-muted: #c4c4c4;
+    --brand-border: #4d4d4d;
+
+    --bs-body-bg: #2b2b2b;
+    --bs-body-bg-rgb: 43, 43, 43;
+    --bs-body-color: #ffffff;
+    --bs-body-color-rgb: 255, 255, 255;
+    --bs-emphasis-color: #ffffff;
+    --bs-emphasis-color-rgb: 255, 255, 255;
+    --bs-heading-color: #ffffff;
+    --bs-secondary-color: rgba(255, 255, 255, 0.75);
+    --bs-secondary-bg: #383838;
+    --bs-secondary-bg-rgb: 56, 56, 56;
+    --bs-tertiary-bg: #333333;
+    --bs-tertiary-bg-rgb: 51, 51, 51;
+    --bs-border-color: #4d4d4d;
+    --bs-link-color: #e0e0e0;
+    --bs-link-color-rgb: 224, 224, 224;
+    --bs-link-hover-color: #ffffff;
+    --bs-link-hover-color-rgb: 255, 255, 255;
+}
+
+/* Text that is burgundy in the light theme would be unreadable on gray, so it turns light.
+   :where() keeps these at the specificity of the light rules they replace, so .btn/.nav-link
+   anchors still win with their own colours. */
+:where([data-bs-theme="dark"]) a,
+:where([data-bs-theme="dark"]) main h1 {
+    color: #e0e0e0;
+}
+
+:where([data-bs-theme="dark"]) a:hover {
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .page-panel {
+    background-color: rgba(51, 51, 51, 0.92);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.4);
+}
+
+[data-bs-theme="dark"] .card {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .card.bg-light {
+    background-color: var(--brand-surface) !important;
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+    background-color: var(--brand-surface);
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .btn-outline-primary {
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    border-color: #8a8a8a;
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.15);
+}
+
+[data-bs-theme="dark"] .timeline-hour-label {
+    background-color: #333333;
 }

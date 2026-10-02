@@ -1,5 +1,6 @@
 package com.brinza.notary.controller.admin;
 
+import com.brinza.notary.domain.AdminTheme;
 import com.brinza.notary.dto.ChangePasswordForm;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.ProfileService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -30,12 +32,32 @@ public class ProfileController {
         this.adminActivityLogger = adminActivityLogger;
     }
 
+    @ModelAttribute("themes")
+    public AdminTheme[] themes() {
+        return AdminTheme.values();
+    }
+
+    @ModelAttribute("theme")
+    public AdminTheme theme(Authentication authentication) {
+        return profileService.getTheme(authentication.getName());
+    }
+
     @GetMapping
     public String show(Authentication authentication, Model model) {
         model.addAttribute("username", authentication.getName());
         model.addAttribute("fullName", profileService.getFullName(authentication.getName()));
         model.addAttribute("changePasswordForm", new ChangePasswordForm());
         return "admin/profile";
+    }
+
+    @PostMapping("/theme")
+    public String changeTheme(@RequestParam AdminTheme theme,
+                              Authentication authentication,
+                              RedirectAttributes redirectAttributes) {
+        profileService.changeTheme(authentication.getName(), theme);
+        adminActivityLogger.log("Changed own theme to " + theme);
+        redirectAttributes.addFlashAttribute("success", "Tema a fost actualizată.");
+        return "redirect:/admin/profile";
     }
 
     @PostMapping("/password")

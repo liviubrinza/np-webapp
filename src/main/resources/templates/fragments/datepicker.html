@@ -10,6 +10,7 @@
 -->
 <th:block th:fragment="styles">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+    <link th:if="${adminTheme == 'dark'}" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css"/>
 </th:block>
 
 <th:block th:fragment="scripts">

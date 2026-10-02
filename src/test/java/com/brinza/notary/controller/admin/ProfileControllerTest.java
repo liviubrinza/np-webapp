@@ -1,10 +1,12 @@
 package com.brinza.notary.controller.admin;
 
 import com.brinza.notary.config.AdminSessionRegistry;
+import com.brinza.notary.domain.AdminTheme;
 import com.brinza.notary.service.AdminActivityLogger;
 import com.brinza.notary.service.ProfileService;
 import com.brinza.notary.service.GeoLocationService;
 import com.brinza.notary.service.TrafficStatsService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -16,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,6 +41,11 @@ class ProfileControllerTest {
     private ProfileService profileService;
     @MockitoBean
     private AdminActivityLogger adminActivityLogger;
+
+    @BeforeEach
+    void stubTheme() {
+        when(profileService.getTheme("titi")).thenReturn(AdminTheme.LIGHT);
+    }
 
     @Test
     void showRendersCurrentUsername() throws Exception {
@@ -97,5 +105,34 @@ class ProfileControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/profile"))
                 .andExpect(model().attributeExists("error"));
+    }
+
+    @Test
+    void showRendersThemeSelectorWithCurrentThemeChecked() throws Exception {
+        when(profileService.getTheme("titi")).thenReturn(AdminTheme.DARK);
+
+        mockMvc.perform(get("/admin/profile"))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("theme", AdminTheme.DARK))
+                .andExpect(content().string(containsString("action=\"/admin/profile/theme\"")))
+                .andExpect(content().string(containsString("data-bs-theme=\"dark\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.matchesPattern(
+                        "(?s).*value=\"DARK\"[^>]*checked.*")));
+    }
+
+    @Test
+    void changeThemeSavesAndRedirectsWithFlash() throws Exception {
+        mockMvc.perform(post("/admin/profile/theme").with(csrf()).param("theme", "DARK"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/profile"))
+                .andExpect(flash().attributeExists("success"));
+
+        verify(profileService).changeTheme("titi", AdminTheme.DARK);
+    }
+
+    @Test
+    void changeThemeRejectsUnknownValue() throws Exception {
+        mockMvc.perform(post("/admin/profile/theme").with(csrf()).param("theme", "PURPLE"))
+                .andExpect(status().isBadRequest());
     }
 }

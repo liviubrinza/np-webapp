@@ -45,6 +45,10 @@ public class AdminUser {
     @Column(name = "lock_until")
     private LocalDateTime lockUntil;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private AdminTheme theme = AdminTheme.LIGHT;
+
     protected AdminUser() {
     }
 
@@ -122,5 +126,13 @@ public class AdminUser {
 
     public void setLockUntil(LocalDateTime lockUntil) {
         this.lockUntil = lockUntil;
+    }
+
+    public AdminTheme getTheme() {
+        return theme;
+    }
+
+    public void setTheme(AdminTheme theme) {
+        this.theme = theme;
     }
 }

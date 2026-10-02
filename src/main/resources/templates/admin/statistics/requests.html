@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<html lang="ro" xmlns:th="http://www.thymeleaf.org" th:data-bs-theme="${adminTheme}">
 <head th:replace="~{admin/fragments :: head('Statistici · Cereri', ~{})}"></head>
 <body>
 
@@ -76,6 +76,11 @@
 <script th:inline="javascript" th:unless="${monthlyStats.isEmpty()}">
     document.addEventListener('DOMContentLoaded', function () {
         var chartData = /*[(${monthlyStatsChartJson})]*/ {labels: [], confirmed: [], cancelled: [], completed: []};
+
+        if (document.documentElement.dataset.bsTheme === 'dark') {
+            Chart.defaults.color = '#ffffff';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.15)';
+        }
 
         new Chart(document.getElementById('requestsChart'), {
             type: 'bar',
