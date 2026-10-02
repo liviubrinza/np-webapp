@@ -8,8 +8,8 @@ import java.util.Locale;
  * mode and the dark overrides in {@code style.css}.
  */
 public enum AdminTheme {
-    LIGHT("Luminoasă"),
-    DARK("Întunecată");
+    LIGHT("Deschisă"),
+    DARK("Închisă");
 
     private final String displayName;
 
