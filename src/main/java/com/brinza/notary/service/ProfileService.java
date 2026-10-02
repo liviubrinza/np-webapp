@@ -1,5 +1,6 @@
 package com.brinza.notary.service;
 
+import com.brinza.notary.domain.AdminTheme;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.repository.AdminUserRepository;
 import org.slf4j.Logger;
@@ -27,6 +28,21 @@ public class ProfileService {
         return adminUserRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("No admin user with username " + username))
                 .getFullName();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminTheme getTheme(String username) {
+        return adminUserRepository.findByUsername(username)
+                .map(AdminUser::getTheme)
+                .orElse(AdminTheme.LIGHT);
+    }
+
+    @Transactional
+    public void changeTheme(String username, AdminTheme theme) {
+        AdminUser adminUser = adminUserRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("No admin user with username " + username));
+        adminUser.setTheme(theme);
+        log.debug("Theme set to {} for username={}", theme, username);
     }
 
     @Transactional

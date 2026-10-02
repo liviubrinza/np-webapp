@@ -1,6 +1,7 @@
 package com.brinza.notary.service;
 
 import com.brinza.notary.domain.AdminRole;
+import com.brinza.notary.domain.AdminTheme;
 import com.brinza.notary.domain.AdminUser;
 import com.brinza.notary.repository.AdminUserRepository;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,32 @@ class ProfileServiceTest {
         when(adminUserRepository.findByUsername("ghost")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service().getFullName("ghost"))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void themeDefaultsToLight() {
+        AdminUser user = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
+        when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(user));
+
+        assertThat(service().getTheme("titi")).isEqualTo(AdminTheme.LIGHT);
+    }
+
+    @Test
+    void changeThemeUpdatesUser() {
+        AdminUser user = new AdminUser("titi", "hash", "Titi Full Name", AdminRole.TECHNICIAN);
+        when(adminUserRepository.findByUsername("titi")).thenReturn(Optional.of(user));
+
+        service().changeTheme("titi", AdminTheme.DARK);
+
+        assertThat(user.getTheme()).isEqualTo(AdminTheme.DARK);
+    }
+
+    @Test
+    void changeThemeThrowsWhenUserNotFound() {
+        when(adminUserRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service().changeTheme("ghost", AdminTheme.DARK))
                 .isInstanceOf(NoSuchElementException.class);
     }
 }

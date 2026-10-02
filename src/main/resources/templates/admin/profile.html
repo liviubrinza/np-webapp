@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ro" xmlns:th="http://www.thymeleaf.org">
+<html lang="ro" xmlns:th="http://www.thymeleaf.org" th:data-bs-theme="${adminTheme}">
 <head th:replace="~{admin/fragments :: head('Profilul Meu', ~{})}"></head>
 <body>
 
@@ -17,6 +17,17 @@
             <dt class="col-sm-3">Nume complet</dt>
             <dd class="col-sm-9" th:text="${fullName}"></dd>
         </dl>
+
+        <h2 class="h5 mb-3">Temă</h2>
+        <form th:action="@{/admin/profile/theme}" method="post" class="mb-4">
+            <div class="mb-3">
+                <div class="form-check form-check-inline" th:each="t : ${themes}">
+                    <input class="form-check-input" type="radio" name="theme" th:id="'theme-' + ${t.attributeValue()}"
+                           th:value="${t.name()}" th:checked="${t == theme}" onchange="this.form.submit()"/>
+                    <label class="form-check-label" th:for="'theme-' + ${t.attributeValue()}" th:text="${t.displayName}"></label>
+                </div>
+            </div>
+        </form>
 
         <h2 class="h5 mb-3">Schimbă parola</h2>
         <form th:action="@{/admin/profile/password}" th:object="${changePasswordForm}" method="post">

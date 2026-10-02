@@ -551,6 +551,18 @@ a `data-locale` attribute on the script tag, so no page wires that up either.
 `/js/**` is content-hash-versioned like `/css/**` (`WebConfig`), so the shared
 file can't go stale in a browser. Tests: `SharedDatePickerConfigurationTest`.
 
+Beyond spec: per-user admin theme (light/dark), picked on the Profile page
+(`POST /admin/profile/theme`) and persisted on `AdminUser.theme` (`V18`,
+default `LIGHT`). Deliberately one set of templates, not per-theme template
+folders (that was the original ask; rejected to avoid maintaining every admin
+page twice): `AdminGlobalModelAttributes` exposes `adminTheme` and every admin
+page's `<html>` carries `th:data-bs-theme="${adminTheme}"`, which switches
+Bootstrap 5.3's colour mode plus the gray overrides at the end of `style.css`.
+Any new admin page needs that attribute too. Login and public pages get no
+theme. The datepicker fragment adds flatpickr's dark CSS, and the statistics
+chart switches its text colours, when the theme is dark. Tests:
+`AdminThemeWorkflowTest`.
+
 Not started:
 
 - [ ] 12. Dockerize — no `Dockerfile`, `docker-compose.yml`, or
