@@ -701,9 +701,6 @@ a:hover {
     color: #ffffff;
 }
 
-[data-bs-theme="dark"] .btn-outline-primary {
-    color: #ffffff;
-}
 
 [data-bs-theme="dark"] .form-control:focus,
 [data-bs-theme="dark"] .form-select:focus {
@@ -713,4 +710,87 @@ a:hover {
 
 [data-bs-theme="dark"] .timeline-hour-label {
     background-color: #333333;
+}
+
+/* ==========================================================
+   Admin secondary buttons — the outline variants get a solid
+   fill on logged-in admin pages (any data-bs-theme), since a
+   transparent background blended into the page. Hover fills
+   with the variant's full colour. Public pages are untouched.
+   ========================================================== */
+
+[data-bs-theme] .btn-outline-secondary {
+    --bs-btn-bg: #e7e0d6;
+    --bs-btn-color: var(--brand-text);
+    --bs-btn-border-color: #d3c9bb;
+    --bs-btn-hover-bg: #d3c9bb;
+    --bs-btn-hover-color: var(--brand-text);
+    --bs-btn-hover-border-color: #c2b6a5;
+    --bs-btn-active-bg: #c2b6a5;
+    --bs-btn-active-color: var(--brand-text);
+    --bs-btn-active-border-color: #c2b6a5;
+}
+
+[data-bs-theme] .btn-outline-danger {
+    --bs-btn-bg: #f8d7da;
+    --bs-btn-color: #842029;
+    --bs-btn-border-color: #f1aeb5;
+    --bs-btn-hover-bg: #dc3545;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-border-color: #dc3545;
+    --bs-btn-active-bg: #b02a37;
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-border-color: #b02a37;
+}
+
+/* The light-theme .btn-outline-primary rules above set colours directly rather than through
+   Bootstrap's variables, so they are pointed back at the variables here. */
+[data-bs-theme] .btn-outline-primary {
+    --bs-btn-bg: #f3e3e3;
+    --bs-btn-color: var(--brand-primary);
+    --bs-btn-border-color: #e0c2c2;
+    --bs-btn-hover-bg: var(--brand-primary);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-border-color: var(--brand-primary);
+    --bs-btn-active-bg: var(--brand-primary-dark);
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-border-color: var(--brand-primary-dark);
+    color: var(--bs-btn-color);
+    border-color: var(--bs-btn-border-color);
+}
+
+[data-bs-theme] .btn-outline-primary:hover {
+    color: var(--bs-btn-hover-color);
+    background-color: var(--bs-btn-hover-bg);
+    border-color: var(--bs-btn-hover-border-color);
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    --bs-btn-bg: #4d4d4d;
+    --bs-btn-color: #ffffff;
+    --bs-btn-border-color: #5e5e5e;
+    --bs-btn-hover-bg: #5e5e5e;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-border-color: #707070;
+    --bs-btn-active-bg: #707070;
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-border-color: #707070;
+}
+
+[data-bs-theme="dark"] .btn-outline-danger {
+    --bs-btn-bg: #5c1d24;
+    --bs-btn-color: #ffffff;
+    --bs-btn-border-color: #7a2630;
+    --bs-btn-hover-bg: #b02a37;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-border-color: #b02a37;
+    --bs-btn-active-bg: #8f2230;
+    --bs-btn-active-color: #ffffff;
+    --bs-btn-active-border-color: #8f2230;
+}
+
+[data-bs-theme="dark"] .btn-outline-primary {
+    --bs-btn-bg: #4d4d4d;
+    --bs-btn-color: #ffffff;
+    --bs-btn-border-color: var(--brand-primary);
 }
